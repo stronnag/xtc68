@@ -115,10 +115,18 @@ cpyname( dst, p )
                 strncpy( dst, &flexnames[i][j], 8 );
                 return;
         }
-        for ( i = 0; p->name.here[i] && i < 8; i++ )
+
+
+// core dumps madly with -O2 ....
+#if 0
+        for ( i = 0; (p->name.here[i] && (i < 8)); i++ )
                 dst[i] = p->name.here[i];
         for ( ; i < 8; i++ )
-                dst[i] = (char) 0;
+            dst[i] = (char) 0;
+#else
+        strncpy(dst,  p->name.here, 8);
+#endif
+
 }
 
 int
@@ -385,10 +393,8 @@ symindex(void)
                          * if a static symbol starts with an L,
                          * then it is truely invisible
                          */
-                        char name[8];
-
+                        char name[12];
                         cpyname( name, p );
-
                         if ( p->flags & SEGMT && Lflag <= 1 && name[0] == 'L' )
                                 p->access = O_SUPPRESS;
                         else
@@ -426,4 +432,3 @@ fixsymval(long addr, long incr, unsigned short segmt)
                         p->value += incr;
         }
 }
-
