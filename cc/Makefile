@@ -68,8 +68,13 @@ INDENTFLAGS= -bad -br -ce -di8 -i4 -npsl
 CC=gcc
 PROG=qcc
 DEFINES = -DXTC68 -DENVVAR -DHAVE_BASENAME
-CFLAGS =  -O2 -m32
-LDFLAGS = -m32
+CFLAGS =  -O2
+LDFLAGS =
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+CFLAGS += -m32
+LDFLAGS += -m32
+endif
 #--------------------------------------------------------------
 #     CPOC front-end when hosted on LINUX
 #CC = gcc

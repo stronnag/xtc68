@@ -3,7 +3,14 @@ VPATH = ../
 OBJS = ld.o
 
 # We force an ia32 application to avoid having to fix numerous long assumptions
-CFLAGS = -DXTC68 -O2 -m32
+CFLAGS = -DXTC68 -O2
+LDFLAGS =
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+CFLAGS += -m32
+LDFLAGS += -m32
+endif
+
 PROG = qld
 
 all: 	$(PROG)

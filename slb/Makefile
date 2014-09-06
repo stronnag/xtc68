@@ -7,8 +7,14 @@
 
 #  ... for compiling on MINIX
 CC = gcc
-CFLAGS =  -I. -O2 -c -m32
-LDFLAGS = -m32
+CFLAGS =  -I. -O2 -c
+LDFLAGS =
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+CFLAGS += -m32
+LDFLAGS += -m32
+endif
+
 LIBS =
 
 # Set the object file extension

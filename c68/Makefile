@@ -9,7 +9,7 @@
 
 RM=rm -f
 #CFLGS=  -g
-CFLGS=  -DNDEBUG -O2 -m32
+CFLGS=  -DNDEBUG -O2
 
 # cxref flags
 CXFLAGS=-d -l -s
@@ -79,7 +79,12 @@ PROG=c68
 CCFLAGS=-O2
 CC=gcc
 CFLAGS=$(CCFLAGS) $(CFLGS)
-LDFLAGS=-m32
+LDFLAGS =
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+CFLAGS += -m32
+LDFLAGS += -m32
+endif
 
 #------------------------------------------------------------------------------
 #	Source files common to all versions of c68/c386

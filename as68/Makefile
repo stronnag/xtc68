@@ -1,8 +1,14 @@
 VPATH = ../
 
 GCFLAGS = -O2
-CFLAGS =   $(GCFLAGS) -DXTC68 -DLABELDIFF -DUSELINE -DMINIX -DHOST_LITTLE_ENDIAN -m32
+CFLAGS =   $(GCFLAGS) -DXTC68 -DLABELDIFF -DUSELINE -DMINIX -DHOST_LITTLE_ENDIAN
 LDFLAGS =
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+CFLAGS += -m32
+LDFLAGS += -m32
+endif
+
 
 OBJS = cbuf.o cpy.o gen.o hdr.o lex.o main.o ops.o \
 	 opt.o parse.o pass.o scan.o sym.o cross.o
