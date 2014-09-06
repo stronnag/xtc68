@@ -1,0 +1,202 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<TITLE>RLL User Guide</TITLE>
+</HEAD>
+
+<BODY LINK="#0000ff" VLINK="#800080">
+
+<H2 ALIGN="CENTER">Runtime Link Library System</H2>
+<H1 ALIGN="CENTER">RLL USER GUIDE</H1>
+
+<P><HR></P>
+
+<A NAME="Contents"></A>
+<H2>Contents</H2>
+<UL>
+ <LI><A HREF="#Overview">Overview</A></LI>
+ <LI><A HREF="#Pre_Processor">RLL and the Pre-Processor</A></LI>
+ <LI><A HREF="#Linker">RLL and the Linker</A></LI>
+ <LI><A HREF="#CC_Front_End">RLL and the CC Front-End</A></LI>
+ <LI><A HREF="#RunTime">RLL Runtime Requirements</A></LI>
+</UL>
+
+<P><HR></P>
+
+<A NAME="Overview"></A>
+<H2>Overview </H2>
+<P>
+The RLL User Guide section is concerned with what the application
+programmer has to do to make use of the RLL system.
+It looks at the system from the perspective of a C application programmer,
+but similar considerations would apply to using the RLL system from any
+other compiled language that has RLL support implemented for it.
+<P>
+The first point to make is that from the perspective of the C application
+programmer, no complicated tricks have to be used to make use of a RLL library
+that has been provided by someone else. You write your program just as you
+would normally. The only differences are:
+
+<UL>
+<LI>You are advised to define the pre-processor constant RLL_LIBS when you
+    compile the program. This can be done either explicitly in your source
+    via a statement of the form
+    <DIR>
+     <CODE>#define RLL_LIBS</CODE>
+    </DIR>
+    before you use any <CODE>#include</CODE> statements to bring in system
+    headers, or by using the CC runtime option
+    <DIR>
+     <CODE>-DRLL_LIBS</CODE>
+    </DIR>
+    to define this symbol at runtime.
+    <P>
+    It is expected that most users will opt for the second of these
+    approaches as it makes it easy to switch between static linking
+    without using RLLs and dynamic linking using RLLs.
+    <P>
+<LI>Additional parameters are given to the LD linker to tell it to produce
+    a program that will make use of RLL libraries, and to tell it what
+    RLL libraries a program is to use.
+</UL>
+
+<P><HR></P>
+
+<A NAME="Pre_Processor"></A>
+<H2>RLL and the Pre-Processor</H2>
+
+There are no explicit changes to the Pre-Processor to support the RLL system.
+<P>
+Having said that, many of the standard system include files need the
+pre-processor symbol <CODE>RLL_LIBS</CODE> defined if you want to use
+RLL versions of standard library routines.  This can be specified by
+using the command line option
+<DIR>
+ <CODE>-DRLLLIBS</CODE>
+</DIR>
+to the Pre-processor.
+<P>
+In practise one normally does this indirectly by passing an appropriate
+command line option to the <STRONG>CC</STRONG> front-end program as
+discussed later.
+
+<P><HR></P>
+
+<A NAME="Linker"></A>
+<H2>RLL and the Linker</H2>
+<P>
+To use the RLL system you need <STRONG>LD v2.0</STRONG> or later.
+The <STRONG>LD</STRONG>LD linker is supplied as part of the
+C68 C ompilation system for QDOS, although it is quite capable of
+being used independently of the C68 system.
+<P>
+When you are using RLL libraries the linker needs to be told that
+you are using such libraries.   This is done vy using command line
+options of the form 
+<DIR>
+  <CODE>-r<VAR>???</VAR></CODE>
+</DIR>
+where <VAR>???</VAR> specifies the name of the RLL library
+to be used. The LD linker will automatically add the letters
+<CODE>lib</CODE> to the start, and <CODE>_rll</CODE> to the
+end in a manner that is analogous to use of the <CODE>-l</CODE>
+parameter when linking without using RLLs.
+Thus a command line option of<BR>
+<DIR>
+  <CODE>-rm</CODE>
+</DIR>
+would cause LD to use the library <CODE>LIBM_RLL</CODE> which is
+the RLL equivalent of the <CODE>LIBM_A</CODE> library.
+<P>
+In practise one normally does this indirectly by passing an appropriate
+command line option to the <STRONG>CC</STRONG> front-end program as
+discussed later.
+
+<P><HR></P>
+
+<A NAME="CC_Front_End"></A>
+<H2>RLL and the CC Front-End</H2>
+<P>
+To simplify it even further for the user,
+the <B>CC</B> front-end program will recognise the
+<CODE>-DRLL_LIBS</CODE> option to the pre-processor or any
+<CODE>-r???</CODE> option to the linker, and automatically generate
+the instructions to the <B>LD</B> linker that tell it to use
+the LIBC_RLL library (which is the RLL equivalent to the standard
+C library LIBC_A). This is very akin to the way that the LIBC_A
+library is included by default for standard user programs that
+are statically linked to not use RLLs.
+<P>
+Not all routines that are available in the standard C68 libraries
+have equivalents in the RLL versions of the same libraries.
+Therefore to play safe, you should include both the RLL and
+standard variants of the libraries.
+The RLL version should precede the standard version of any library.
+The LD linker will then select the RLL versions of the routines where
+they exist, and the standard ones where they do not.
+<P>
+The corollary to this is that use of the RLL system is ALWAYS optional.
+If you want to use RLL libraries, then you explicitly tell the system
+to produce a version of your program that is to make use of RLL libraries.
+If you do not do this, the default action will be to produce a version
+ of the program that has all the necessary libraries routine statically
+linked in so that the resultant program can be run independently of the
+RLL system.
+<P>
+As an example, if you were going to build a program that needed routines
+from both the maths libraries and the standard C library you would used
+parameters of the form:
+<DIR>
+  <CODE>-rm -lm -rc</CODE>
+</DIR>
+This would search <B>LIBM_RLL</B>, the RLL version of the maths library,
+to pull in whatever routines it could from there. It would then search
+<B>LIBM_A</B>, the standard version of the maths library, to pull in any
+maths routines that had no RLL equivalents.
+Following that it would search <B>LIBC_RLL</B>, the RLL version of the
+standard C library to pull in RLL versions of that type of routines.
+Finally it would search <B>LIBC_A</B>, the standard version of the C library.
+You could omit the <CODE>-rc</CODE> parameter from the above if you are
+using the CC front-end and have used the <B>_DRLL_LIBS</B> option as
+CC will then would automatically search the standard C libraries
+- searching the RLL version before the non-RLL version when building
+a RLL enabled program.
+
+<P><HR></P>
+
+<A NAME="RunTime"></A>
+<H2>RLL RunTime Requirements</H2>
+<P>
+It is worth emphasising that once a program has been linked to use
+the RLL system, there are number of components that will <STRONG>need</STRONG>
+to be present at runtime for it to work correctly. These are: </P>
+<UL>
+  <LI>The THING system as the RLL system depends on it for correct
+      functioning. The THING system is built into SMS2, SMSQ/E and
+      Level E drivers for the Atari QDOS emulator.
+      All other systems need support for the THING system to be
+      explicitly loaded. However as it is also built into the HotKey
+      system many such users will already have the THING system loaded.</LI>
+      <P>
+      For those who do not already have THING support via one of the above
+      software components, the file THING_REXT that is supplied with the
+      C68 system can be used to fulfil this purpose.
+      If you are not sure how to load such a file,
+      look at the sample BOOT file provided on the C68 RUNTIME 2 disk
+      which shows a suitable example.
+      <P>
+  <LI>The <A HREF="RLMUSER.HTM">Runtime Library Manager</A> (RLM).</LI>
+      <P>
+  <LI>Any RLL libraries specified during the LD link phase
+      (LIBM_RLL and LIBC_RLL in the example given above).
+      These can be preloaded in the BOOT file, or dynamically loaded
+      as required. How this is done is discussed in the
+      <A HREF="rlmuser.htm">RLM User Guide</A>.</LI>
+</UL>
+
+If all these conditions are satisfied then the RLL system will function
+in a completely transparent manner, and the user will be unaware of its
+presence.
+
+</BODY>
+</HTML>

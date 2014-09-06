@@ -1,0 +1,25 @@
+.OPTIMIZE
+
+COS = nt
+LOS = nt
+BIN = e:\bin\
+
+APFLAGS=  -dXTC68 -dDOS_LIKE
+CFLAGS = -j -w4 -e25 -zp4 -zq -oneatx -5 -bt=$(COS)
+LDFLAGS = SYS $(LOS) op st=8192 op maxe=25 op q
+
+SD = ..\
+
+CC = wcc386
+LD = wlink
+
+OBJS= version.obj cexp.obj cccp.obj alloca.obj
+
+.c:    $(SD)
+.c.obj :
+    $(cc) $[* $(CFLAGS) $(APFLAGS)
+
+$(BIN)cpp.exe: $(OBJS)
+    $(ld) $(ldflags)  name $(BIN)cpp.exe file version.obj,cexp.obj,cccp.obj,alloca.obj
+
+

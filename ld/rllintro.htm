@@ -1,0 +1,180 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<TITLE>RLL Overview</TITLE>
+</HEAD>
+
+<BODY LINK="#0000ff" VLINK="#800080">
+
+<H2 ALIGN="CENTER">Runtime Link Library System</H2>
+<H1 ALIGN="CENTER">RLL and RLM OVERVIEW</H1>
+
+<P><HR><P>
+
+<H2>Introduction </H2>
+<P>
+The Runtime Link Library (RLL) system is designed to satisfy a number of goals:
+
+<UL>
+<LI>To allow a number of programs to share common code at runtime.
+    <P>
+    This is a similar concept to the SuperBasic "Toolkit" which adds new 
+    keywords to the language, but extends the idea to other languages that 
+    need compiling and linking.
+    <P>
+<LI>To be independent of the programming language used. 
+    <P>
+    The RLL system was originally developed for use with programs compiled 
+    using the C68 compilation system. However, the implementation of most of 
+    the components has been done in a generic fashion so that there is no 
+    built in limitation that will stop it being used with other languages as well.
+    <P>
+<LI>To allow new versions of libraries to easily be introduced.
+    <P>
+    New versions of the libraries can be introduced without the need to recompile 
+    programs that use these libraries.
+    <P>
+<LI>To be efficient.
+    <P>
+    The aim is that there should no (or at least very minimal) additional call time 
+    overhead for accessing routines or data when sing such dynamically bound 
+    libraries compared to having inline code.
+    <P>
+<LI>To make the system easy to use for developers..
+    <P>
+    It is possible for the average casual developer who wants to know the 
+    minimum possible about the mechanics of the system while still being able 
+    to make use of the key features.
+    <P>
+<LI>To provide complete control
+    <P>
+    Those programmers who want to do more than the standard default should 
+    have complete control over the RLL process. This allows for situations 
+    in which the programmers want to control the loading and unloading of 
+    libraries themselves.
+    <P>
+<LI>The runtime system should be transparent in operation.
+    <P>
+    It should not be necessary for the user of programs that have been built
+    using the RLL system to have any knowledge of how it works.
+</UL>
+<P>
+Runtime Link Libraries (RLL(s)) are (potentially at least) shareable between jobs.
+This saves memory if several jobs are running using the same RLL. 
+In addition the program files are typically smaller as they now no longer 
+need to contain the code for routines that are held in RLL libraries. 
+This reduction in file size can have the useful side effect of reducing 
+load time from mass media if large programs are run. 
+<P>
+The runtime process of loading and using RLLs is managed by the 
+Runtime Library Manager (<B>RLM</B>). An executable programme wishing 
+to use a RLL would call the RLM which would resolve any runtime references 
+and attempt to load any RLL(s) which are not already in the system. 
+This process is completely transparent to C68 users as it is handled 
+automatically in the C68 startup module. 
+<P>
+The remainder of this document covers all details of the Runtime Link Library system. 
+It is structured into several sections, and it is only necessary to read those
+that are relevant to the type of use that you wish to make of the RLL system. 
+The sections are: 
+
+<UL>
+<LI>The <A HREF="RLMUSER.HTM">RLM User Guide</A>
+    that describes how to manage the RLL system. In particular it covers 
+    the <A HREF="RLMUSER.HTM#SUPERBASIC">SuperBasic interface</A> to the 
+    RLM system which is used to manage the loading and use of RLLs at runtime.
+    <EM>All users should read this section.</EM> 
+<LI>The <A HREF="RLLUSER.HTM">RLL User Guide</A>
+    that describes using the Runtime Link Library system from the perspective
+    of the application programmer. All programmers who wish their programs to
+    use RLL(s) should read this section. 
+<LI>The <A HREF="RLMPROG.HTM">RLM Programmers Guide</A>
+    that describes the low level programming interface to the Runtime Library
+    Manager. The average application programmer need not be aware of the 
+    details of this interface. This information is therefore only relevant
+    to system programmers who need to interface to the RLM capabilities. 
+<LI>The <A HREF="RLLPROG.HTM">RLL Programmers Guide</A>
+    that describes the use of Runtime Link Libraries from the perspective
+    of the system programmer writing routines for inclusion into RLLs. 
+<LI>The <A HREF="RLLREFER.HTM">RLL Technical Reference</A>
+    that gives details of the data formats used to store RLL related 
+    information in programs and libraries. 
+
+<P>
+The runtime library system uses the QJUMP shared memory "<B>THING</B>" system
+to implement run time libraries. This provides mechanisms for the automatic
+removal of a user job should the library thing be removed thus protecting the
+system. The RLM itself is an infinitely shareable and ROMable extension linked
+into the THING system. For those that want further information on the THING system,
+they are adequately documented on QUANTA DISK SPECIALS_0. 
+
+<P><HR><P>
+
+<H3>Acknowlegements </H3>
+<P>
+The key personnel involved in the development and implementation of the 
+Runtime Link Library concept are: 
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=7>
+<TR VALIGN="TOP">
+<TD>Tony Tebby
+<TD>who developed the THING concept which allows for general purpose
+    shareable objects to be easily loaded and manipulated. In particular 
+    thanks must got to Tony for allowing the support code for the THING 
+    system to be freely distributed. 
+</TR>
+<TR VALIGN="TOP">
+<TD>Lester Wareham
+<TD>who produced the original proposals for the RLL concept, and developed
+    the original implementation of the RLM and Superbasic components of the system. 
+</TR>
+<TR VALIGN="TOP">
+<TD>Dave Walker
+<TD>who helped develop the RLL concept; enhancing the LD linker to support
+    the concept of Runtime Link libraries; enhancing the C68 system to exploit
+    the RLL system; and enhancing the RLM system to support full integration
+    with LD and the rest of the C68 system
+</TR>
+<TR VALIGN="TOP">
+<TD>Joachim van der Auwera
+<TD>Who provided the ideas and much of the software that underlies the 
+    "modules" part of the RLL system.
+</TR>
+</TABLE>
+
+<P><HR><P>
+
+<H3>Copyright </H3>
+<P>The RLM component of the RLL system is freely distributable subject
+to the following conditions: 
+
+<OL>
+<LI>The RLM and supporting files are copyright &copy;1992 L.K.Wareham.
+    All rights reserved. 
+<LI>Every effort has been made to ensure that the RLM software operates correctly.
+    However no guarantee of any kind is given that the programmes are reliable or
+    that the information describing the RLM is accurate. It is up to the user to
+    satisfy himself that the RLM is suitable for the use to which it will be put. 
+<LI>The RLM software may be distributed in user group or public domain libraries,
+    posted on public access BBS, or distributed fee with commercial software 
+    provided that:
+    <UL>
+    <LI>You do not profit by distributing RLM. You may only make reasonable charges 
+        for your time, media and postage costs. Any such charges (excluding postage)
+        shall not exceed US$6.00. 
+    <LI>In the case of distribution with a commercial software package, no charges
+        may be made for the RLM component. A commercial package is defined as one 
+        that requires the user to pay more than US$6.00 for its use. 
+    <LI>You may not claim ownership of, or any right to, the RLM software. 
+    <LI>You may not place any restriction on the further distribution of the RLM software. 
+    </UL>
+<LI>The complete RLM package must be enclosed including this notice with any
+    further distribution.
+</OL>
+
+<P>
+The remainder of the RLL system is copyright &copy;1992-1997 D.J.Walker.
+All rights reserved. Permission is granted for the RLL system to be freely 
+distributed on the same terms as the rest of the C68 system. 
+
+</BODY>
+</HTML>

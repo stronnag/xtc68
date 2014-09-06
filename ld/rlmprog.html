@@ -1,0 +1,1313 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<TITLE>RLM programmersr Guide</TITLE>
+</HEAD>
+
+<BODY LINK="#0000ff" VLINK="#800080">
+
+<H2 ALIGN="CENTER">Runtime Link Library System</H2>
+<H1 ALIGN="CENTER">RLM PROGRAMMERS GUIDE</H1>
+<H2><A NAME="Contents"></A>Contents</H2>
+
+<UL>
+  <LI><A HREF="#Overview">Overview</A></LI>
+  <LI><A HREF="#Standard_Definitions">Standard Definitions</A></LI>
+  <LI><A HREF="#Finding_RLM">Finding the RLM</A></LI>
+  <LI><A HREF="#Calling_RLM">Calling the RLM</A></LI>
+  <LI><A HREF="#Freeing_RLM">Freeing the RLM</A></LI>
+  <LI><A HREF="#Simplified_Interface">Simplified Interface to the RLM</A></LI>
+  <LI><A HREF="#RLM_Operation">RLM Operation</A></LI>
+  <LI><A HREF="#Supported_RLM_Calls">Supported RLM Calls</A></LI>
+</UL>
+
+<P><HR></P>
+
+<A NAME="Overview"></A>
+<H2>Overview </H2>
+<P>
+It is not envisaged that the average C programmer will ever need
+to be directly concerned with the details of how a system interfaces
+to the Runtime Link Manager. This capability is intended primarily
+for use by a systems level programmer who is trying to interface a
+new programming language to the RLM. </P>
+<P>
+The calls that the RLM supports allow all phases of its operation
+to be directly controlled. This should make it easy to interface a
+new system to the RLM. </P>
+<P>
+If you are a C programmer using the C68 system, then you do not have
+to worry about this aspect of the RLM at all. The necessary calls to
+link C68 programs to the RLM are issued automatically from the
+C startup module if you specified that you wanted to use RLL libraries
+when you built your program.</P>
+<P>
+The RLM is implemented using the THING system. The calls to the
+RLM therefore use the standard mechanisms for interfacing to the
+THING system. Some systems such as SMSQ, SMSQ/E, SMS2 or Atari
+QL Emulators with Level E drivers have built in support for the
+THING system. On other systems it needs to be loaded explicitly.
+It is worth noting that if your system has support for the Hotkey
+system, then you do already have THING support loaded (this means
+that users of QPAC2 will always have such support loaded).
+If the system does not satisfy any of the above criteria then the
+THING support code needs to be loaded explicitly. C68 users will
+have the THING_REXT file on the RUNTIME 2 disk to provide such
+support.</P>
+
+<P><HR></P>
+
+<A NAME="Standard_Definitions"></A>
+<H2>Standard Definitions </H2>
+<P>
+If you are going to write code that interfaces to the RLL or
+RLM at this level, then you should use the standard include
+files provided. </P>
+<P>
+For C programmers, this is done using a statement of the form:</P>
+
+<DIR>
+<CODE><P>#include &lt;rll.h&gt;</CODE>
+</DIR>
+<P>
+while for assembler programmers the equivalent is</P>
+<DIR>
+<CODE>include rll_in</CODE>
+</DIR>
+
+<P>
+These include files are themselves used internally within th
+e components used to implement the RLL system, so using them
+in your own code will ensure consistency. </P>
+
+<P><HR><P>
+
+<A NAME="Finding_RLM"></A>
+<H2>Finding the RLM </H2>
+<P>
+The first thing that one has to do is to check that the RLM is
+ actually loaded into memory, and if so at what address.
+ This is done by using assembler of the form: </P>
+<DIR>
+<CODE>
+<PRE>rlmname dc.b 0,3,"RLM",0 
+rlmaddr dc.l 0 
+rlmver  dc.l 0
+ 
+moveq  #sms.uthg,d0    ; Use THING call 
+moveq  #-1,d1          ; this job 
+moveq  #-1,d3          ; infinite timeout 
+lea    rlmname$pc),a0  ; name of THING 
+bsr    _ThingTrap      ; ... do it 
+tst.l  d0              ; did it work? 
+bne    suicide         ; ... NO, abandon 
+move.l a0,rlmaddr      ; save address 
+move.l d3,rlmver       ; save version </PRE>
+</CODE>
+</DIR>
+
+<P>
+In the above example, the <CODE>_ThingTrap</CODE> routine
+is used to invoke the <CODE>sms.uthg</CODE> system call.
+This is because on systems that have direct operating support
+for THINGS, the relevant operating system calls are available
+as TRAP #1 calls, while on other systems these calls have to be
+performed via a vector. The routine <CODE>_ThingTrap</CODE> is
+a way of automatically using the TRAP #1 call if it is available,
+or using the vector method otherwise - but in both cases passing
+exactly the same parameters.
+The source of the <CODE>_ThingTrap</CODE> routine is provided as
+part of the source of the C68 LIBC_A libraries.</P>
+
+<P><HR></P>
+
+<A NAME="Calling_RLM"></A>
+<H2>Calling the RLM</H2>
+<P>
+The calls to the RLM are made with a value in d0 indicating the
+operation required, with any additional parameters passed on the
+stack in C style. The parameters passed for each operation type
+will be as defined for that particular operation.</P>
+<P>
+In assembler, a typical call sequence will be something of the form:</P>
+<DIR>
+<CODE><PRE>.... set up any parameters required 
+moveq   #OperationCode,d0 
+move.l  rlmaddr$pc),a0 
+jsr 12  $a0) 
+lea     ??$sp),sp   ; remove stack parameters 
+tst.l   d0          ; did it work? 
+bne     ???         ; ... NO, do something </PRE></CODE>
+</DIR>
+
+<P>
+Note that it is the responsibility of the calling code to tidy
+the stack and remove the parameters that were passed on the stack
+when the call has completed. </P>
+
+<P><HR><P>
+
+<A NAME="Freeing_RLM"></A>
+<H2>Freeing the RLM </H2>
+<P>
+When you have finished using the RLM, then you should immediately
+free it.</P>
+<P>
+In Assembler this would look like: </P>
+<DIR>
+<CODE><PRE>moveq #sms.fthg,d0 
+moveq #-1,d1 
+lea   rlmname,a1 
+jsr   _ThingTrap </PRE></CODE>
+</DIR>
+
+<P><HR><P>
+
+<A NAME="Simplified_Interface"></A>
+<H2>Simplified Interface to the RLM </H2>
+<P>
+The C68 standard C library contains routines which simplifies the
+handling of the RLM. The above complexities of finding, calling
+and releasing the RLM are hidden behind a single function call.
+This simplified interface does the following every time: </P>
+
+<UL>
+  <LI>Finds the RLM THING </LI>
+  <LI>Make the requested call.</LI>
+  <LI>Free the RLM thing.</LI>
+</UL>
+
+<P>
+The simplified assembler interface is provided by the <CODE>CallRLM()</CODE> function. This used by as follows: </P>
+<DIR>
+<CODE><PRE>.... set up parameters for the RLM call 
+moveq #OperationCode,d0 ; Set the operation type 
+jsr   CallRLM           ; go and do it 
+lea   ??$sp),sp         ; remove stack params  
+tst.l d0                ; did call work? 
+bne   ???               ; ... NO, do something </PRE></CODE>
+</DIR>
+
+<P>
+The interface for the C programmer consists of a named call
+corresponding to each of the possible RLM functions (which
+are then mapped internally in the library onto the
+<CODE>CallRLM()</CODE> function mentioned above).
+If you are going to use these versions of the calls,
+then the C program should include a statement of the form:</P>
+<DIR>
+<CODE><P>#include &lt;rll.h&gt; </P></CODE>
+</DIR>
+
+<P>
+to get the appropriate prototype definitions included.
+You can then simply use statements such as: </P>
+<DIR>
+<CODE><P>RLM_SetDebugDir("ram1_"); </P></CODE>
+</DIR>
+
+<P>
+from within the C program. This C interface is also, of course,
+available to the assembler programmer. The full definition of
+all these calls in C terms follows later in this document.</P>
+<P>
+Note, however, that a program cannot issue a call to the RLM
+to do relocation on itself using this simplified interface.
+This is because the C compiler does not produce position
+independent code, so until the relocation has happened no
+C library routines can be called.</P>
+
+<P><HR><P>
+
+<A NAME="RLM_Operation"></A>
+<H2>RLM Operation </H2>
+<P>
+In operation the Runtime Library Manager will be installed as a
+shareable utility thing with a single entry point at offset %10
+relative to its Thing Header. The first parameter must always be
+a word containing an operation code to indicate the call function
+required. A QDOS/SMS error code is returned in d0.l. Parameters
+are passed on the calling jobs stack. Calling jobs should have at
+least 1000 bytes of stack space available + any stack space used
+by RLL init routines $thus maximum total usage 2000 bytes). </P>
+<P>
+The RLM is initialised by the conventional LRESPR call.
+The SuperBasic command INIT_RLM is also linked in to permit the
+user to re-link the RLM in the event of accidental Thing removal.
+The RLM is not currently ROMable as it includes C code that needs
+runtime relocation. It could be rewritten in assembler to remove
+this restriction.</P>
+<P>
+SuperBasic extensions are provided to permit the user to change
+defaults etc. This interface was described in Section 2 of this
+document. The low-level assembler calls to change the global
+environment of the RLM are intended for front-end programs and
+not client jobs requiring linking. </P>
+<P>
+Libraries can be loaded explicitly by the user or as required by
+the RLM $and automatically removed when not in use). A default
+library directory is defined internally to the RLM as the primary
+search path for RLLs. In addition the LIB_ subdirectory of the
+PROG_USE directory, and the DATA_USE directories would also be
+searched.</P>
+
+<P><HR><P>
+
+<A NAME="Supported_RLM_Calls"></A>
+<H2>Supported RLM Calls</H2>
+<P>
+The following gives the details of the calls that are supported
+by the RLM.</P>
+<P>
+The operation codes available are:</P>
+<DIR>
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7>
+<TR VALIGN="TOP">
+ <TH ALIGN="CENTER">Operation Code
+ <TH>C function name
+ <TH>Description
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">0</TD>
+ <TD><A HREF="#RLM_LINKCODE">RLM_LinkCode</A></TD>
+ <TD>Link Code to RLL system </TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">1</TD>
+ <TD><A HREF="#RLM_CHECKRLL">RLM_CheckRLL</A></TD>
+ <TD>Check if a RLL is loaded</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">2</TD>
+ <TD><A HREF="#RLM_LINKRLL">RLM_LinkRLL</A></TD>
+ <TD>Link code to a single RLL</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">3</TD>
+ <TD><A HREF="#RLM_UNLINKRLL">RLM_UnlinkRLL</A></TD>
+ <TD>Unlink code from a single RLL</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">4</TD>
+ <TD><A HREF="#RLM_LOADLIB">RLM_LoadLib</A></TD>
+ <TD>Load a RLL</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">5</TD>
+ <TD><A HREF="#RLM_SETTIMEOUT">RLM_SetTimeout</A></TD>
+ <TD>Set Default timeout delay</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">6</TD>
+ <TD><A HREF="#RLM_SETLOADMODE">RLM_SetLoadMode</A></TD>
+ <TD>Set Interactive Reporting mode</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">7</TD>
+ <TD><A HREF="#RLM_SETLOADDIR">RLM_SetLoadDir</A></TD>
+ <TD>Set Default Library Directory</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">8</TD>
+ <TD><A HREF="#RLM_SETDEBUGDIR">RLM_SetDebugDir</A></TD>
+ <TD>Set Debug Directory</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">9</TD>
+ <TD><A HREF="#RLM_SETDEBUGMODE">RLM_SetDebugMode</A></TD>
+ <TD>Set Debug Mode</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">10</TD>
+ <TD><A HREF="#RLM_READSETTINGS">RLM_ReadSettings</A></TD>
+ <TD>Read RLM global settings</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">11</TD>
+ <TD><A HREF="#RLM_RELOCLD">RLM_RelocLD</A></TD>
+ <TD>Relocate code using C68 compatible relocation</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">12</TD>
+ <TD><A HREF="#RLM_RELOCGST">RLM_RelocGST</A></TD>
+ <TD>Relocate code using GST compatible relocation</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">13</TD>
+ <TD><A HREF="#RLM_LIBRARYSYMBOL">RLM_LibrarySymbol</A></TD>
+ <TD>Get the address of a symbol within the given RLL</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD ALIGN="CENTER">14</TD>
+ <TD><A HREF="#RLM_PROGRAMSYMBOL">RLM_ProgramSymbol</A></TD>
+ <TD>Get the address of a symbol used by the current program</TD>
+</TR>
+</TABLE>
+</DIR>
+
+Note that it is possible to pass a console channel on some calls.
+This feature is primarily intended for the internal use by the RLM.
+It is not expected (but not forbidden) that client jobs will pass a
+channel.
+<P>
+The above calls are each described in detail in the remainder of this
+section.</P>
+
+<P><HR></P>
+
+<A NAME="RLM_LINKCODE"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+<TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_LinkCode</H3>
+<TD WIDTH="40%" ALIGN="CENTER"><H4>Link Code to RLL</H4>
+<TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 0)</H3>
+</TR>
+</TABLE>
+<DIR>
+  Carry out the actual process of linking a program (or a RLL)
+  to all the RLLs that it needs.
+</DIR>
+
+<H4>C prototype</H4>
+<DIR>
+  <CODE>int RLM_LinkCode(char *, BSS_HEADER *, jobid_t, chanid_t);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">long</TD>
+   <TD>Address of start of code to be linked in</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Address of RLL BSS area. In practise only the BSS_HEADER,
+       RLIB and XREF areas need to be present at this stage</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Job Id of the owner</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Channel ID for debug reports. A value of -1 causes a new
+       console channel ID to be opened</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7  WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code.</TD>
+  </TR>
+</TABLE>
+</DIR>
+
+<H4>Description </H4>
+<DIR>
+  This expected to be the interface to the RLM used by most programs.
+  It carries out the whole process of identifying what RLLs are needed
+  by the caller, loading them if they are not already loaded, and then
+  linking the calling code to the RLLs that it is going to use.</P>
+  <P>
+  The list of RLLs required is taken from the RLIB section of RLL BSS
+  area of the calling code. If any RLLs are specified by the calling
+  program that have not already been loaded, then an attempt will be
+  made to load them.</P>
+  <P>
+  The list of addresses in the calling program that need linking are
+  taken from the XREF part of the BSS area.</P>
+  <P>
+  It is possible for one job to link the code of another by passing
+  the job ID of the code owner. If this is done steps must be taken
+  to guard against the unexpected removal of the code owner,
+  for example the calling job being owned by the code owner. </P>
+  <P>
+  Note that this call does not do program relocation of the calling
+  program. The RLM can, however, be called to do this if needed.</P>
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_CHECKRLL"></A>
+<TABLE BORDER=0 CELLPADDING=7>
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_CheckRLL</H3></TD>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Check if a RLL is loaded</H4></TD>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 1)</H3></TD>
+</TR>
+</TABLE>
+
+<DIR>
+  Check if a specified RLL is already loaded into memory.
+</DIR>
+
+<H4>C prototype</H4>
+<DIR>
+  <CODE>RLL_HEADER * RLM_CheckRLL (char *);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">long</TD>
+   <TD>Address of the name of the RLL that we want to check to see if
+       it is already loaded into memory.
+       This is passed as a C style string.</TD>
+</TR>
+</TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">+ve</TD>
+  <TD>Success.
+      The value returned is a pointer to the RLL Header.</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>0</TD>
+   <TD>RLL is not loaded. </TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>-ve</TD>
+   <TD>QDOS/SMS error code.</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  The list of RLLs that are loaded into memory will be searched.
+  If the RLL is found then a pointer to the RLL header will be
+  passed back, and 0 (NULL) if it cannot. If any other error
+  occurs it will be passed back as a negative error code.</P>
+  <P>
+  The RLL Header can be used to check things such as the version
+  number, or locate any of the other control areas.</P>
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_LINKRLL"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+  <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_LinkRLL</H3>
+  <TD WIDTH="40%" ALIGN="CENTER"><H4>Link to a specified RLL</H4>
+  <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 2)</H3></TD>
+</TR>
+</TABLE>
+
+<DIR>
+  Carry out the process of linking a program (or a RLL) to a
+  specified RLL.
+</DIR>
+
+<H4>C prototype</H4>
+<DIR>
+  <CODE>int RLM_LinkRLL (char *, char *, BSS_XREF *, chanid_t);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">long</TD>
+   <TD>Address of the name of the RLL to be linked in.</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Address of start of code to be unlinked in.</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Address of BSS_XREF area.</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Channel ID for debug reports.
+       A value of -1 causes a new console channel ID to be opened.</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code.</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  This call is not expected to be used very often as in most cases the
+  <A HREF="#RLM_LINKCODE"><CODE>RLM_LinkCode()</CODE></A> call would
+  be used instead to link all RLL(s associated with a particular program.
+  It is intended for use by programs that want to be able to dynamically
+  load and unload RLL(s at runtime. It carries out the actual process
+  of linking external references that are in the caller with the relevant
+  locations in the RLL.
+  <P>
+  If the RLL to be used has any dependencies on other RLLs, then these
+  will also be automatically loaded. However no references from these
+  extra RLLs will be used to satisfy the ones listed in the BSS_XREF
+  area passed to this call.</P>
+  <P>
+  It is possible for one job to link the code of another by passing the
+  job ID of the code owner. If this is done steps must be taken to guard
+  against the unexpected removal of the code owner, for example the
+  calling job being owned by the code owner.</P>
+  <P>
+  Note that this call does not do program relocation of the calling
+  program.
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_UNLINKRLL"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_UnlinkRLL</H3></TD>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>UnLink Code from a specified RLL</H4></TD>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 3)</H3></TD>
+</TR>
+</TABLE>
+
+<DIR>
+  Carry out the process of unlinking a program $or a RLL) from a
+  specified RLL.
+</DIR>
+
+<H4>C prototype</H4>
+<DIR>
+  <CODE>int RLM_UnlinkRLL (char *, char *, BSS_XREF *, chanid_t);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">long</TD>
+   <TD>Address of the name of the RLL to be unlinked from</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Address of start of code to be unlinked from the RLL</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Address of BSS_XREF area</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>Channel ID for debug reports.
+       A value of -1 causes a new console channel ID to be opened. </TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  This call is a companion to the
+  <A HREF="#RLM_LINKRLL"><CODE>RLM_LinkRLL()</CODE></A> call.
+  It will unlink a specified program from the given RLL.
+  If the unload timeout for this RLL is reached, then it will
+  be automatically unloaded. Similarly if there are any dependent
+  RLLs that reach their unload timeout, then they would also be
+  unloaded.
+  <P>
+  This call is not expected to be used very often as in most cases
+  the <A HREF="#RLM_LINKCODE"><CODE>RLM_LinkCode()</CODE></A> call
+  would be used instead to link all RLL(s) associated with a
+  particular program, and they would never be explicitly unlinked.
+  Instead the program would terminate itself, and the RLM would
+  automatically tidy up the state of the loaded RLLs as a result.
+  <P>
+  The main purpose of this call is to provide a method of dynamically
+  linking in different RLLs at runtime according to some external
+  criteria. This system needs to be used with great care as any
+  attempt to execute code that has not yet been linked to its target
+  RLL is certain to cause a program to crash, and is quite likely to
+  crash the whole system.
+  <P>
+  It is possible for one job to unlink the code of another by passing
+  the job ID of the code owner. If this is done steps must be taken
+  to guard against the unexpected removal of the code owner,
+  for example the calling job being owned by the code owner.
+  <P>
+  Note that the default action of the LD linker is to set up the
+  program so that the BSS_XREF area is to be re-used as UDATA 
+  (Unitialised Data) purposes once a program has finished its
+  initialisation phase. If you want to make the UDATA area start
+  after the XDEF area then you need to make sure you use the
+  <B>-keepxref</B> parameter to LD.
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_LOADLIB"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_LoadLib</H3></TD>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Load a RLL</H4></TD>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 4)</H3></TD>
+</TR>
+</TABLE>
+
+<DIR>
+  Load a specified RLL into memory.
+</DIR>
+
+<H4>C prototype</H4>
+<DIR>
+  <CODE>int RLM_LoadLib (char *, timeout_t, chanid_t);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">long</TD>
+   <TD>Address of a zero terminated string that is the name of
+       the RLL to be loaded</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>word</TD>
+   <TD>The timeout value to be used. A negative value means make
+       permanently resident and only removable by manual action</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>long</TD>
+   <TD>The channel ID to be used for reporting status</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  The system first attempts to load a RLL with the same name as
+  that specified in the parameters. If this is not found
+  (or if it is found, but the major version numbers do not match)
+  then the major version number is added to the name and further
+  attempts are made to load the RLL using this revised name.
+</DIR>
+
+<H4>Notes</H4>
+<OL>
+<LI>If any of the RLLs loaded have a dependency on other RLLs,
+    then these will also be loaded. It is good practise (although
+    not essential) to load RLLs in "reverse" order so that at any
+    point in time any dependency on other RLLs are already satisfied.
+<LI>RLLs with a finite timeout or a dependency on another RLL are
+    loaded into transient program space. Is is so that they can be
+    allocated a job ID to permit the THING system to mark them as
+    users of other THINGs. The job names given to RLLs loaded into
+    transient program space will always be "RLL " followed by the
+    RLL name. RLLs that have no dependencies and infinite timeout
+    are loaded into the Common Heap.
+<LI>RLLs that are cascade loaded will be given the same timeout
+    value as applied to the orginally loaded RLL.
+</OL>
+
+<P><HR><P>
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_SetTimeout</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Set Default Timeout Value</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 5)</H3>
+</TR>
+</TABLE>
+
+<DIR>
+  Set the default value of the timeout delay
+</DIR>
+
+<H4>C prototype</H4>
+<DIR>
+  <CODE>int RLM_SetTimeout (timeout_t);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">word</TD>
+   <TD>New timeout value</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE CELLSPACING=0 BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR>
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  The timeout delay is used for deciding when to unload libraries
+  that are loaded dynamically. A negative value is treated as
+  infinite delay. This timeout delay does not apply to libraries
+  that are loaded statically as in this case the delay is explicitly
+  stated in the load call.
+  <P>
+  It is also normally inadvisable to specify too small a value for
+  this timeout. If you do, you may find that the library is continually
+  being unloaded just before you are about to use it again.
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_SETLOADMODE"></A>
+<TABLE WIDTH="100%" BORDER=0 CELLPADDING=7>
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_SetLoadMode</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Set Interactive Reporting status</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 6)</H3>
+</TR>
+</TABLE>
+<DIR>
+  Specify whether interactive reporting is to used when loading RLLs.
+</DIR>
+
+<H4>C prototype:</H4>
+<DIR>
+  <CODE>int RLM_SetLoadMode (short);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE CELLSPACING=0 BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">word</TD>
+  <TD>Set Reporting status. 0 = off, 1 = on</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">0</TD>
+  <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>Other</TD>
+  <TD>QDOS/SMS error code</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  Normally one would expect the RLL system to be run with the
+  Interactive Reporting status set to off. However, if a particular
+  program is refusing to load because it cannot find all the RLLs
+  that it requires, then the interactive mode can be useful in
+  determining which RLL is missing.
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_SETLOADDIR"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_SetLoadDir</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Set Default Library Load Directory</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 7)</H3>
+</TR>
+</TABLE>
+<DIR>
+  Set the default directory that is to be used for loading RLLs.
+</DIR>
+
+<H4>C prototype:</H4>
+<DIR>
+  <CODE>int RLM_SetLoadDir (char *);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">long</TD>
+   <TD>Address of a zero terminated string (C style) that is the new
+       name to be used</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  The default directory is always searched first when trying to find
+  a RLL. If it is not found there, then the PROG_USE and DATA_USE
+  directories are searched.
+</DIR>  
+
+<H4>Notes.</H4>
+<OL>
+<LI>The default directory can also be set using the QJUMP CONFIG
+    program. This is the value that is then used unless superseded
+    by a call to the
+    <A HREF="#RLM_SETLOADDIR"><CODE>RLM_SetLoadDir()</CODE></A>
+    function.
+</OL>
+
+<P><HR><P>
+
+<A NAME="RLM_SETDEBUGDIR"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_SetDebugDir</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Set Debug Directory</H3>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H4>(d0 = 8)</H4>
+</TR>
+</TABLE>
+<DIR>
+  Set the directory that is to be used for writing debug information files.
+</DIR>
+
+<H4>C prototype:</H4>
+<DIR>
+  <CODE>int RLM_SetDebugDir (char *);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE CELLSPACING=0 BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">long</TD>
+   <TD>Address of a zero terminated string that is the new name
+       to be used. </TD>
+  </TR>
+</TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code</TD>
+  </TR>
+</TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  If debug mode is active, then any debug files are put into
+  this directory. The debug filename is made up of the job name
+  with _DBG appended at the end.
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_SETDEBUGMODE"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_ SetDebugMode</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Set Debug Mode</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 9)</H3>
+</TR>
+</TABLE>
+<DIR>
+  Switch debug mode on or off.
+</DIR>
+
+<H4>C prototype:</H4>
+<DIR>
+  <CODE>int RLM_SetDebugMode (short);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">word</TD>
+   <TD>Debug mode. 0 = off, 1 = on</TD>
+  </TR>
+</TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+   <TD WIDTH="15%">0</TD>
+   <TD>Success</TD>
+  </TR>
+  <TR VALIGN="TOP">
+   <TD>Other</TD>
+   <TD>QDOS/SMS error code</TD>
+  </TR>
+</TABLE>
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  The debug mode is intended primarily for use in debugging
+  RLL libraries. It give copious information about exactly
+  what libraries are used, and what symbols are linked in from
+  each RLL.
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_READSETTINGS"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_ReadSettings</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Read RLM Settings</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 10)</H3>
+</TR>
+</TABLE>
+
+<DIR>
+  Read all the RLM internal settings and pass the results back
+  to the calling code.
+</DIR>
+
+<H4>C prototype:</H4>
+<DIR>
+  <CODE>void RLM_ReadSettings (RLM_READVALUES *);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">long</TD>
+  <TD>Address of a structure that will be used to return the values
+      of the RLM internal variables.</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return values</H4>
+<DIR>
+  none
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  The results are passed back in a structure of the form:
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">34 bytes</TD>
+  <TD>Name of the default debug directory</TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>34 bytes</TD>
+  <TD>Name of the default directory for loading RLLs</TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>Word</TD>
+  <TD>Default timeout for unloading RLLs that are dynamically loaded.</TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>word</TD>
+  <TD>Debug Mode status </TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>word</TD>
+  <TD>Report Mode status</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_RELOCLD"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_RelocLD</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Relocate using C68 relocation</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 11)</H3>
+</TR>
+</TABLE>
+
+<DIR>
+  Do the relocation of the specified bit of code.
+  The relocation table supplied will be in the format of that
+  used by the LD linker. </P></DIR>
+</DIR>
+
+<H4>C prototype:</H4>
+<DIR>
+  <CODE>void RLM_RelocLD (char *, BSS_HEADER *);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">Long</TD>
+  <TD>Base address of the code to be relocated. </TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>long</TD>
+  <TD>Address of the BSS area for the code to be relocated</TD>
+</TR>
+</TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  none
+</DIR>
+
+<H4>Description</H4>
+  <DIR>
+  This routine examines the System Variable that holds the
+  Processor type information (at offset $a0), and if it is
+  not set it performs checks to determine the processor type.
+  The system variable is then updated with the results of
+  these checks. </P>
+  <P>
+  If the processor is a 68020 or better, then the System Variable
+  that controls hardware FPU support (at offset $d0) is examined.
+  If this not set, then a check will be made to see if hardware
+  FPU is present. The System Variable will then be set to disable
+  checks if not found, and to use hardware FPU if it is found. </P>
+  <P>
+  If the processor is a type that supports caches (i.e. a 68020
+  or better), then the current cache state will be read; the caches
+  disabled while the relocation takes place; and then the original
+  cache state restored.
+</DIR>
+
+<H4>Notes</H4>
+<OL>
+  <LI>It is assumed that all locations that need relocation are
+      of type long. No provision is made for any shorter data types. </LI>
+  <LI>To aid with transition, if the "&lt;&lt;RELOC&gt;&gt;" string
+      is missing from the start of the area passed, it will be assumed
+      that this is an LD v1.xx format area that is missing this
+      identifying string. </LI>
+</OL>
+
+<P><HR><P>
+
+<A NAME="RLM_RELOCGST"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_RelocGST</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Relocate using GST relocation</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 12)</H3>
+</TR>
+</TABLE>
+
+<DIR>
+  Do the relocation of the specified bit of code.
+  The relocation table supplied will be in the format
+  of that used by the GST linker.
+</DIR>
+
+<H4>C prototype:</B></H4>
+<DIR>
+ <CODE><P>int RLM_RelocGST (char *, long *);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">long</TD>
+  <TD>Base address of the code to be relocated.</TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>long</TD>
+  <TD>Address of the BSS area for the code to be relocated</TD>
+</TR>
+</TABLE>
+</P>
+
+<H4>Return Values</H4>
+<DIR>
+  none
+</DIR>
+
+<H4>Description</H4>
+<DIR>
+  As with the <A HREF="#RLM_RELOCLD"><CODE>RLM_RelocLD()</CODE></A>
+  routine, processor type will be detected, hardware FPU will be
+  detected and caches handled if appropriate. </P>
+  <P>
+  Note that it is assumed that all locations that need relocation
+  are of type long. No provision is made for any shorter data types.
+</DIR>
+
+<P><HR><P>
+
+<A NAME="RLM_LIBRARYSYMBOL"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_LibrarySymbol</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Get library symbol address</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 13)</H3>
+</TR>
+</TABLE>
+
+<DIR>
+  Get the address of the given symbol from the given RLL library.
+  The library must already be loaded. </P></DIR>
+</DIR>
+
+<H4>C prototype:</H4>
+
+<DIR>
+  <CODE>char * RLM_LibrarySymbol(char * <VAR>symname</VAR>, char * <VAR>libname</VAR<);</CODE>
+</DIR>
+
+<H4>Parameters</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">long</TD>
+  <TD>Name of the symbol to find as a C string </TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>long</TD>
+  <TD>Name of the library to search</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values</H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">0 (NULL)
+  <TD>Symbol (or library) not found
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>Other
+  <TD>Address of the symbol.
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description</H4>
+
+<P><HR><P>
+
+<A NAME="RLM_PROGRAMSYMBOL"></A>
+<TABLE BORDER=0 CELLPADDING=7 WIDTH="100%">
+<TR VALIGN="TOP">
+ <TD WIDTH="30%" ALIGN="LEFT"><H3>RLM_ProgramSymbol</H3>
+ <TD WIDTH="40%" ALIGN="CENTER"><H4>Get Program symbol address</H4>
+ <TD WIDTH="30%" ALIGN="RIGHT"><H3>(d0 = 14)</H3>
+</TR>
+</TABLE>
+
+<DIR>
+  Get the address of the given symbol from any RLL used by the
+  current program. The library must already be loaded.
+</DIR>
+
+<H4>C prototype:</H4>
+<DIR>
+  <CODE>char * RLM_ProgramSymbol(char *name);</CODE>
+</DIR>
+
+<H4>Parameters </H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">char * name</TD>
+  <TD>Name of the symbol to find as a C string</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Return Values </H4>
+<DIR>
+  <TABLE BORDER=0 CELLPADDING=7 WIDTH="90%">
+  <TR VALIGN="TOP">
+  <TD WIDTH="15%">0 (NULL)</TD>
+  <TD>Symbol not found.</TD>
+  </TR>
+  <TR VALIGN="TOP">
+  <TD>Other</TD>
+  <TD>Address of the symbol</TD>
+  </TR>
+  </TABLE>
+</DIR>
+
+<H4>Description </H4>
+
+</BODY>
+</HTML>

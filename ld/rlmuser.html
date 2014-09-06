@@ -1,0 +1,341 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<TITLE>RLM User Guide</TITLE>
+</HEAD>
+
+<BODY LINK="#0000ff" VLINK="#800080">
+
+<H2 ALIGN="CENTER">Runtime Link Library System</H2>
+<H1 ALIGN="CENTER">RLM USER GUIDE</H1>
+
+<P><HR></P>
+<H2>Overview </H2>
+<P>
+The Runtime Link Manager (or RLM) is that component of the RLL system
+that handles the runtime aspects of using the RLL system. </P>
+<P>
+The RLM is intended to normally operate in a manner that is transparent
+to the average user. A programme using RLLs would be executed in the
+normal fashion and the program itself would automatically use the RLM
+to search for and load any RLLs it requires.</P>
+<P>
+For experienced users, the RLM system also supplies commands that provide
+a greater level of control, and allow explicit loading and removal of RLLs</P>
+
+<P><HR></P>
+
+<H2>RLM Operation </H2>
+<P>
+The operation of the RLM is similar to that of most other software
+components that are used on QDOS, SMSQ, SMSQ/E or SMS2 systems.
+The RLM is loaded as a resident extension at BOOT time.
+It provides both a SuperBasic and a low level programmers interface.
+The low level interface is only intended for specialist use,
+and it use is discussed in the RLM Programmers Guide section.</P>
+
+<H3>Loading the RLM </H3>
+<P>
+The RLM will normally be loaded at system start up time.
+For QDOS, SMSQ or SMSQ/E users this would be done via an entry in
+the BOOT file of the form:</P>
+<DIR>
+  <CODE>a=respr(15000): LBYTES "flp1_RLM_rext",a: CALL a</CODE>
+</DIR>
+or if you have Toolkit 2
+<DIR>
+  <CODE>LRESPR "flp1_RLM_rext"</CODE>
+</DIR>
+Those who use SMS2 achieve the analogous result by including an
+entry in the STARTUP file of the form
+<DIR>
+  <CODE>REXT "flp1_RLM_rext" </P></DIR></CODE>
+</DIR>
+The RLM system will then remain resident in the machine,
+ready to be automatically activated as soon as any program that
+has been built to use the RLL system is loaded.
+<P>
+You may also want to pre-load some RLL libraries during the boot stage.
+This would be done by including in your BOOT file
+(after the RLM has been loaded) lines of the form:
+<DIR>
+  <CODE>RLM_LOADLIB "flp1_LIB_libc_rll",0</CODE>
+</DIR>
+More details of the commands available via the SuperBasic interface,
+and the way in which they might be used is covered in the remainder
+of this section.
+
+<H3>Normal Operation </H3>
+<P>
+As long as the RLM has been loaded during the BOOT stage,
+the user would not normally need to do anything special when trying
+to execute programs that have been built to use RLLs.
+The RLM system will automatically be activated as soon as any
+program that tries to use a RLL starts to run.
+<P>
+If a RLL is required that is not already loaded,
+then the RLL is searched for in three directories:
+<OL>
+  <LI>An directory whose name is held internally within the RLM called
+      the RLL library default.
+      The value of the library default can be configured by the user.</LI>
+  <LI>Following failure to find an RLL in the RLL library default
+      directory mentioned above, the
+      LIB subdirectory of the PROG_USE directory is searched.</LI>
+  <LI>If it still has not been found the DATA_USE directory
+      is searched.</LI>
+</OL>
+
+To avoid libraries being loaded and unloaded with unnecessary frequency,
+a timeout value is used to determine when and under what conditions they
+should be unloaded. RLLs that are loaded automatically inherit a timeout
+defined internally to the RLM. When a RLL is no longer in use,
+this timeout is used as the delay before initiating the automatic
+removal of the RLL, returning the memory used back to the operating system.
+If the RLL is used again before this timeout expires,
+then the timeout is reset back to its original value.
+<P>
+Failure to find a required RLL or an error in the run time linking
+process causes the programme that has just been started to be removed.
+If the programme was loaded via <CODE>EXEC_W</CODE> or <CODE>EW </CODE>
+an error code will be returned to the caller.
+If the interactive mode is in effect, or if the system has been
+configured to do so, the RLM will display an appropriate error
+message on such failures.
+
+<H3>Interactive Mode operation </H3>
+
+Normally use of the RLL system is transparent to the end user.
+However, recognising that things do not always work quite as expected,
+the RLM has an interactive mode available.
+This assists in solving minor problems in starting a job that uses RLLs.
+<P>
+The interactive mode opens a console window which is then used to inform
+the user of the link status, errors etc. It also permits the user to
+retry on any failure to find an RLL (after say changing default directories
+or media). On successful linking the RLM console is closed and the job continues.
+On failure the user must press a key to exit.
+<P>
+<B>N.B.</B> All integer quantities when in the interactive mode screen are represented in hex.
+
+<H3>Debug Mode operation </H3>
+<P>
+The RLM also provides some additional support to assist in developing
+runtime libraries, or producing bug reports. This is the RLM debug facility.
+This can be switched on so that a debug file is produced for each
+programme linked. The average user will not need to make use of this
+capability - it is intended primarily for those who are developing
+RLL libraries.
+<P>
+The debug file format consists of lists of RLLs referenced and their
+version number. Following this each symbol is listed and its source
+RLL named with the offset in the RLL, followed by a list of offsets
+in the linked code of addresses referring to this symbol.
+Error messages are produced for any undefined symbols.
+<P>
+The debug file is opened for overwrite on a directory defined by
+the debug directory maintained internally to the RLM,
+this may be a directory or serial device.
+The file will be named as the job name truncated to 8 characters
+(or failing a job name the job tag in hex) with the extension
+"_DBG" appended.
+<P>
+The debug file also lists the absolute addresses of the code being
+linked and all the libraries to permit an interface to a symbolic debugger.
+<P>
+<B>N.B. </B>All integer quantities in the debug file are represented in hex. &nbsp;</P>
+
+<P><HR></P>
+
+<A NAME="SUPERBASIC"></A>
+<H2>SuperBasic Interface</H2>
+<P>
+The default settings of the RLM will satisfy many users so that the
+system can be left to function completely autonomously.
+However, there are a number of new SuperBasic keywords made available
+once the RLM has been loaded to help users exploit its
+capabilities to the maximum. Experienced users may well wish to
+use this SuperBasic interface to tailor the RLM system more closely
+to their particular system, or to explicitly preload RLL libraries
+in their BOOT files.
+
+<A NAME="RLM_PROCS"></A>
+<H3>RLM Procedures </H3>
+<P>
+The following new SuperBasic procedures can be used to control or set
+aspects of the RLM. Note that many of the options that can be changed
+via these keywords can also be given default values via the
+<A HREF="#CONFIG">CONFIG program</A>.
+
+<DIR>
+<TABLE BORDER=0 CELLPADDING=5 WIDTH="100%">
+<TR VALIGN="TOP" ALIGN="LEFT">
+ <TH WIDTH="30%"><FONT SIZE="+1">Procedure Name and syntax</FONT></TD>
+ <TH WIDTH="70%"><FONT SIZE="+1">Description</FONT></TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_INIT</B></CODE></TD>
+ <TD>Relink RLM on accidental removal of RLM Thing</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_LOADLIB</B></CODE> <VAR>rllname$,timeout%</VAR></TD>
+ <TD>Load a RLL with a defined timeout.
+     The file name of the RLL is assumed to have the extension
+     "_RLL". This will be added automatically if omitted </TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_REMOVE</B></CODE> <VAR>rllname$</VAR></TD>
+ <TD>Remove a RLL.
+    This will also remove any jobs or other RLLs that have
+    dependencies on the presence of this RLL.</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_LIBUSE</B></CODE> <VAR>directory$</VAR></TD>
+ <TD>Sets the default directory that is to be searched for RLL libraries.
+     If any RLL cannot be found in this location, the system will also
+     search the current PROG_USE and DATA_USE locations.</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_DEBUGUSE</B></CODE> <VAR>directory$</VAR></TD>
+ <TD>Set the device/directory to be used for storing debug
+      information files. </TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_SETMODE</B> </CODE><VAR>m%</VAR></TD>
+ <TD>Set interactive mode status, where <CODE>m%</CODE> specifies the mode as follows:
+    <TABLE  WIDTH="100%">
+    <TR VALIGN="TOP">
+      <TD ALIGN="CENTER" WIDTH="10%">0
+      <TD>silent mode
+    </TR>
+    <TR VALIGN="TOP">
+     <TD ALIGN="CENTER">1
+     <TD>interactive mode
+    </TR>
+    </TABLE>
+ </TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_SETDEBUG</B></CODE> <VAR>m%</VAR></TD>
+ <TD>Set debug mode status. The parameter <VAR>m%</VAR> specifies
+     the mode as follows:
+    <TABLE WIDTH="100%">
+    <TR VALIGN="TOP">
+      <TD ALIGN="CENTER" WIDTH="10%">0
+      <TD>debug mode on
+    </TR>
+    <TR VALIGN="TOP">
+      <TD ALIGN="CENTER">1
+      <TD>debug mode off
+    </TR>
+    </TABLE>
+ </TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_SETTIME</B></CODE> <VAR>m%</VAR></TD>
+ <TD>Set autoload timeout where <VAR>m%</VAR> has the
+     following meaning:
+    <TABLE WIDTH="100%">
+    <TR VALIGN="TOP">
+     <TD ALIGN="CENTER" WIDTH="10%">-1
+     <TD>(or any negative value) infinite timeout (RLL never auto-removed)
+    </TR>
+    <TR VALIGN="TOP">
+     <TD ALIGN="CENTER">+ve
+     <TD>value is the delay time to unload in seconds after an RLL is
+         no longer in use.
+    </TR>
+    </TABLE>
+</TR>
+</TABLE>
+</DIR>
+
+<A NAME="RLM_FUNCS"></A>
+<H3>RLM Functions</H3>
+<P>
+The following functions can be used to interrogate the RLM about
+its current settings: <DIR>
+<TABLE BORDER=0 CELLPADDING=5 WIDTH="100%">
+<TR VALIGN="TOP" ALIGN="LEFT">
+ <TH WIDTH="30%"><FONT SIZE="+1">Function Name and syntax</FONT></TD>
+ <TH WIDTH="70%"><FONT SIZE="+1">Description</FONT></TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_MODE%</B></CODE></TD>
+ <TD>Returns interactive mode status as follows:
+    <TABLE  WIDTH="100%">
+    <TR VALIGN="TOP">
+      <TD ALIGN="CENTER" WIDTH="10%">0
+      <TD>silent mode
+    </TR>
+    <TR VALIGN="TOP">
+     <TD ALIGN="CENTER">1
+     <TD>interactive mode
+    </TR>
+    </TABLE></TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_DEBUG%</B></CODE></TD>
+ <TD>Returns debug status as follows:
+    <TABLE WIDTH="100%">
+    <TR VALIGN="TOP">
+      <TD ALIGN="CENTER" WIDTH="10%">0
+      <TD>debug mode on
+    </TR>
+    <TR VALIGN="TOP">
+      <TD ALIGN="CENTER">1
+      <TD>debug mode off
+    </TR>
+    </TABLE></TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_TIME%</B></CODE></TD>
+ <TD>Returns value of the autoload timeout as follows:
+    <TABLE WIDTH="100%">
+    <TR VALIGN="TOP">
+     <TD ALIGN="CENTER" WIDTH="10%">-1
+     <TD>(or any negative value) infinite timeout (RLL never auto-removed)
+    </TR>
+    <TR VALIGN="TOP">
+     <TD ALIGN="CENTER">+ve
+     <TD>value is the delay time to unload in seconds after an RLL is
+         no longer in use.
+    </TR>
+    </TABLE>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_LIBD$</B></CODE></TD>
+ <TD>Returns value of the default device/directory that will be searched for
+     any RLLs that need loading.</TD>
+</TR>
+<TR VALIGN="TOP">
+ <TD><CODE><B>RLM_DEBUGD$</B></CODE></TD>
+ <TD>Returns current value of the debug device/directory that will be used
+     for storing any RLL debug files. </TD>
+</TR>
+</TABLE>
+</DIR>
+
+<B> NOTES</B>
+<OL>
+ <LI>The usage of loaded RLLs may be investigated using the QPAC2 Things menu.
+</OL>
+<P><HR></P>
+
+<A NAME="CONFIG"></A>
+<H2>Configuration of the RLM </H2>
+<P>
+The default settings of many of the RLM options are stored
+internally in a CONFIG block. You may configure your copy of RLM to set the startup state of
+these global settings using the QJUMP CONFIG program.
+You can also use the MENUCONFIG program provided by Jochen Merz. <P>
+Note that as level 1 CONFIG treats all values as unsigned.  To specify a
+negative value  in this case (to get infinite timeout) you
+will need to set a large positive number 
+(i.e. &gt; 32,768 and &lt; 65537).
+The RLM will treat any negative number as infinite.
+Very small timeouts are not recommended as the RLL may be removed before the programme has a chance to use it.
+Positive values represent the unload time in seconds.
+
+</BODY>
+</HTML>

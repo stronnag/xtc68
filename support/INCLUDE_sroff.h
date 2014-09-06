@@ -1,0 +1,23 @@
+
+#ifndef _SYS_SROFF
+#define _SYS_SROFF
+#define SROFF_FLAG 0xFB
+#define SROFF_SOURCE 0x01
+#define SROFF_COMMENT 0x02
+#define SROFF_ORG 0x03
+#define SROFF_SECTION 0x04
+#define SROFF_OFFSET 0x05
+#define SROFF_XDEF 0x06
+#define SROFF_XREF 0x07
+#define SROFF_DEFINE 0x10
+#define SROFF_COMMON 0x12
+#define SROFF_END 0x13
+#define TRUNC_BYTE 0x01
+#define TRUNC_WORD 0x02
+#define TRUNC_LONG 0x04
+#define TRUNC_SIGNED 0x08
+#define TRUNC_UNSIGNED 0x10
+#define TRUNC_PCREL 0x20
+#define TRUNC_RELOC 0x40
+#define TRUNC_UNUSED 0x80
+#endif

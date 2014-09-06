@@ -1,0 +1,133 @@
+#
+#   Makefile for C68 LD command
+#
+#   Choose the appropriate set up to suit your system
+#
+#------------------------------------------------------------
+#  ... for compiling with C68 on QDOS
+CC = cc
+CFLAGS = -Qerror=5 -Qwarn=5 -maxerr=5 -O
+LDFLAGS= -bufp120k -bufl50k -m
+LDLIBS=
+CFLAGS = -Qerror=5 -Qwarn=5 -maxerr=5 -O -DLIBDEBUG
+LDLIBS=  -ldebug
+I = ${P}INCLUDE_
+S = _
+O = o
+#------------------------------------------------------------
+#   .. for compiling with MINIX-68K
+# CC = cc68
+# CFLAGS = -Werror=5 -Qwarn=6 -maxerr=5 -D_MINIX -I../ -O
+# LDFLAGS =
+# LDLIBS=
+# I = /usr/include/
+# S = .
+# O = o
+#------------------------------------------------------------
+#   .. for compiling with MINIX-PC
+# CC = cc
+# CFLAGS = -F -D_MINIX -I../
+# LDFLAGS = -i
+# LDLIBS=
+# I = /usr/include/
+# S = .
+# O = s
+#------------------------------------------------------------
+#   .. for compiling with MINIX-386 and GNU C
+# CC = gcc
+# CFLAGS = -D_MINIX -I../ -I/usr/include -I../include -O
+# LDFLAGS =
+# LDLIBS=
+# I = /usr/include/
+# S = .
+# O = o
+#------------------------------------------------------------
+#   .. for compiling with MINIX-386 and Bruce Evans BCC
+# CC = bcc
+# CFLAGS = -D_MINIX -I../ -O
+# LDFLAGS =
+# LDLIBS=
+# I = /usr/include/
+# S = .
+# O = o
+#------------------------------------------------------------
+#   .. for compiling with MINIX-386 and c386
+# CC = gcc
+# CFLAGS = -Qerror=5 -Qwarn=6 -Qmaxerr=5 -D_MINIX -I../ -O
+# LDFLAGS =
+# LDLIBS=
+# I = /usr/include/
+# S = .
+# O = o
+#------------------------------------------------------------
+#   .. for compiling with LINUX-386
+# CC = gcc
+# CFLAGS = -D_MINIX -I../ -O
+# LDFLAGS =
+# LDLIBS=
+# I = /usr/include/
+# S = .
+# O = o
+#------------------------------------------------------------
+#   .. for compiling with UNIX SVR4
+# CC = cc
+# CFLAGS = -c -D_MINIX -DSYSV -I../include
+# LDFLAGS =
+# LDLIBS=
+# I = /usr/include/
+# S = .
+# O = o
+# LINTFLAGS = -m -x
+#------------------------------------------------------------
+
+LD = ld
+RM = rm
+CP = cp
+
+OBJS =  ldmain${S}${O}   ldparams${S}${O} ldlist${S}${O} \
+        ldqdos${S}${O}   ldrll${S}${O}    ldsroff${S}${O}  ldutils${S}${O}
+
+LOBJ =  ldmain$Sln   ldparams$Sln  ldlist$Sln \
+        ldqdos$Sln   ldrll$Sln   ldsroff$Sln  ldutils$Sln
+
+.SUFFIXES : ${S}x ${S}s ${S}asm ${S}o ${S}rel ${S}hdr ${S}h
+
+all :   ${OBJS}
+    ${CC} ${LDFLAGS} -o ld ${OBJS} ${LDLIBS}
+
+${S}hdr${S}h :
+    packhdr $*${S}hdr $*${S}h
+
+${S}c${S}ln:
+    lint ${CFLAGS} -x ${DEFINES} $< >>ld${S}lint 2>&1
+
+lint :lint2 ${LOBJ}
+    lint ${LOBJ} ${LINTFLAGS} >>ld$Slint 2>&1
+
+clean:
+    ${RM} -f *$S$O *$Si *$Ss *$Sln
+
+clobber: clean
+    ${RM} -f ld
+
+#---------------------- Header file dependencies --------------------------
+
+ld${S}h  :  ${I}ctype${S}h    ${I}errno${S}h \
+            ${I}fcntl${S}h \
+            ${I}stdlib${S}h   ${I}stdio${S}h \
+            ${I}string$Sh \
+            ${I}qdos$Sh \
+            ldconfig${S}h   ldmsgs${S}h
+    touch ld$Sh
+
+${OBJS} :  ld$Sh
+${LOBJ} :  ld$Sh
+
+ldsroff${S}c :  ${I}sroff${S}h
+            touch ldsroff${S}c
+ldqdos${S}c  :  ${I}rll${S}h
+ldrll${S}c   :  ${I}rll${S}h
+            touch ldrll${S}c
+ldutils${S}c :  ldmsgs${S}h
+            touch ldutils${S}c
+

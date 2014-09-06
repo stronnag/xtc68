@@ -1,0 +1,18 @@
+#   Makefile for GNU CPP
+CC= cc
+RM= rm
+
+CFLAGS= -O -maxerr=1 -warn=3 -DGPLUSPLUS_INCLUDE_DIR="" -DGCC_INCLUDE_DIR="" -DSTDC_VALUE=1
+LDFLAGS= -bufp100k 
+
+SRCS= alloca_c version_c cexp_c cccp_c
+OBJS= alloca_o version_o cexp_o cccp_o
+
+cpp: $(OBJS)
+	${CC} -ocpp $(LDFLAGS) $(OBJS)
+
+clean:
+	@${RM} -fv ${OBJS}
+
+clobber : clean
+	@${RM} -fv cpp

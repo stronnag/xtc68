@@ -1,0 +1,38 @@
+    SLB (SROFF librarian)   CHANGE LOG
+    ~~~                     ~~~~~~~~~~
+
+13/10/92  v2.9  DJW  Corrected problems with crashing machine when TEMP not set.
+                     Added TMP as alternative to TEMP
+                     Changed symbol comparisons to be case sensitive by default.
+                     New -U flag added to treat all symbols as uppercase.
+01/09/92  v2.8  DJW  Added usage of TEMP environment variable
+                     Added -k option to use full filename.
+20/12/91  v2.7  DJW  Added -Y option to get external reference cross-reference
+                     Added -W option to get file-level cross reference
+                     Further work done on dis-assembly module.
+11/12/91  v2.6  DJW  Corrected problem with Basename when files are being
+                     picked up from sub-directories.
+                     Small esthetic improvements to print layouts.
+07/11/91  v2.5  DJW  Added -L option to produce an analysis of library order
+                     dependencies.   The output of this option is intended
+                     to be processed by the 'tsort' topological sort program.
+30/06/91  v2.4  DJW  Added dis-assembly module.  Not yet fully integrated.
+06/0691   v2.3  DJW  Added program version and copyright to usage screen
+                     Added -A option to analyse a module
+31/05/91  v2.2  DJW  Removed -a option as -r is sufficient
+                     Allowed -c and -r to be used together
+01/05/91  v2.1  DJW  Corrected bug in handling of XREF (type 07) directives
+                     and extended the error messages.
+30/03/91  v2.0  DJW  Completely re-written.
+                     -a option enhanced to check if module already exists.
+                     Added -m option to specify file containing module_names filename
+                     Added -d option to delete modules
+                     Added -r option to replace modules
+                     Added -x option to extract modules
+                     Added -t option to table contents
+                     Added -e option to retain module extensions
+                     Added -f option to get module_name from file contents
+                     Added -n option for numbering modules
+Jan 1991  v1.0  DJW  Original version based upon some concepts from
+                     the nlb program by Jeremy Allison
+

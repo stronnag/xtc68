@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for D in c68 cc cpp as68 ld slb
+do
+ cd $D
+ make $@
+ cd ..
+done

@@ -1,0 +1,482 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<TITLE>RLL Programmers Guide</TITLE>
+</HEAD>
+
+<BODY LINK="#0000ff" VLINK="#800080">
+
+<H2 ALIGN="CENTER">Runtime Link Library System</H2>
+<H1 ALIGN="CENTER">RLL PROGRAMMERS GUIDE</H1>
+
+<A NAME="Contents"></A>
+<H2>Contents</H2>
+
+<UL>
+<LI><A HREF="#Overview">Overview</A>
+<LI><A HREF="#Programming_Constraints">Programming Constraints</A>
+<LI><A HREF="#Progamming_Around_Constraints">Programming Around Constraints</A>
+<UL>
+  <LI><A HREF="#Using_C_Preprocessor">Using the C Pre-Processor</A>
+  <LI><A HREF="#Using_Stubs">Using Stub Libraries</A>
+</UL>
+
+<LI><A HREF="#Name_and_Version">Name and Version Number</A>
+<LI><A HREF="#Name_and_Version">Initialisation Routines</A>
+<LI><A HREF="#Building_Library">Building a RLL Library
+<LI></A><A HREF="#Building_Stub_Library">Building a Stub Library</A>
+<LI><A HREF="#Testing_RLL">Testing a RLL</A>
+</UL>
+
+<P><HR><P>
+
+<H2><A NAME="Overview"></A>Overview </H2>
+<P>
+The use of the RLL system is reasonable transparent from the view of 
+the application programmer who is writing C programs, and the user who 
+uses the resulting C programs.   These users will find that the system 
+is transparent in operation and needs the minimum of consideration.
+<P>
+Special considerations have to be taken by the programmer who is trying
+to produce routines that are suitable for inclusion into Runtime Link Libraries. 
+<P>
+These constraints arise from a number of underlying causes:
+
+<UL>
+<LI>The QL does not have memory management hardware, so each process 
+    starts at a different address
+<LI>It is difficult to generate position independent code when writing a 
+    compiler for a high-level language.
+<LI>The SROFF object format only allows certain categories of information
+    to be stored in the object file that is passed into the linking process.
+</UL>
+
+<P>
+The net effect is 
+<P><HR><P>
+<H2><A NAME="Programming_Constraints"></A>Programming Constraints </H2>
+<P>
+There are various constraints that have to be met for routines that are to 
+be placed into a RLL library. These are necessary because of a combination 
+of the way the Runtime Linking process is implemented, and the need for 
+libraries to be simultaneously shareable amongst many programs.
+These restrictions are: 
+<UL>
+<LI>The routines must not have any static or global variables. 
+    This would preclude such code from being shareable amongst many programs.
+    Static or global <B>constants</B> are allowed as these do not cause problems
+    with sharing routines. 
+<LI>The routines must not contain any explicit references back to variables or
+    functions in the calling program.
+</UL>
+
+<P>
+Routines may, however, include references to functions or variables that are
+in the other modules that are in the same RLL library as themselves, or in 
+other RLL libraries that were specified as being used by this RLL library 
+when it was built. 
+<P>
+If you are writing library routines in C, then this means that effectively 
+these constraints translate into the following: 
+<UL>
+<LI>Store no values other than read only ones in the RLL.
+    This means all variables should be passed as parameters or held 
+    as <CODE>auto</CODE> variables. Assembler routines can also pass
+    parameters between themselves in registers. 
+<LI>If you want to be able to change a variable that is in the calling 
+    program, then its address must be passed as a parameter to the call.
+    Such parameters would normally be passed on the stack, although in the
+    case of assembler modules they can also be passed in registers.
+    <P>
+    It may be most efficient if a calling job passes a pointer to a fixed 
+    format area for the most common global references such as error value
+    variables and file management structures.
+</UL>
+<P>
+Many routines will automatically satisfy these constraints and will already 
+be suitable for inclusion into a RLL library. A very useful tool in helping
+you decide whether routines will be suitable for inclusion in a RLL is SLB,
+the SROFF Librarian Program that is provided as part of the C68 package. 
+If run using the <CODE>-W</CODE> parameter, it can give you an analysis of 
+the external references made by a module (XREFs), and also of the symbols in
+the module that are globally visible (XDEFs). 
+
+<P><HR><P>
+
+<H2><A NAME="Progamming_Around_Constraints"></A>
+Programming around constraints </H2>
+<P>
+The obvious question arises is what do you do with a routine which does
+not satisfy all the above constraints. An obvious simple example is a 
+C routine which sets the global variable <B>errno</B> for reporting 
+diagnostic information on an error return. 
+<P>
+There are fundamentally two techniques available. These are: 
+<UL>
+<LI>The use of the C pre-processor 
+<LI>The use of (stubs)
+</UL>
+
+<P>
+It is quite likely that both of these techniques could be used in parallel. 
+These techniques are now discussed in more detail. 
+<P>
+<H3><A NAME="Using_C_Preprocessor"></A>
+Using the C Pre-processor to call RLL routines </H3>
+<P>
+The C pre-processor allows for any calls to library routines to be 
+expanded into slightly different variants for routines that need 
+additional parameters when present in a RLL. To assist the library 
+programmer in implementing this, the preprocessor symbol RLL_LIBS 
+will be set if the RLL version of a library routine is to be used. 
+<P>
+You could have an entry in the header file that defines your library 
+function in the form:
+<DIR><CODE><P>
+<PRE>  #ifdef RLL_LIBS 
+   #define myfunc(p1,p2) RLL_myfunc(&amp;errno,p1,p2)
+  #else 
+   #define myfunc(p1,p2) RLL_myfunc(p1,p2)
+  #endif</PRE>
+</CODE></DIR>
+<P>
+This means that all references to <VAR>myfunc</VAR> in the original 
+source code will have been replaced to calls to <VAR>RLL_myfunc</VAR>, 
+and an additional parameter will have been added to the call. Having 
+done this, you would then write the RLL version of the function that 
+is to go into the library along the lines of:
+<DIR>
+
+<CODE><PRE>/* 
+* This piece of code is written so that the RLL 
+* version is generated if RLL_LIBS is defined, and 
+* the standard version if it is not 
+*/ 
+#ifdef RLL_LIBS 
+ #define ERRNO * errnoptr 
+ int RLL_myfunc (int *errnoptr, char *par1, int par2) 
+#else 
+ #define ERRNO errno 
+ int myfunc (char * par1, int par2) 
+#endif 
+ { 
+   ...... 
+   ERRNO = error_code; 
+   ...... 
+ }</PRE>
+</DIR>
+
+</CODE><P>Points to note about this are that: 
+
+<UL>
+<LI>The code has been written so that both a RLL version
+    and a non-RLL version can be generated from the same
+    source file according to whether RLL_LIBS has been defined
+    at compile time.
+</UL>
+
+<DIR>
+<P>
+It is recommended that normally you provide both standard
+and RLL versions of any libraries you create so that the
+application programmer can make the final decision on whether
+to use RLL(s) or not. Making sure both versions are based on
+the same file helps ensure that the two versions are kept
+consistent with each other.
+</DIR>
+
+
+<UL>
+<LI>The use of the ERRNO macro for accessing the
+    <VAR>errno</VAR> variable. This allows us to hide the
+    fact of whether we are accessing it directly as in the
+    case of the routine that goes into the standard version
+    of the library, or indirectly via a pointer as in the
+    RLL version.
+</UL>
+
+<P>
+The above way of doing things is reasonable clear to
+understand and has the advantage that it can all be
+done at the C level. It has the disadvantage that
+parameters need to be copied with the attendant runtime
+overheads, and that it relies on the appropriate header
+file being included. 
+<P>
+<A NAME="Using_Stubs"></A>
+<H3>Using stubs to call RLL routines </H3>
+<P>
+There is an alternative technique that can be used either
+instead of, or in addition to, the one mentioned in the
+previous section. 
+<P>
+The technique is to break the call down into two stages: 
+<UL>
+  <LI>A stub routine which is statically linked into the
+      users program that sets up pointers on the stack to
+      these global variables. 
+  <LI>The main routine that is in the RLL which has been
+      adapted to use this extra information. This could be
+      the same adaptation as mentioned in the previous example.
+</UL>
+
+<P>
+If written in C the stub routine for the example would then
+look something like:
+<DIR>
+<CODE><PRE>int myfunc (char * param1, int param2) 
+{ 
+    return RLL_myfunc (&amp;errno, NULL, param1, param2)l 
+} </PRE>
+</CODE>
+</DIR>
+
+<P>
+You can do this more efficiently if you use assembler
+for the stub routine. In this case you need to exploit
+knowledge of the way parameters are stored and write a
+routine for the AS68 assembler that looks something like:
+<DIR>
+<CODE><PRE>
+    .globl _myfunc 
+_myfunc: 
+    pea  errno         ;set up pointer to errno 
+    jsr _RLL_myfunc    ;call main routine 
+    lea  4(sp),sp      ;remove parameter from stack 
+    rts
+</PRE>
+</CODE>
+</DIR>
+
+<P>
+This stub routine should then be included into a special
+stub library that will have the same name as the corresponding
+RLL library, but will have the <VAR>_rls</VAR> extension.
+Any time that a RLL library is linked in, any relevant
+stubs in the (stub( library will be statically linked
+into the main program to establish the link. 
+<P>
+Note the fact that underscores need to be added to the
+C names when written in assembler. The corresponding
+code for the routine in the RLL library now becomes:
+<DIR>
+
+<CODE><PRE>/* 
+* This piece of code is written so that the RLL 
+* version is generated if RLL_LIBS is defined, and 
+* the standard version if it is not 
+*/ 
+#ifdef RLL_LIBS 
+ #define ERRNO * errnoptr 
+ int RLL_myfunc (int *errnoptr, char * dummy, char *par1, int par2) 
+#else 
+ #define ERRNO errno 
+ int myfunc (char * par1, int par2) 
+#endif 
+ { 
+   ...... 
+   ERRNO = error_code; 
+   ...... 
+ }</PRE>
+</DIR>
+
+</CODE>
+<P>
+Note that in this example the extra parameter which is
+a pointer to <CODE>errno</CODE> appears at the front
+of the parameter list (because the parameters on the
+stack are accessed from right to left when at the C level
+- which means that the additional parameter is the first
+one declared in the <CODE>rll_myfunc()</CODE> routine).
+There is also a dummy parameter between those added by
+the stub routine and the original parameters to allow
+for the fact that the return address for the
+<CODE>stub_myfunc()</CODE> routine is still there.
+<P>
+If you do not understand the above, then you should get
+the SOURCE disks that are available for use with C68 and
+look at some of the source code for routines in the LIBC_A
+library. A good example might be that for the
+<B>?????()</B> routine<B>.</B> 
+
+<P><HR><P>
+
+<A NAME="Name_and_Version"></A>
+<H2>RLL THING Name and Version Number </H2>
+<P>When you build a RLL, it has to be assigned both a name
+for use by the THING system, and a version number. 
+<P>
+The Version Number should always be of the form "n.mm"
+where "n" is the major version number and "mm" the minor
+version number. This Version Number information is used
+by the RLL system as follows: 
+
+<UL>
+<LI>If the major version number agrees, then the library
+    is assumed to have compatible call standards with the
+    code that is to be linked to use it. This allows for
+    major changes that will cause backwards compatibility
+    to be a problem to be catered for.
+</UL>
+
+
+<UL>
+<LI>If the minor version number of the RLL is the same
+    <B>or higher</B> than that requested by the caller
+    then it is assumed to be compatible. This allows
+    updated libraries to be used without the need to
+    relink the main program.
+</UL>
+
+<P>
+The THING name of a RLL is made up of the main part of
+the filename plus the most significant part of the
+Version Number. Thus version 4.14 of the LIBC_RLL library
+would have a THING name of "LIBC4". There is a limit or
+16 characters (including the character for the major
+version number) in a RLL THING name - if necessary the
+name will be truncated on the left. As the major version
+number is part of the THING name, then it is possible to
+have RLLs that are for different major numbers of the same
+library loaded simultaneously. 
+<P>
+<P ALIGN="CENTER"><HR>
+
+<A NAME="Initialisation_Routines"></A>
+<H2>RLL Initialisation Routines </H2>
+<P>
+The system allows for you to have special user provided
+initialisation routines invoked at certain points.
+These routines are executed at the following points: 
+<UL>
+  <LI>When a RLL is loaded into memory the routine
+      <CODE>RLL_LoadInit()</CODE> will be called if present.
+</UL>
+
+<UL>
+<LI>When the call to link some code into the RLL is made,
+    then the routine <CODE>RLL_LinkInit()</CODE> will be
+    called if present. A typical use of this routine might
+    be to set up a series of pointers to global addresses
+    passed in from the parent routine to allow for backward
+    references to such addresses.
+</UL>
+
+<P>
+These routines are optional. If not included in the RLL
+when it is built, then no special additional routines
+will be called at these points. It is not expected that
+most RLLs will require these routines, but the facility
+is provided for special cases. 
+
+<P><HR><P>
+
+<A NAME="Building_Library"></A>
+<H2>Building a Runtime Link Library.</H2>
+<P>
+Once you have written your RLL compatible library module(s)
+and have done the compile to produce the SROFF versions of
+the files (the ones whose name end in _o), the next stage
+is to actually build all these modules into a RLL library. 
+<P>
+Where for a standard library you use the SLB SROFF Librarian
+to build a library, the process of building a RLL library
+from its constituent models is more akin to building a program
+in that the LD linker is used rather than the SLB librarian
+program. 
+<P>
+o get the LD linker to build a RLL library, you proceed as if
+you were about to link all the relevant modules into a single
+program, except that (at a minimum) you additionally specify
+the <B>-R</B> parameter to LD. The <B>-R</B> parameter is
+followed by the version number that is to be given to the
+generated RLL. Once you have done that the rest is done
+automatically by LD. Of course you still have to test the
+resultant RLL library! 
+<P>
+To illustrate this you might well build a RLL library by using
+parameters to LD of the form:
+
+<DIR>
+<CODE><P>-olibmine -R1.00 -rm</CODE>
+</DIR>
+
+<P>
+This would build the file LIBMINE_RLL (the _RLL extension is
+added automatically if not explicitly specified), giving it
+a version number of '1.00'. The <B>-rm</B> parameter has been
+used to specify that this library is to have a dependency on
+the library file LIBM_RLL which is the RLL version of the
+standard maths library. The system will also automatically
+set up a dependency on LIBC_RLL - the RLL version of the
+standard C library (<B>Tip:-</B> If you want to suppress
+the dependency on LIBC_RLL you can do this by explicily
+giving the <B>-lc</B> parameter to the linker). 
+<P>
+Note that the above example illustrates the fact that it is
+possible to build one RLL library that has a dependency on
+other ones. However also note that it is necessary to
+explicitly state any such dependencies when you link a
+library - LD will not automatically follow any dependencies
+already set up in a RLL you link in. 
+<P>
+Another point to note is that the RLL system treats symbol
+names as case sensitive. For situations in which this would
+be a problem, the LD linker provides an option to treat all
+case names as though they were upper case. If this option is
+used when building the RLL, then all names will be stored in
+upper case. You should then use the same option when linking
+programs that will use this RLL so that they only ask for
+symbols using upper case. 
+
+<P><HR><P>
+
+<A NAME="Building_Stub_Library"></A>
+<H2>Building a Stub library </H2>
+<P>
+This is built in the same way as standard C68 library, using
+the SLB SROFF librarian program. The only difference is that
+the extension of stub libraries should be <VAR>_rls.</VAR> 
+<P>
+It is not compulsory to have a stub library corresponding
+to each RLL library. If one is present it will be used, and
+if not no error message will be output. It really depends on
+the programmer producing the RLL library and the techniques
+that he used. 
+<P>
+Note that is not necessary that the "Stub" libraries associated
+with a RLL library be present at runtime. This is because the
+stubs are statically linked into the main program at link time. 
+
+<P><HR><P>
+
+<A NAME="Testing_RLL"></A>
+<H2>Testing a Runtime Link Library </H2>
+<P>
+Testing a RLL is rather like testing any library routine
+- you have to write a suitable test program. 
+<P>
+You may find that the Interactive and Debug facilities
+providing control of the RLM system from the SuperBasic
+level are useful while testing your code. You are likely
+to be continually loading/unloading any RLL that contains
+routines that you are trying to test. 
+<P>
+There is a useful trick if you are working on producing an
+updated version of a RLL that you have already used in your
+current programs. Give the test version of your RLL a different
+major version number to your current "production" version.
+That way existing programs can still pick up the old tested
+version of the library, while your test program which you have
+linked to use the new one will (because it has a different major
+version number) select your test version. 
+<P>
+When you have finished testing your new RLL, you can make a
+decision whether it is backward compatible with your existing RLL.
+If it is, then merely by giving it the same major version number as
+the existing RLL, but an updated minor version number all your
+programs will switch to using the new RLL. Do not forget, however,
+to unload the old copy of the RLL and put the new one in its place!
+
+</BODY>
+</HTML>

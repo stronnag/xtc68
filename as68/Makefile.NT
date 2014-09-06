@@ -1,0 +1,52 @@
+.OPTIMIZE
+
+COS = nt
+LOS = nt
+BIN = e:\bin\
+
+XTCFLAGS = -dDOS_LIKE -dLABELDIFF -dUSE_LINE -dMINIX -DLITTLE_ENDIAN -DXTC68 
+CFLAGS = -w4 -e25 -zp4 -zq -oneatx -5 -bt=$(COS)
+LDFLAGS = SYS $(LOS) op st=20000 op maxe=25 op q
+
+SD = ..\
+
+CC = wcc386
+LD = wlink
+
+OBJS = cbuf.obj cpy.obj gen.obj hdr.obj lex.obj main.obj ops.obj &
+	 opt.obj parse.obj pass.obj scan.obj sym.obj cross.obj
+
+.h:    $(SD)
+.c:    $(SD)
+.c.obj :
+    $(cc) $[* $(CFLAGS) $(XTCFLAGS)
+
+all:    $(BIN)as68.exe
+
+$(BIN)as68.exe:    $(OBJS)
+ @%write as68.lnk NAME $(BIN)as68
+ @%append as68.lnk FIL cbuf.obj,cpy.obj,gen.obj,hdr.obj,lex.obj,main.obj,ops.obj,&
+	 opt.obj,parse.obj,pass.obj,scan.obj,sym.obj,cross.obj
+ @%append as68.lnk 
+        $(LD) $(LDFLAGS) @as68.lnk
+        del as68.lnk
+
+cbuf.obj:   cbuf.c jas.h
+cpy.obj:    cpy.c jas.h
+gen.obj:    gen.c jas.h
+hdr.obj:    hdr.c jas.h
+lex.obj:    lex.c jas.h scan.h parse.h
+main.obj:   main.c jas.h
+ops.obj:    ops.c jas.h opcodes.h
+opt.obj:    opt.c jas.h
+parse.obj:  parse.c jas.h parse.h
+pass.obj:   pass.c jas.h
+scan.obj:   scan.c jas.h scan.h parse.h
+sym.obj:    sym.c jas.h
+
+
+
+
+
+
+
