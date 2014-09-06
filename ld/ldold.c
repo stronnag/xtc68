@@ -878,9 +878,9 @@ void xref_dir(void)
    {
       x->xref_oper[i].xop_oper = sy.xref_oper[i].op;
       xid = sy.xref_oper[i].id;
-      switch(x->xref_oper[i].xop_optyp = sgn(xid))
+      switch((int)(x->xref_oper[i].xop_optyp = sgn(xid)))
       {
-         case -1  :  if (-xid > MAX_NDEF)
+          case -1  :  if (-xid > MAX_NDEF)
                          halt(11, "XREF names");
                      if ((sec = src_sec(sec_liste,ndef_name[-xid])) == NULL)
                         sec = def_section(ndef_name[-xid]);
@@ -1076,7 +1076,7 @@ void calc_xref(XREF  *x, char  *c, char *modname)
    for (i=0;i<x->xref_ops;i++)
    {
 
-      switch (x->xref_oper[i].xop_optyp)
+       switch ((int)x->xref_oper[i].xop_optyp)
       {
          case -1 : if (x->xref_oper[i].xop_oper=='+')
                         value+=x->xref_oper[i].xop_ptr.xop_sec->sec_start
