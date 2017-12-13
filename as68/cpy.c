@@ -90,7 +90,7 @@ DO_XREF:
 #ifndef XTC68
 	output( (char *)&segval , 2, 1);
 #else
-	output( swapw((char *)&segval, 2) , 2, 1);
+	output( swapw((char *)&segval, 1) , 2, 1);
 #endif
 	c = 0xFB;
 	output(&c,1,1);
