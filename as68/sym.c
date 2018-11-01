@@ -277,7 +277,7 @@ putsym(p)
 #ifndef XTC68
           output((char *)&len, 2, 1);
 #else
-          output(swapw((char *)&len, 2), 2, 1);
+          output(swapw((char *)&len, 1), 2, 1);
 #endif
         }
     if (! p->name.stix[0] ) {
