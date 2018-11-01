@@ -24,6 +24,7 @@
 
 #include "jas.h"
 
+#include <unistd.h>
 #include "proto.h"
 
 #ifdef VMS
@@ -214,7 +215,7 @@ void setflags(ac,av)
 		char *ip, *op;
 
                 for ( op = (char *) buf, ip = ifile; (*op++ = *ip) != 0 ; ip++ ) {
-                        if ( *ip == '/' 
+                        if ( *ip == '/'
 #ifdef DOS_LIKE
                               ||*ip == '\\' || *ip == ':'
 #endif
@@ -288,4 +289,3 @@ fprintf( stderr, "free( %lx )\n", x );
 	free( x );
 }
 #endif /* MEM_DEBUG */
-

@@ -3,7 +3,7 @@
  * This module handles the dis-assembly of an SROFF module.  It is
  * based on the MINIX mdb disassembler (see notice below), although
  * significant changes have been made from the original.
- * 
+ *
  * The system has been modified to be a 2 pass system:
  *     Pass 1 is used to build up symbol tables.
  *     Pass 2 actually prints the disassembly.
@@ -36,6 +36,7 @@
 
 #include "slb.h"
 #include <stdarg.h>
+#include <arpa/inet.h>
 
 PRIVATE short gword         _PROTOTYPE((void));
 PRIVATE long  glong         _PROTOTYPE((void));
@@ -364,38 +365,38 @@ int mode, reg;
     default:
 	switch (reg)    {
 	case 0:
-		lprintf("%d.w", gword()); 
+		lprintf("%d.w", gword());
 		break;
 	case 1:
-		Long_Label((char)'\0'); 
+		Long_Label((char)'\0');
 		break;
-	case 2: 
+	case 2:
 		l = gaddr;
 		lprintf("%d(pc)", d = gword());
 		symbolic((long)(l+d), (char)'}');
 		break;
-	case 3: 
+	case 3:
 		d = gword();
 		lprintf("%d(pc,%c%d.%c)",
 			BFIELD(d,7,8) | (BTST(d,7) ? 0xFF00 : 0),
 			BTST(d,15) ? 'a' : 'd', BFIELD(d,14,3),
 			BTST(d,11) ? 'l' : 'w');
 		break;
-	case 4: 
+	case 4:
 		lprintf("#");
                 switch (gisize) {
-		case LONG: 
+		case LONG:
 			lprintf("%ld",(long)glong());
                         break;
-		case BYTE: 
+		case BYTE:
 			lprintf("%d", gword() & 0xFF);
                         break;
-		default: 
+		default:
 			lprintf("%d", gword());
                         break;
                 }
 		break;
-	case 5: 
+	case 5:
 		lprintf("sr"); break;
                 break;
 	} /* end of 'reg' switch */
@@ -407,17 +408,17 @@ int mode, reg;
 
 /*================================================================== OP2 */
 PRIVATE
-void    op2 (f,m1,r1,m2,r2) 
+void    op2 (f,m1,r1,m2,r2)
 /*      ~~~
  * Print two operands
- * f set means order passed, clear reverses order 
+ * f set means order passed, clear reverses order
  *----------------------------------------------------------------------*/
 int f, m1, r1, m2, r2;
 {
     DBG (("OP2",1001,"Enter"));
     f ? op1(m1,r1) : op1(m2,r2);
     lprintf(",");
-    f ? op1(m2,r2) : op1(m1,r1); 
+    f ? op1(m2,r2) : op1(m1,r1);
     DBG (("OP2",1001,"Exit"));
 }
 
@@ -455,18 +456,18 @@ long rel_addr, *off_p;
 
     while (l < r) {
         i = (l + r) >> 1;
-        if (rel_addr < nbufp[i].n_value) 
+        if (rel_addr < nbufp[i].n_value)
             r = i;
-        else if (rel_addr > nbufp[i].n_value) 
+        else if (rel_addr > nbufp[i].n_value)
             l = i + 1;
-        else 
+        else
             break;
     }
     if (l == nsyms || r == 0)   {
         *off_p = rel_addr;
         return "_start";
     }
-    if (rel_addr < nbufp[i].n_value) 
+    if (rel_addr < nbufp[i].n_value)
         i--;
     *off_p = rel_addr - nbufp[i].n_value;
     return nbufp[i].n_name;
@@ -494,7 +495,7 @@ void    symbolic (long addr, char sep)
             return;
         }
         fputs(addr_to_name(addr - saddr, &off), stdout);
-        if (off) 
+        if (off)
             lprintf("+0x%lx", off);
 #endif
         lprintf ("SYMBOLIC%ld",addr);
@@ -532,8 +533,8 @@ void    Long_Label(char sep)
               value = 0xFB00 + inchar(libfp);
               DBG(("LONG_LABEL",0x408,"... FB, so read byte"));
           }
-          value = (value << 16) 
-                   + (inchar(libfp) << 8) 
+          value = (value << 16)
+                   + (inchar(libfp) << 8)
                    + (inchar(libfp));
           sprintf (buffer,"%08.8x",value);
           DBG(("LONG_LABEL",0x408,"... data=%s",buffer));
@@ -546,7 +547,7 @@ void    Long_Label(char sep)
              offset = LongWord;
              Get_TruncRule();
              lprintf ("LONG_LABEL%c",sep);
-      } 
+      }
      DBG(("LONG_LABEL",0x401,"Exit"));
 }
 
@@ -564,7 +565,7 @@ char    *name;
     char ds;
 
     DBG (("DISASM_MODULE",0x21,"Enter: name=%s",name));
-    gaddr = printpass = endflag = 0; 
+    gaddr = printpass = endflag = 0;
     modfstart = ftell (fp);
     strcpy (databuf,"");
 
@@ -601,10 +602,10 @@ char    *name;
                 op2(1,7,4,(int)m2,(int)r2);
                 break;
         case 0x1:
-                gisize = BYTE; 
+                gisize = BYTE;
                 goto domove;
         case 0x2:
-                gisize = LONG; 
+                gisize = LONG;
                 goto domove;
         case 0x3:
                 gisize = WORD;
@@ -630,12 +631,12 @@ char    *name;
                     if (m1 == 3)    {
                         lprintf("move\t");
                         gisize = WORD;
-                        if (r1 == 0) 
+                        if (r1 == 0)
                             lprintf("sr,");
                         op1((int)m2,(int)r2);
-                        if (r1 == 2) 
+                        if (r1 == 2)
                             lprintf(",ccr");
-                        if (r1 == 3) 
+                        if (r1 == 3)
                             lprintf(",sr");
                         break;
                     }
@@ -644,16 +645,16 @@ char    *name;
                     break;
                 } else if (r1 == 4) {
                     switch(m1)  {
-                    case 0: 
-                            lprintf("nbcd\t"); 
+                    case 0:
+                            lprintf("nbcd\t");
                             break;
-                    case 1: 
-                            lprintf(m2 ? "pea\t" : "swap\t"); 
+                    case 1:
+                            lprintf(m2 ? "pea\t" : "swap\t");
                             break;
                     case 2:
                     case 3:
                             OPI(m2 ? "movem" : "ext", BTST(w,6) ? 'l' : 'w');
-                            if (m2) 
+                            if (m2)
                                 movem(1,m2==4, gword());
                             break;
                     }
@@ -661,9 +662,9 @@ char    *name;
                     break;
                 }
                 if (r1 == 5)    {
-                    if (m1 == 3) 
+                    if (m1 == 3)
                         lprintf("tas\t");
-                    else 
+                    else
                         OPI("tst", size[m1]);
                     op1((int)m2,(int)r2);
                     break;
@@ -685,20 +686,20 @@ char    *name;
                 case 1:
                         lprintf("trap\t#%d", BFIELD(w,3,4));
                         break;
-                case 2: 
-                        lprintf("link\ta%d,#%d", r2, gword()); 
+                case 2:
+                        lprintf("link\ta%d,#%d", r2, gword());
                         break;
-                case 3: 
-                        lprintf("unlk\ta%d", r2); 
+                case 3:
+                        lprintf("unlk\ta%d", r2);
                         break;
-                case 4: 
-                        lprintf("move.l a%d,usp", r2); 
+                case 4:
+                        lprintf("move.l a%d,usp", r2);
                         break;
-                case 5: 
-                        lprintf("move.l usp,a%d", r2); 
+                case 5:
+                        lprintf("move.l usp,a%d", r2);
                         break;
-                case 6: 
-                        lprintf(misc2[r2]); 
+                case 6:
+                        lprintf(misc2[r2]);
                         break;
                 }
                 break;
@@ -726,9 +727,9 @@ char    *name;
 #else
                 lprintf("b%s\t", cc[BFIELD(w,11,4)]);
 #endif
-                if (ds) 
+                if (ds)
                     symbolic(gaddr+ds,'\0');
-                else 
+                else
                     reladdr('\0');
                 break;
         case 0x7:
@@ -816,4 +817,3 @@ char    *name;
     DBG (("DISASM_MODULE",0x21,"Exit"));
     return gaddr;
 }
-

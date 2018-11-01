@@ -20,6 +20,8 @@
  *
  */
 
+#include <unistd.h>
+#include <stdarg.h>
 #include "cc.h"
 
 #ifdef JDBG
@@ -35,7 +37,7 @@ void	jdbg (char *proc, int x, char *ctl,...)
 
 	fputs(proc, stdout);
 	fputs(": ", stdout);
-	
+
 	vprintf (ctl, va);
 	va_end (va);
 	fputc ('\n', stdout);
@@ -49,7 +51,7 @@ void	jdbg (char *proc, int x, char *ctl,...)
 char   *basename ( fname )
 /*		~~~~~~~~
  *
- * Routine to return the base name of any filename. 
+ * Routine to return the base name of any filename.
  * (Cheats in this implementation as we know we should
  * end in "_ext".  We actually also allow for ".ext".
  *------------------------------------------------------------------------*/
@@ -171,7 +173,7 @@ unsigned char _C_hex[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,10,11,12,13,14,1
  */
 
 
-char *  __streadd ( char *       output, 
+char *  __streadd ( char *       output,
                     const char * input,
                     const char * exceptions,
                     const char * escape)
@@ -689,7 +691,7 @@ int   argunpack (const char *   cmdline,
  *                      escaping when packing arguments.
  */
 
-char * argpack (char * const * argv, 
+char * argpack (char * const * argv,
 			    int 		   flag)
 {
 	char *	cmdline, *cmdlinenew;

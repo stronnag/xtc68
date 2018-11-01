@@ -28,7 +28,7 @@ geninst( sp )
         CBUF *cbp;
         extern int line;
         extern long newdot;
-        extern Optimize;
+        extern int Optimize;
         extern CBUF *generate();
 
         findinst( sp );
@@ -256,7 +256,7 @@ geninst( sp )
                                 nbits += 6;
                                 break;
                         }
-                } 
+                }
         }
         if ( nbits % 8 )
                 error( line, "internal alignment" );
@@ -309,4 +309,3 @@ geninst( sp )
                 }
         }
 }
-

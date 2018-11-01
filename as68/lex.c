@@ -16,7 +16,7 @@
 #include "parse.h"
 #include "proto.h"
 
-extern do_star;
+extern int do_star;
 
 struct reserved words[] = {
 	/*
@@ -201,21 +201,21 @@ void yyinit(void)
 {
 	{
 		register struct lexacts *ap;
-		
+
 		for ( ap = actions; ap < &actions[256]; ap++ )
 			*ap = deflexact;
 	}
 	{
 		register struct lextab *lp;
 		register struct lextab *ep;
-		
+
 		ep = &lextab[lextabsize];
 		for ( lp = lextab; lp < ep; lp++ )
 			actions[lp->select] = lp->action;
 	}
 }
 
-yyprocess(char c)
+int yyprocess(char c)
 {
 	register int i;
 	char buf[256];
@@ -251,7 +251,7 @@ yyprocess(char c)
 		c = yygetc();
 		for ( i = 0; c; ) {
 			buf[i++] = c;
-			if ( c == '\\' ) 
+			if ( c == '\\' )
 				buf[i++] = yygetc();
 			c = yygetc();
 			if ( c == '\'' )

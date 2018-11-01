@@ -30,6 +30,8 @@
 /* for basename() --- see the man page for GNU v. POSIX versions */
 #define _GNU_SOURCE
 #include <string.h>
+#include <unistd.h>
+
 /* #include <libgen.h> (POSIX) */
 #include "cc.h"
 #ifdef WIN32

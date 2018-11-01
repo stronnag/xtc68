@@ -88,3 +88,4 @@ char *   Find_String    _PROTOTYPE((char *));
 void     Kill_String    _PROTOTYPE((char *));
 #define String_Save(s)  Make_String(s)
 
+extern int extract_mode();

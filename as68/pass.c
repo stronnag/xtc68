@@ -55,7 +55,7 @@ void chsegmt(unsigned short segment)
 void aspass1(void)
 {
 	extern jmp_buf err_buf;
-	extern Optimize;
+	extern int Optimize;
 
 #if defined (QDOS) || defined (XTC68)
 	long l;

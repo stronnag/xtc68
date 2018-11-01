@@ -81,18 +81,18 @@ Yline(void)
 	ignore = 0;
 }
 
-yyparse(void)
+int yyparse(void)
 {
 	token = yylex();
 	while ( token ) {
 		Yline();
 		dot.value = newdot;
 	}
-	
+
 	return sawerror;
 }
 
-Ylabel_list(void)
+int Ylabel_list(void)
 {
 	while ( token == NAME ) {
 		cursym = yylval.sym;
@@ -207,7 +207,7 @@ VOID Yinstruction(void)
 		if ( size != 8 ) {
 			if ( newdot & 1 ) {
 				zeros( 1L );
-				if ( cursym != (SYM *) NULL ) 
+				if ( cursym != (SYM *) NULL )
 					cursym->value = newdot;
 			}
 		}
@@ -261,7 +261,7 @@ VOID Yinstruction(void)
 		if ( size != 8 ) {
 			if ( newdot & 1 ) {
 				zeros( 1L );
-				if ( cursym != (SYM *) NULL ) 
+				if ( cursym != (SYM *) NULL )
 					cursym->value = newdot;
 			}
 		}
@@ -281,7 +281,7 @@ VOID Yinstruction(void)
 			long n = val.value - ( newdot % val.value );
 
 			zeros( n );
-			if ( cursym != (SYM *) NULL ) 
+			if ( cursym != (SYM *) NULL )
 				cursym->value = newdot;
 		}
 		break;
@@ -289,7 +289,7 @@ VOID Yinstruction(void)
 	case _EVEN:
 		if ( newdot & 1 ) {
 			zeros( 1L );
-			if ( cursym != (SYM *) NULL ) 
+			if ( cursym != (SYM *) NULL )
 				cursym->value = newdot;
 		}
 		token = yylex();
@@ -489,7 +489,7 @@ Yoperand(void)
 
 				token = yylex();
 				inx = yylval.val;
-				if ( token != REG ) 
+				if ( token != REG )
 					Yerror("invalid register list");
 				if ( tok == DIV ) {
 					op->expr.value |= (1L << inx);
@@ -508,7 +508,7 @@ Yoperand(void)
 			}
 		}
 		break;
-	case LP: 
+	case LP:
 		if ( (token = yylex()) != REG )
 			Yerror( "missing register" );
 		reg = yylval.val;
@@ -531,7 +531,7 @@ Yoperand(void)
 #endif
 		funny_state = 0;
 		if ( setjmp( YYopbuf ) ) {
-			/* 
+			/*
 			 * Yexpr() saw MINUS LP REG
 			 */
 			reg = yylval.val;
@@ -769,11 +769,11 @@ Mexpr(void)
 		if ( val1.psym || val2.psym )
 			Yerror( "illegal use of symbol in expression" );
 		if ( op == DIV ) {
-			if ( val2.value == 0L ) 
+			if ( val2.value == 0L )
 				Yerror( "divison by zero" );
 			val1.value /= val2.value;
 		} else if ( op == MOD ) {
-			if ( val2.value == 0L ) 
+			if ( val2.value == 0L )
 				Yerror( "modulo by zero" );
 			val1.value %= val2.value;
 		} else {

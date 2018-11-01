@@ -54,6 +54,7 @@ typedef unsigned char U_CHAR;
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #ifndef QDOS
 #include <malloc.h>
@@ -116,8 +117,9 @@ extern char *getenv ();
 #define bzero(b,len) memset(b, '\0', len)
 #define bcopy(b1,b2,len) memcpy(b2,b1,len)
 #endif
-extern char *version_string;
 
+extern char *version_string;
+extern int error(char *msg,...);
 
 
 #ifndef FATAL_EXIT_CODE
@@ -485,7 +487,7 @@ long discard_comments (U_CHAR *start, long length, long newlines);
 void dump_arg_n (DEFINITION *, long);
 void dump_defn_1 (U_CHAR *, long, long);
 
-extern parse_c_expression (void *);
+extern int parse_c_expression (void *);
 
 /* Some definitions for the hash table.  The hash function MUST be
    computed as shown in hashf () below.  That is because the rescan
@@ -5327,7 +5329,7 @@ long discard_comments (U_CHAR *start, long length, long newlines)
 /*
  * error - print error message and increment count of errors.
  */
-error (char *msg,...)
+int error (char *msg,...)
 {
   long i;
   FILE_BUF *ip = NULL;
@@ -5349,7 +5351,7 @@ error (char *msg,...)
 
 /* Error including a message from `errno'.  */
 
-error_from_errno (char *name)
+int error_from_errno (char *name)
 {
   long i;
   FILE_BUF *ip = NULL;

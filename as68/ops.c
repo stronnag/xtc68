@@ -166,7 +166,7 @@ struct hcc_bug {
 	{ "", 0 }
 };
 
-chk_cond( tp, all, misc )
+int chk_cond( tp, all, misc )
 	register char *tp;
 	int all;
 	short *misc;
@@ -176,7 +176,7 @@ chk_cond( tp, all, misc )
 	i = all ? 0 : 3;
 	for ( ; cctab[i].cc[0]; i++ ) {
 		if (! strncmp( tp, cctab[i].cc, strlen(cctab[i].cc) ) ) {
-			*misc |= ( cctab[i].en << 4 ); 
+			*misc |= ( cctab[i].en << 4 );
 			return strlen( cctab[i].cc );
 		}
 	}

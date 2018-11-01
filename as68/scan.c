@@ -33,11 +33,11 @@ static int lab_no = 101;
 
 #endif
 
-getnext(void)
+int getnext(void)
 {
         static char buf[80];
         static int cnt = 0, size = 0;
-        static last = '\n';
+        static char last = '\n';
         int sawstar = 0;
 
         do {
@@ -67,7 +67,7 @@ getnext(void)
         return last = buf[cnt++];
 }
 
-yygetc(void)
+int yygetc(void)
 {
         register int c;
 
@@ -98,7 +98,7 @@ void yyungetc( c )
         lastc = c;
 }
 
-yylex(void)
+int yylex(void)
 {
         register int i;
         int c;
@@ -124,7 +124,7 @@ yylex(void)
                 if ( lp->acts & L_BEGID ) {
                         int tsz;
                         char *nm, *tnm;
-                        extern yywidth;
+                        extern int yywidth;
 
                         tsz = 16;
                         nm = ALLOC(tsz,char);
@@ -160,7 +160,7 @@ yylex(void)
                                         break;
                                 }
                         }
-                        
+
                         {
                                 register int lo = 0;
                                 register int hi = nwords-2;
@@ -189,7 +189,7 @@ yylex(void)
                                         }
                                 }
                         }
-                        
+
                         /*
                          * if it's not a reserved word, put the length back
                          */
@@ -206,7 +206,7 @@ yylex(void)
                                         sp = ALLO(STMT);
                                         sp->inst = ip;
                                         sp->misc = misc;
-                                        yylval.stmt = sp; 
+                                        yylval.stmt = sp;
                                         return INSTR;
                                 }
                         }

@@ -20,7 +20,7 @@ inst_ok( sp )
 {
 	register INST *ip = sp->inst;
 	register unsigned short size;
-	extern Optimize;
+	extern int Optimize;
 
 	if (! Optimize ) {
 		/*
@@ -150,7 +150,7 @@ geninst( sp )
        CBUF *cbp;
        extern int line;
        extern long newdot;
-       extern Optimize;
+       extern int Optimize;
 
        findinst( sp );
        eff[0] = eff[1] = (OPERAND *) NULL;
@@ -487,4 +487,3 @@ geninst( sp )
 		}
 	}
 }
-
