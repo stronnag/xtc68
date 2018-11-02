@@ -69,7 +69,7 @@ char    *text;
     char    idstr[20];
 
     DBG(("ADD_ID",0x1001,"Enter: id=%04.4x, text='%s'",id,text));
-    sprintf (idstr,"%04.4x",((unsigned)id & 0xFFFF));
+    sprintf (idstr,"%04x",((unsigned)id & 0xFFFF));
     if (! (ptr=(IDPTR)Find_Node((NODEPTR)IdTree,idstr))) {
         ptr=(IDPTR)Add_Node ((NODEBASE)&IdTree,OwnerNode,idstr,sizeof(IDSTRUCT));
     }
@@ -97,12 +97,12 @@ short   id;
         return ("PC");
     }
 
-    sprintf(buffer,"%04.4x",((unsigned)id & 0xFFFF));
+    sprintf(buffer,"%04x",((unsigned)id & 0xFFFF));
     if (ptr = (IDPTR)Find_Node((NODEPTR)IdTree,buffer)) {
         DBG(("FIND_ID",0x801,"Exit: Node name='%s'",ptr->name));
         return (ptr->name);
     }
-    sprintf (buffer,"Id=$%04.4x",id);
+    sprintf (buffer,"Id=$%04x",id);
     DBG(("FIND_ID",0x801,"Exit: '%s'",buffer));
     return (buffer);              
 }
@@ -140,7 +140,7 @@ char  * Get_LongWord()
                     + (inchar(libfp) << 16) 
                     + (inchar(libfp) << 8) 
                     + inchar(libfp));
-    sprintf (LongText,"$%08.8x",LongWord);
+    sprintf (LongText,"$%08lx",LongWord);
     DBG(("GET_LONGWORD",0xF01,"%s",LongText));
     return (LongText);
 }
@@ -161,7 +161,7 @@ char    *buffer;
     case '-':
             if (Op != ' ')  *buffer++ = Op;
             Op = (char)ch;
-            sprintf (buffer,Get_Id());
+            strcpy (buffer,Get_Id());
             Get_Op(&buffer[strlen(buffer)]);
             break;
     default:

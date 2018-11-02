@@ -294,7 +294,7 @@ void halt(int n,...)
          long npos;
          npos = (long)(lseek (inp_hnd, 0, SEEK_CUR)-(buf_end-buf_ptr));
 
-        (void) fprintf (stderr,"(file='%s', position = %ld (%x))\n",
+        (void) fprintf (stderr,"(file='%s', position = %ld (%lx))\n",
                         currentname, npos, npos);
         }
 #else
@@ -319,7 +319,7 @@ void statistic(void)
    (void) fprintf(list_file,"---------------------------\n");
    for (s=sec_liste;s!=NULL;s=s->sec_next)
       (void) fprintf(list_file,
-         "%-9s %8lX %8lX\n",s->sec_name,s->sec_start-membot,s->sec_length);
+         "%-9s %8X %8lX\n",s->sec_name,s->sec_start-membot,s->sec_length);
    fprintf(list_file,"---------------------------\n");
 }
 
@@ -459,7 +459,7 @@ void list_xsy(XSYMBOL  *xsy_liste, int      u_flag)
          if (xsy_liste->xsy_defd&1)
          {
             fprintf(list_file,
-               "%-20s %08X%c",xsy_liste->xsy_name,calc_xsy(xsy_liste),
+               "%-20s %08lX%c",xsy_liste->xsy_name,calc_xsy(xsy_liste),
                   xsy_liste->xsy_defd&2?' ':'*');
             if (xsy_liste->xsy_sect!=NULL)
                fprintf(list_file," %15s",xsy_liste->xsy_sect->sec_name);
@@ -621,7 +621,7 @@ void nxsy(void)
                         sy.length=1;
                         sy.data_byte=0xFB;
                         break;
-         default     :  printf("Illegal Directive $%02.2x\n", ch); halt(2);
+         default     :  printf("Illegal Directive $%02x\n", ch); halt(2);
                         break;
       }
    }
@@ -1042,7 +1042,7 @@ void module(void)
       if (lstng_flag)
       {
          if (i++>3) { fprintf(list_file,"\n"); i=0; }
-         fprintf(list_file," %8.8s=%08X",
+         fprintf(list_file," %8.8s=%08lX",
                  sec->sec_name,sec->sec_length-sec->sec_oldlen);
       }
       sec->sec_oldlen=sec->sec_length;
@@ -1478,9 +1478,9 @@ void write_prog(void)
       }
    }
 	if(psize & 1)
-		{/* Write an extra byte of zero to even up the program file */
-		write(handle,&c,1);
-		}
+        {/* Write an extra byte of zero to even up the program file */
+            if(write(handle,&c,1)); // shut up ubuntu compiler ...
+        }
    /* Read the QDOS header information */
    bss_size -= (endcode - start );
 #ifdef QDOS
@@ -1501,9 +1501,9 @@ void write_prog(void)
 #ifdef XTC68
     {
        char x[4];
-       write(handle, "XTcc", 4);
+       if(write(handle, "XTcc", 4));
        out_long(x, dspace);
-       write(handle, x, 4);
+       if(write(handle, x, 4));
 #ifdef __unix__
        fchmod(handle, S_IRUSR |S_IWUSR);
 #endif
@@ -1777,9 +1777,9 @@ int main(int   argc, char  **argv)
        fprintf(list_file,"Relocation table = %8X\n",code_ptr-debug_end);
        fprintf(list_file,"--------------------\n");
        fprintf(list_file,
-          "Memory Usage     = %7d%%\n",(code_ptr-membot)*100/mem_size);
+          "Memory Usage     = %7ld%%\n",(code_ptr-membot)*100/mem_size);
        fprintf(list_file,
-          "Buffer Usage     = %7d%%\n",(module_max-module_buffer)*100/buf_size);
+          "Buffer Usage     = %7ld%%\n",(module_max-module_buffer)*100/buf_size);
        fprintf(list_file,"--------------------\n");
     }
    list_xsy(xsy_ll,1);

@@ -240,7 +240,7 @@ int     size;
         default:
             DBG (("GET_DATA",0x88,"$%02.2x character",ch));
             reply = (reply << 8) + (ch & 0xFF);
-            sprintf (buffer,"%02.2x",ch & 0xFF);
+            sprintf (buffer,"%02x",ch & 0xFF);
             strcat (databuf,buffer);
             size--;
             break;
@@ -536,7 +536,7 @@ void    Long_Label(char sep)
           value = (value << 16)
                    + (inchar(libfp) << 8)
                    + (inchar(libfp));
-          sprintf (buffer,"%08.8x",value);
+          sprintf (buffer,"%08lx",value);
           DBG(("LONG_LABEL",0x408,"... data=%s",buffer));
           strcat(databuf,buffer);
           symbolic (value, sep);

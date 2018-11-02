@@ -818,7 +818,7 @@ void	printstr ( char * str, ...)
 		}
 		else
 #else
-		(void) write( STDERR_FILENO, str, strlen(str));
+                    if(write( STDERR_FILENO, str, strlen(str))); // shut up Ubuntu's compiler
 #endif
 		str = (char *)va_arg(ap, char *);
 	}

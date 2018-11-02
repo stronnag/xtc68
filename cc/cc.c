@@ -1524,12 +1524,12 @@ ASM_PASS:
 					 */
 					if (0 < (fd = open(inname,O_RDONLY)))
 					{
-						(void) read (fd, &ch, 1);
-						(void) close (fd);
-						if ('#' == ch)
-						{
-							goto X_FILE;
-						}
+                                            int n = read (fd, &ch, 1);
+                                            close (fd); 
+                                            if (n == 1 && '#' == ch)
+                                            {
+                                                goto X_FILE;
+                                            }
 					}
 				}
 				break;
