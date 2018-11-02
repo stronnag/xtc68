@@ -167,7 +167,7 @@ FILE * lstfp;
     incount = 0;
     if (lstfp) {
         if (nflag) {
-            sprintf (filename, "%03.3d_",nflag);
+            sprintf (filename, "%03d_",nflag);
             if (newfp || lstfp)    nflag++;
         } else
             filename[0] = '\0';

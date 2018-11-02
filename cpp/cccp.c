@@ -2935,8 +2935,8 @@ void special_symbol ( HASHNODE *hp, FILE_BUF *op)
       if (instack[i].fname != NULL)
         true_indepth++;
 
-    buf = (char *) alloca (8);	/* Eigth bytes ought to be more than enough */
-    sprintf (buf, "%d", true_indepth - 1);
+    buf = (char *) alloca (16);	/* Eigth bytes ought to be more than enough jh: but not for the compiler ... */
+    sprintf (buf, "%ld", true_indepth - 1);
     break;
 
   case T_VERSION:
@@ -2946,12 +2946,12 @@ void special_symbol ( HASHNODE *hp, FILE_BUF *op)
 
   case T_CONST:
     buf = (char *) alloca (4 * sizeof (long));
-    sprintf (buf, "%d", hp->value.ival);
+    sprintf (buf, "%ld", hp->value.ival);
     break;
 
   case T_SPECLINE:
     buf = (char *) alloca (10);
-    sprintf (buf, "%d", ip->lineno);
+    sprintf (buf, "%ld", ip->lineno);
     break;
 
   case T_DATE:
@@ -4119,7 +4119,7 @@ void do_elif (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op)
   } else {
     if (if_stack->type != T_IF && if_stack->type != T_ELIF) {
       error ("#elif after #else");
-      fprintf (stderr, " (matches line %d", if_stack->lineno);
+      fprintf (stderr, " (matches line %ld", if_stack->lineno);
       if (if_stack->fname != NULL && ip->fname != NULL &&
 	  strcmp (if_stack->fname, ip->fname) != 0)
 	fprintf (stderr, ", file %s", if_stack->fname);
@@ -4404,7 +4404,7 @@ void do_else (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op)
   } else {
     if (if_stack->type != T_IF && if_stack->type != T_ELIF) {
       error ("#else after #else");
-      fprintf (stderr, " (matches line %d", if_stack->lineno);
+      fprintf (stderr, " (matches line %ld", if_stack->lineno);
       if (strcmp (if_stack->fname, ip->fname) != 0)
 	fprintf (stderr, ", file %s", if_stack->fname);
       fprintf (stderr, ")\n");
@@ -4904,7 +4904,7 @@ void macroexpand (HASHNODE *hp, FILE_BUF *op)
 	    if (isprint (c))
 	      xbuf[totlen++] = c;
 	    else {
-              sprintf ((char *) &xbuf[totlen], "\\%03o", (unsigned long) c);
+              sprintf ((char *) &xbuf[totlen], "\\%03lo", (unsigned long) c);
 	      totlen += 4;
 	    }
 	  }
@@ -5342,7 +5342,7 @@ int error (char *msg,...)
     }
 
   if (ip != NULL)
-    fprintf (stderr, "%s:%d: ", ip->fname, ip->lineno);
+    fprintf (stderr, "%s:%ld: ", ip->fname, ip->lineno);
   vfprintf (stderr, msg, arg);
   fprintf (stderr, "\n");
   errors++;
@@ -5363,7 +5363,7 @@ int error_from_errno (char *name)
     }
 
   if (ip != NULL)
-    fprintf (stderr, "%s:%d: ", ip->fname, ip->lineno);
+    fprintf (stderr, "%s:%ld: ", ip->fname, ip->lineno);
 
 #ifdef QDOS
   if ((errno < sys_nerr) && (errno != -1))
@@ -5398,7 +5398,7 @@ int warning (char *msg,...)
 }
 
   if (ip != NULL)
-    fprintf (stderr, "%s:%d: ", ip->fname, ip->lineno);
+    fprintf (stderr, "%s:%ld: ", ip->fname, ip->lineno);
   fprintf (stderr, "warning: ");
   vfprintf (stderr, msg, va);
   fprintf (stderr, "\n");
@@ -5418,7 +5418,7 @@ int error_with_line (long line, char *msg,...)
   }
 
   if (ip != NULL)
-    fprintf (stderr, "%s:%d: ", ip->fname, line);
+    fprintf (stderr, "%s:%ld: ", ip->fname, line);
   vfprintf (stderr, msg, va);
   fprintf (stderr, "\n");
   errors++;
