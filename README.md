@@ -10,3 +10,11 @@ So you need a 32bit development environment on a x86-64 machine. For Debian / Ub
 ```
 sudo apt install libc6-dev-i386
 ```
+
+Note:
+
+You need the C68 library binary distribution. A good place to start looking is http://www.dilwyn.me.uk/c/index.html. 
+
+You might also check there for updated header files as well.
+
+It is not purpose of this repo to provide a QDOS c68 environemnt, it is merely a cross compiler.
