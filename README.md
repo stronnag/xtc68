@@ -11,10 +11,13 @@ So you need a 32bit development environment on a x86-64 machine. For Debian / Ub
 sudo apt install libc6-dev-i386
 ```
 
-Note:
+## Runtime
 
-You need the C68 library binary distribution. A good place to start looking is http://www.dilwyn.me.uk/c/index.html. 
+You need the C68 runtime binary distribution. A good place to start looking is http://www.dilwyn.me.uk/c/index.html. If runtime disk1 is installed under `support`, the `install.sh` script will install a usable environment, such that:
 
-You might also check there for updated header files as well.
+```
+qcc -o hw hw.c
+```
+will generate a QDOS executable, where `hw.c` is a trivial, standard "Hello World" application, assuming `/usr/local/bin` is on `$PATH`.
 
-It is not purpose of this repo to provide a QDOS c68 environemnt, it is merely a cross compiler.
+It is not purpose of this repo to provide a QDOS c68 environemnt, nor does it offer any help for QDOS development; it mere maintains a cross compiler.
