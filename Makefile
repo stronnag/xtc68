@@ -12,9 +12,8 @@ $(CLEANDIRS):
 
 install:
 	@echo
-	@echo "**** You can use move.pl to install in /usr/local ****"
+	@echo "**** You can use install.sh to install in /usr/local ****"
 
 .PHONY: subdirs $(DIRS)
 .PHONY: subdirs $(CLEANDIRS)
 .PHONY: all clean
-
