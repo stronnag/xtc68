@@ -24,7 +24,7 @@ do
   case $FN in
     */include_*)
       IFILE=${FN##*include_}
-      case IFILE in
+      case $IFILE in
 	sys_*)
 	  SIFILE=${IFILE##*sys_}
 	  $CP $FILE /usr/local/qdos/include/sys/$SIFILE
