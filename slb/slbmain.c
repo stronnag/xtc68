@@ -1,4 +1,4 @@
-/* 
+/*
  *     s l b m a i n _ c
  *
  *     slb - SROFF librarian
@@ -96,7 +96,7 @@ FILE *fp;
 PUBLIC
 void    outchar( c, fp)
 /*      ~~~~~~~
- * Routine to put a character into a file, and stop if 
+ * Routine to put a character into a file, and stop if
  * an error occurs.
  *---------------------------------------------------------------------*/
 int c;
@@ -116,7 +116,7 @@ PUBLIC
 char *  has_extension (name)
 /*      ~~~~~~~~~~~~~
  *  Analyse the name supplied to see if it has an extension.
- *  
+ *
  *  If it does return a pointer to the first character of the
  *  extension, and otherwise return NULL.
  *-----------------------------------------------------------------------*/
@@ -230,7 +230,7 @@ void    add1_list (filename)
 /*      ~~~~~~~~
  *  Add the specified file to the list of file/module names.
  *
- *  The modulename is derived from the filename unless the 
+ *  The modulename is derived from the filename unless the
  *  -f flag has been set, in which case the file is read to
  *  determine the modulename.  In both cases, the -e flag
  *  determines whether the extension (if any) is to be removed.
@@ -314,7 +314,7 @@ FILE * fp;
     char    *ptr, *nptr;
     char    name[100], filename[100];
 
-    for ( ; ; ) {    
+    for ( ; ; ) {
         if (fgets( name, (int)sizeof(name), fp)==(char *)NULL) {
             if (feof(fp) )  return;
             error (5);
@@ -486,7 +486,7 @@ MAINTOPT:
     if (tflag && mflag) {
             if (mflag) eprintf ("\n-m option not used if only action is -t\n");
             errflag++;
-    } 
+    }
     if (maintflag) {
         DBG(("MAIN",0x14,"Checking for library name parameter - argc=%d, optind=%d",argc,optind));
         if (argc > optind ) {
@@ -507,10 +507,10 @@ MAINTOPT:
         while ( argc > optind )
         {
             puts(argv[optind]);
-        
+
                 add_list(argv[optind++]);
         }
-        
+
     }
     if (mflag) {
         if (strcmp(modulename,"-")) {
@@ -554,7 +554,7 @@ MAINTOPT:
         exit (7);
     }
     /*
-     * open library file.  
+     * open library file.
      * If create mode specified it is valid for it to not exist,
      * in all other cases this is an error.
      */
@@ -577,7 +577,7 @@ MAINTOPT:
                     fclose (libfp);
                     error (8, libname);
                 }
-            } 
+            }
         } else {
             /*
              *  Library file does not already exist
@@ -602,14 +602,14 @@ MAINTOPT:
     if (dflag || rflag) {
         char    *ptr;
 
-        if (((ptr = getenv("TEMP")) == NULL) 
-        &&  ((ptr = getenv("TMP")) == NULL) ) 
+        if (((ptr = getenv("TEMP")) == NULL)
+        &&  ((ptr = getenv("TMP")) == NULL) )
             ptr="";
         strcpy (fullworkname, ptr);
 #ifdef QDOS
         if (*fullworkname && isdirdev (ptr) == 0) {
             strcpy (fullworkname, getcwd(fullworkname, (int)sizeof(fullworkname)));
-        } 
+        }
 #endif /* QDOS */
         strcat (fullworkname, WORKNAME);
         DBG(("MAIN",0x14,"Opening Workfile %s",fullworkname));

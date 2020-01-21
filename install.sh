@@ -13,7 +13,7 @@ mkdir -p /usr/local/bin
 
 CP="cp -v"
 
-for B in as68/as68 c68/c68 cc/qcc  cpp/qcpp ld/qld
+for B in as68/as68 c68/c68 cc/qcc  cpp/qcpp ld/qld slb/slb
 do
   $CP $B /usr/local/bin/
 done

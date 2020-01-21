@@ -147,8 +147,8 @@ XDEFPTR t;
                 lprintf (" defined in %-15s",fp->node.name);
             } else {
                 lprintf(" Multiple defines");
-                for ( fp=(LISTPTR)First_Node((NODEPTR)t->xdef) ; 
-                            np=(LISTPTR)Next_Node((NODEPTR)fp) ; 
+                for ( fp=(LISTPTR)First_Node((NODEPTR)t->xdef) ;
+                            np=(LISTPTR)Next_Node((NODEPTR)fp) ;
                                     fp = (LISTPTR)Next_Node((NODEPTR)fp)) {
                     DBG(("PRINT_DEPENDS",0x108,"%s  :Multiple defines %s and %s\n",t->node.name, fp->node.name,np->node.name));
                     fprintf (Lflag ? stderr : listfp," in %s and %s", fp->node.name, np->node.name);
@@ -171,7 +171,7 @@ XDEFPTR t;
          */
         DBG (("PRINT_DEPENDS",0x108,"... Printing XDEF cross-reference"));
         if (! t->xdef)  lprintf("**** NO XDEF's IN THIS MODULE ****");
-        for (fp = (LISTPTR)First_Node((NODEPTR)t->xdef); fp ; 
+        for (fp = (LISTPTR)First_Node((NODEPTR)t->xdef); fp ;
                     fp = (LISTPTR)Next_Node((NODEPTR)fp)) {
             Print_Entry(fp->node.name);
         }
@@ -185,7 +185,7 @@ XDEFPTR t;
         lprintf ("%20s","Xrefs: ");
         linepos = 20;
     }
-    for (fp = (LISTPTR)First_Node((NODEPTR)t->xref); fp ; 
+    for (fp = (LISTPTR)First_Node((NODEPTR)t->xref); fp ;
                     fp = (LISTPTR)Next_Node((NODEPTR)fp)) {
         DBG (("PRINT_DEPENDS",0x108,"... fp=%ld '%s')", (long)fp, fp->node.name));
         /*
@@ -193,7 +193,7 @@ XDEFPTR t;
          */
         if (Lflag ) {
             /* Allow for multiple definitions ! */
-            for (np = (LISTPTR)First_Node((NODEPTR)t->xdef); np ; 
+            for (np = (LISTPTR)First_Node((NODEPTR)t->xdef); np ;
                         np = (LISTPTR)Next_Node((NODEPTR)np)) {
                 DBG (("PRINT_DEPENDS",0x108,"... checking '%s'(%ld) against '%s'(%ld)",np->node.name,(long)np->node.name,fp->node.name,(long)fp->node.name));
                 if (np->node.name != (char *)fp->node.name) {
@@ -226,7 +226,7 @@ char   *Add_List(listptr,s)
 /*      ~~~~~~~~
  * Add an entry to a list.
  *
- * If an entry is found to be already on the list then it is 
+ * If an entry is found to be already on the list then it is
  * not added again.
  *-----------------------------------------------------------------*/
 LISTPTR *listptr;
@@ -365,7 +365,7 @@ int     Process_File ()
                         Module = Make_String(Get_String());
                         if (vflag  && strcasecmp(File,Module)) {
                             eprintf ("... module %s\n",Module);
-                        } 
+                        }
                         if (Lflag && libflag) {
                             lprintf("%s %s\n", Module, Module);
                         }
@@ -381,7 +381,7 @@ int     Process_File ()
                         }
                         DBG(("ANALYSE_FILE",0x801,"... filemodname='%s'",filemodname));
                         break;
-                case SROFF_COMMENT: 
+                case SROFF_COMMENT:
                         DBG(("ANALYSE_FILE",0x801,"... COMMENT Directive"));
                         Get_String();
                         if (vflag) {
@@ -509,6 +509,7 @@ int     Library_Analysis()
             Process_File();
         }
         fclose (libfp);
+        libfp = NULL;
     } /* end of for loop */
     DBG(("LIBRARY_ANALYSIS",0x101,"PRINT DEPENDENCIES"));
     if (Lflag) {

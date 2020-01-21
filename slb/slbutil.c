@@ -245,7 +245,7 @@ PUBLIC
 NODEPTR     First_Node (node)
 /*          ~~~~~~~~~~
  *  Find the first node (alphabetically) in the tree (or branch).
- *  Basically this just involves following the 'prev' pointer until we 
+ *  Basically this just involves following the 'prev' pointer until we
  *  reach a leaf of the tree.  If there is no 'prev' branch then the
  *  given node is the first one.
  *-----------------------------------------------------------------------*/
@@ -461,7 +461,7 @@ char *s;
     if (n=(STRINGPTR)Find_Node((NODEPTR)StringSpace,s)) {
         return (n->node.name);
     }
-    return ((char *)NULL); 
+    return ((char *)NULL);
 }
 
 /*======================================================= KILL_STRING */

@@ -85,7 +85,7 @@ char *  modname;
             DBG(("REMOVE_LIST",0x808,"... but no match found"));
             oldptr = ptr;
             continue;
-        } 
+        }
         DBG(("REMOVE_LIST",0x808,"... match found, ptr=%ld",(long)ptr));
         /* Entry found - so remove from list */
         if (ptr == filelist) {
@@ -109,13 +109,13 @@ char *  modname;
 /*========================================================== GET_MODULENAME */
 PUBLIC
 int     get_modulename (fp, modname)
-/*      ~~~~~~~~~~~~~~ 
+/*      ~~~~~~~~~~~~~~
  *  Get the module name from the file.
  *
  *  The file pointer should be pointing at the FB byte to start it, or
  *  something is wrong.
  *
- *  Leave the file pointer at the next character after the name - this 
+ *  Leave the file pointer at the next character after the name - this
  *  may be comment data.
  *--------------------------------------------------------------------------*/
 FILE *  fp;
@@ -187,14 +187,14 @@ FILE * lstfp;
         outchar ((char)strlen(modname), newfp);
         fputs (modname, newfp);
     }
-    /* 
+    /*
     Now go into a big loop - reading the library file and only doing
     special actions on the special escape character 0xFB.  We need to
     take into account, though, that some of the fixed fields following
     a directive may contain 0xFB bytes.
 
     The actions are:
-        0xFB 0x01 - New object file - followed by byte of name length 
+        0xFB 0x01 - New object file - followed by byte of name length
                     then name itself.
                     NOTE.   This should not happen at this point as the
                             module name should already have been passed
@@ -322,7 +322,7 @@ FILE * lstfp;
     char    fullfilename[100];
 
     if (xflag) {
-        if (nflag)       
+        if (nflag)
             sprintf (fullfilename, "%03d_",nflag);
         else
             fullfilename[0] = '\0';
@@ -402,7 +402,7 @@ int     Add_Mode ()
     /*
      * Now use "create" function to add to end of library
      */
-    return (errors ? -1 : create_mode()); 
+    return (errors ? -1 : create_mode());
 }
 #endif
 
