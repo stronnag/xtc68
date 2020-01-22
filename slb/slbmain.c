@@ -506,11 +506,8 @@ MAINTOPT:
         DBG(("MAIN",0x18,"Building module list from command line. argc=%d, optind=%d",argc,optind));
         while ( argc > optind )
         {
-            puts(argv[optind]);
-
                 add_list(argv[optind++]);
         }
-
     }
     if (mflag) {
         if (strcmp(modulename,"-")) {
@@ -559,6 +556,7 @@ MAINTOPT:
      * in all other cases this is an error.
      */
     errno = 0;
+
     if (libname) {
         /*
          *  First try to open in read mode
@@ -736,4 +734,3 @@ MAINTOPT:
     DBG(("MAIN",0x11,"*** PROGRAM ENDING **** :  exit_status=%d",exit_status));
     exit (0);
 }
-

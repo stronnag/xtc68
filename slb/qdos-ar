@@ -1,0 +1,37 @@
+#!/bin/sh
+
+flags=$1
+libname=$2
+
+shift
+shift
+
+PATH=/usr/local/qdos/bin:$PATH
+
+case $flags in
+   -*) ;;
+   *) flags="-$flags" ;;
+esac
+
+case $flags in
+   -rc|-rcv|-r|-c)
+      slb $flags -ek $libname $@
+      case $flags in
+	r)
+	  qdos-ranlib $libname
+	  ;;
+      esac
+     ;;
+   -x|-xv)
+     slb $flags -m- $libname "$@"
+    ;;
+   -t|-tv)
+     slb $flags $libname
+     ;;
+   *)
+     echo 'Sorry, only -rc or -x '
+     exit 127
+     ;;
+esac
+
+exit 0

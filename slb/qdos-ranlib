@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Behave a bit like 'ranlib' for compatibility
+
+BDIR=`pwd`
+TDIR=$(mktemp -d)
+
+trap "cd $BDIR ; [ -d $TDIR ] && rm -rf $TDIR; exit 0" 2 3 15
+
+libname=$(realpath $1)
+PATH=/usr/local/qdos/bin:$PATH
+
+cd $TDIR
+slb -x $libname
+rm $libname
+slb -L- * | tsort | slb -crv -m- $libname
+cd $BDIR
+rm -rf $TDIR
+exit 0
