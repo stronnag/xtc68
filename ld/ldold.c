@@ -104,7 +104,7 @@ char currentname[50];
 #define sgn(x)  ((x)<0?-1:((x)==0?0:1))
 
 typedef enum o_direct  { data,source,comment,org,section,offset,xdef,xref,
-                       define,common,end,eofsy } O_DIRECT;
+                       define,common,end,eofsy } O___DIRECT;
 
 typedef char ALFA[MAX_LEN];
 
@@ -119,7 +119,7 @@ typedef struct oper
 typedef struct symbol
    {
       short          length;
-      O_DIRECT       directive;
+      O___DIRECT       directive;
       char           string[81];
       long           longword;
       short          id;
