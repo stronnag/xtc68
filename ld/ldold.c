@@ -261,7 +261,7 @@ char     *errmsg[] = {
 };
 
 
-#ifdef linux
+#ifdef __GNUC__
 char *strupr(char *s)
 {
     char *r=s;
