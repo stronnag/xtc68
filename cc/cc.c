@@ -31,8 +31,10 @@
 #define _GNU_SOURCE
 #include <string.h>
 #include <unistd.h>
+#ifdef  __FreeBSD__
+#include <libgen.h> /*(POSIX) */
+#endif
 
-/* #include <libgen.h> (POSIX) */
 #include "cc.h"
 #ifdef WIN32
 #include <process.h>
@@ -1525,7 +1527,7 @@ ASM_PASS:
 					if (0 < (fd = open(inname,O_RDONLY)))
 					{
                                             int n = read (fd, &ch, 1);
-                                            close (fd); 
+                                            close (fd);
                                             if (n == 1 && '#' == ch)
                                             {
                                                 goto X_FILE;
