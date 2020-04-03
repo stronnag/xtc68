@@ -77,7 +77,6 @@ PROG=c68
 #	-Wredundant-decls -Wnested-externs
 #------------------------------------------------------------------------------
 CCFLAGS=-O2
-CC=gcc
 CFLAGS=$(CCFLAGS) $(CFLGS)
 LDFLAGS =
 ARCH := $(shell uname -m)

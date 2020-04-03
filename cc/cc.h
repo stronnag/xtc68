@@ -529,11 +529,6 @@ int 	CheckCPU				_P_((void));
 #	define stricmp strcasecmp
 #  endif /* EPOC */
 # endif /* WIN32 */
-# ifndef WIN32
-# ifndef EPOC
-void	itoa					_P_((int i, char *buf));
-# endif /* EPOC */
-# endif /* WIN32 */
 #ifndef __unix__
 char *	stpcpy					_P_((char *, char *));
 #endif /* __unix__ */

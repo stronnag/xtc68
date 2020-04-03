@@ -75,19 +75,6 @@ char *fname;
 #endif /* ! HAVE_BASENAME */
 
 
-/****************************************************************** STPCPY */
-#ifndef __linux__
-#ifndef QDOS
-#ifndef EPOC
-char *stpcpy(char *d, char *s)
-{
-	while((*d++ = *s++) != '\0');
-	return d-1;
-}
-#endif /* ! EPOC */
-#endif /* ! QDOS */
-#endif /* ! __linux__ */
-
 /****************************************************************** STRPOS */
 /*
  *      s t r p o s
@@ -417,16 +404,6 @@ void AddPart(char *d, char *s, int mlen)
 }
 
 
-/********************************************************************* ITOA */
-#ifndef WIN32
-#ifndef EPOC
-void itoa(int i, char *buf)
-{
-	(void) sprintf(buf, "%d", i);
-	return;
-}
-#endif /* EPOC */
-#endif /* WIN32 */
 
 /****************************************************************** STRPBRK */
 #ifdef EPOC

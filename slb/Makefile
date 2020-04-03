@@ -6,7 +6,6 @@
 
 
 #  ... for compiling on MINIX
-CC = gcc
 CFLAGS =  -I. -O2 -c
 LDFLAGS =
 ARCH := $(shell uname -m)
@@ -34,7 +33,7 @@ SRC =   slbmain.c slbdecl.c slbmodul.c \
 all: 	slb
 
 slb :   ${OBJ}
-	cc ${LDFLAGS} -oslb ${OBJ} ${LIBS}
+	${CC} ${LDFLAGS} -oslb ${OBJ} ${LIBS}
 
 .c.o:
 	${CC} ${CFLAGS} ${DEFINES} $<

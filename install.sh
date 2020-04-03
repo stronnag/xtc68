@@ -5,7 +5,10 @@
 # This script will find the relevant files under ./, in the format
 # from the original distribution runtime disk 1
 
-[ $(id -u) -eq  0 ] || exec sudo $0 $*
+
+if [ $(uname -o) != "Cygwin" ] ; then
+  [ $(id -u) -eq  0 ] || exec sudo $0 $*
+fi
 
 mkdir -p /usr/local/qdos/include/sys
 mkdir -p /usr/local/qdos/lib

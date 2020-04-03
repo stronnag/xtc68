@@ -57,10 +57,12 @@ char _prog_name[] = "ld";
 char _version[] = "v1.22";
 char _copyright[] = " QL 68000 SROFF Linker\n";
 
-#ifdef __linux__
+#ifdef __GNUC__
 #include <unistd.h>
 #include <sys/stat.h>
+#ifndef O_BINARY
 #define O_BINARY 0
+#endif
 #define movmem(a,b,c) memcpy(b,a,c);
 #define stricmp strcasecmp
 #define strnicmp strncasecmp

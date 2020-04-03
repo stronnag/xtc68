@@ -39,7 +39,6 @@
 
 
 PROG=cc
-CC=gcc
 RM=rm -fv
 ZIP=zip
 D=/
@@ -65,7 +64,6 @@ INDENTFLAGS= -bad -br -ce -di8 -i4 -npsl
 #S=_
 #--------------------------------------------------------------
 #     CC (XTC68 version) for QDOS when hosted on LINUX
-CC=gcc
 PROG=qcc
 DEFINES = -DXTC68 -DENVVAR -DHAVE_BASENAME
 CFLAGS =  -O2
