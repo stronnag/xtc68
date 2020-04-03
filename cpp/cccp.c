@@ -56,9 +56,6 @@ typedef unsigned char U_CHAR;
 #include <stdarg.h>
 #include <unistd.h>
 
-#ifndef QDOS
-#include <malloc.h>
-#endif
 
 #if !defined (VMS) && !defined (QDOS) && !defined (DOS_LIKE)
 #include <time.h>

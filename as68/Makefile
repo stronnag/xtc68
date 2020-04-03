@@ -8,6 +8,10 @@ ifeq ($(ARCH),x86_64)
 CFLAGS += -m32
 LDFLAGS += -m32
 endif
+ifeq ($(ARCH),amd64)
+CFLAGS += -m32
+LDFLAGS += -m32
+endif
 
 
 OBJS = cbuf.o cpy.o gen.o hdr.o lex.o main.o ops.o \

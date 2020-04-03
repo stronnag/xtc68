@@ -13,6 +13,10 @@ ifeq ($(ARCH),x86_64)
 CFLAGS += -m32
 LDFLAGS += -m32
 endif
+ifeq ($(ARCH),amd64)
+CFLAGS += -m32
+LDFLAGS += -m32
+endif
 
 LIBS =
 
