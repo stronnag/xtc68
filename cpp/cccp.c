@@ -2932,7 +2932,7 @@ void special_symbol ( HASHNODE *hp, FILE_BUF *op)
       if (instack[i].fname != NULL)
         true_indepth++;
 
-    buf = (char *) alloca (16);	/* Eigth bytes ought to be more than enough jh: but not for the compiler ... */
+    buf = (char *) alloca (32);	/* Eigth bytes ought to be more than enough jh: but not for the compiler ... */
     sprintf (buf, "%ld", true_indepth - 1);
     break;
 
