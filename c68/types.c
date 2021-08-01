@@ -25,6 +25,7 @@
 
 /*****************************************************************************/
 
+#include <stdint.h>
 #include "chdr.h"
 #include "expr.h"
 #include "cglbdec.h"
@@ -1050,7 +1051,7 @@ TYP    *copy_type P1 (const TYP *, tp)
 
 static unsigned hash P1 (const TYP *, tp)
 {
-    return ((unsigned) tp >> (unsigned) 2 & (MAXKEY - (unsigned) 1));
+    return ((uintptr_t) tp >> (unsigned) 2 & (MAXKEY - (unsigned) 1));
 }
 
 /*
