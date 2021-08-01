@@ -43,6 +43,7 @@ Dec 89              QDOS port done by Jeremy Allison
 #include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #ifdef XTC68
 # ifdef DOS_LIKE
@@ -321,7 +322,7 @@ void statistic(void)
    (void) fprintf(list_file,"---------------------------\n");
    for (s=sec_liste;s!=NULL;s=s->sec_next)
       (void) fprintf(list_file,
-         "%-9s %8X %8lX\n",s->sec_name,s->sec_start-membot,s->sec_length);
+         "%-9s %8" PRIxPTR " %8lX\n",s->sec_name,s->sec_start-membot,s->sec_length);
    fprintf(list_file,"---------------------------\n");
 }
 
@@ -1775,9 +1776,10 @@ int main(int   argc, char  **argv)
 
    if (list_file != stdout  || verbose_flag) {
        statistic();
-       fprintf(list_file,"Program length   = %8X\n",memstart-membot);
-       fprintf(list_file,"Relocation table = %8X\n",code_ptr-debug_end);
+       fprintf(list_file,"Program length   = %8" PRIxPTR "\n",memstart-membot);
+       fprintf(list_file,"Relocation table = %8" PRIxPTR "\n",code_ptr-debug_end);
        fprintf(list_file,"--------------------\n");
+
        fprintf(list_file,
           "Memory Usage     = %7ld%%\n",(code_ptr-membot)*100/mem_size);
        fprintf(list_file,
