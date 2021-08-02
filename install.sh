@@ -11,6 +11,8 @@ if [ $(uname -o) != "Cygwin" ] ; then
 fi
 
 mkdir -p /usr/local/qdos/include/sys
+mkdir -p /usr/local/qdos/include/netinet/
+mkdir -p /usr/local/qdos/include/arpa/
 mkdir -p /usr/local/qdos/lib
 mkdir -p /usr/local/bin
 
@@ -31,6 +33,14 @@ do
 	sys_*)
 	  SIFILE=${IFILE##*sys_}
 	  $CP $FILE /usr/local/qdos/include/sys/$SIFILE
+      ;;
+	netinet_*)
+	  SIFILE=${IFILE##*netinet_}
+	  $CP $FILE /usr/local/qdos/include/netinet/$SIFILE
+	  ;;
+	arpa_*)
+	  SIFILE=${IFILE##*arpa_}
+	  $CP $FILE /usr/local/qdos/include/arpa/$SIFILE
 	  ;;
 	*)
 	  $CP $FILE /usr/local/qdos/include/$IFILE
