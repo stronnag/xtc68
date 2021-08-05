@@ -695,7 +695,7 @@ int 	command_line (CC_PASSES_t * preopts,
 			switch (thispass)
 			{
 #ifndef QL
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 				case CPP_PASS:
 #endif /* __unix__ */
 				case ASM_PASS:

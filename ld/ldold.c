@@ -653,6 +653,7 @@ void move_up(SECTION *s)
    if (memend!=memtop) halt(-1);
    moved_sec=s;
    if (s!=NULL)
+   {
       if (s->sec_start!=NULL)
       {
          altstart=memstart;
@@ -660,7 +661,11 @@ void move_up(SECTION *s)
          memend=memtop-(altstart-memstart);
          if (altstart>memstart) movmem(memstart,memend,altstart-memstart);
       }
-      else moved_sec=NULL;
+      else
+      {
+          moved_sec=NULL;
+      }
+   }
 }
 
 /*
@@ -1482,7 +1487,7 @@ void write_prog(void)
    }
 	if(psize & 1)
         {/* Write an extra byte of zero to even up the program file */
-            if(write(handle,&c,1)); // shut up ubuntu compiler ...
+            int res = write(handle,&c,1); // shut up ubuntu compiler ...
         }
    /* Read the QDOS header information */
    bss_size -= (endcode - start );
@@ -1504,10 +1509,11 @@ void write_prog(void)
 #ifdef XTC68
     {
        char x[4];
-       if(write(handle, "XTcc", 4));
+       int res;
+       res = write(handle, "XTcc", 4);
        out_long(x, dspace);
-       if(write(handle, x, 4));
-#ifdef __unix__
+       res = write(handle, x, 4);
+#if defined(__unix__) || defined(__APPLE__)
        fchmod(handle, S_IRUSR |S_IWUSR);
 #endif
     }
@@ -1693,7 +1699,7 @@ void command_line(int   *xac, char  ***xav, char **paths, char *lib_arr)
        char *ldd = getenv("QLLIB");
        if(ldd == NULL)
        {
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
            ldd = strdup("/usr/local/qdos/lib/");
 #else
            ldd = strdup("c:/qllib/");

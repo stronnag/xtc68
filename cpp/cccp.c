@@ -53,6 +53,7 @@ typedef unsigned char U_CHAR;
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdarg.h>
 #include <unistd.h>
 
@@ -105,6 +106,7 @@ typedef unsigned char U_CHAR;
 
 /* External declarations.  */
 
+#ifndef __APPLE__
 #ifndef DOS_LIKE
 void bcopy (), bzero ();
 int bcmp ();
@@ -113,6 +115,7 @@ extern char *getenv ();
 #include <fcntl.h>
 #define bzero(b,len) memset(b, '\0', len)
 #define bcopy(b1,b2,len) memcpy(b2,b1,len)
+#endif
 #endif
 
 extern char *version_string;
@@ -774,15 +777,15 @@ void initialize_char_syntax (void)
 
 void initialize_builtins (void)
 {
-  install ("__LINE__", -1, T_SPECLINE, 0, -1);
-  install ("__DATE__", -1, T_DATE, 0, -1);
-  install ("__FILE__", -1, T_FILE, 0, -1);
-  install ("__BASE_FILE__", -1, T_BASE_FILE, 0, -1);
-  install ("__INCLUDE_LEVEL__", -1, T_INCLUDE_LEVEL, 0, -1);
-  install ("__VERSION__", -1, T_VERSION, 0, -1);
-  install ("__TIME__", -1, T_TIME, 0, -1);
+  install ((U_CHAR *)"__LINE__", -1, T_SPECLINE, 0, -1);
+  install ((U_CHAR *)"__DATE__", -1, T_DATE, 0, -1);
+  install ((U_CHAR *)"__FILE__", -1, T_FILE, 0, -1);
+  install ((U_CHAR *)"__BASE_FILE__", -1, T_BASE_FILE, 0, -1);
+  install ((U_CHAR *)"__INCLUDE_LEVEL__", -1, T_INCLUDE_LEVEL, 0, -1);
+  install ((U_CHAR *)"__VERSION__", -1, T_VERSION, 0, -1);
+  install ((U_CHAR *)"__TIME__", -1, T_TIME, 0, -1);
   if (!traditional)
-    install ("__STDC__", -1, T_CONST, STDC_VALUE, -1);
+    install ((U_CHAR *)"__STDC__", -1, T_CONST, STDC_VALUE, -1);
 /*  install ("__GNU__", -1, T_CONST, 1, -1);  */
 /*  This is supplied using a -D by the compiler driver
     so that it is present only when truly compiling with GNU C.  */
@@ -813,7 +816,7 @@ void make_definition (U_CHAR *str)
   }
   if (*p == 0) {
     buf = (U_CHAR *) alloca (p - buf + 4);
-    strcpy ((char *)buf, str);
+    strcpy ((char *)buf, (char *)str);
     strcat ((char *)buf, " 1");
   } else if (*p != ' ') {
 #ifndef QDOS
@@ -825,8 +828,8 @@ void make_definition (U_CHAR *str)
   } else {
     U_CHAR *q;
     /* Copy the entire option so we can modify it.  */
-    buf = (U_CHAR *) alloca (2 * strlen (str) + 1);
-    strncpy (buf, str, p - str);
+    buf = (U_CHAR *) alloca (2 * strlen ((char *)str) + 1);
+    strncpy ((char *)buf, (char *)str, p - str);
     /* Change the = to a space.  */
     buf[p - str] = ' ';
     /* Scan for any backslash-newline and remove it.  */
@@ -852,7 +855,7 @@ void make_definition (U_CHAR *str)
   ip->fname = "*Initialization*";
 
   ip->buf = ip->bufp = buf;
-  ip->length = strlen (buf);
+  ip->length = strlen ((char *)buf);
   ip->lineno = 1;
   ip->macro = 0;
   ip->free_ptr = 0;
@@ -863,7 +866,7 @@ void make_definition (U_CHAR *str)
 
   /* pass NULL as output ptr to do_define since we KNOW it never
      does any output.... */
-  do_define (buf, buf + strlen (buf) /* ,NULL, kt*/);
+  do_define (buf, buf + strlen ((char *)buf) /* ,NULL, kt*/);
   --indepth;
 }
 
@@ -877,7 +880,7 @@ void make_undef (U_CHAR *str)
   ip->fname = "*undef*";
 
   ip->buf = ip->bufp = str;
-  ip->length = strlen (str);
+  ip->length = strlen ((char *)str);
   ip->lineno = 1;
   ip->macro = 0;
   ip->free_ptr = 0;
@@ -1065,7 +1068,7 @@ main (argc, argv)
         struct file_name_list *q;
         int n;
 
-	if(s = getenv("QLINC"))
+	if((s = getenv("QLINC")))
         {
 
             char *p,*r;
@@ -1313,19 +1316,19 @@ main (argc, argv)
       while (*p && *p != ' ') p++;
       if (*p != 0)
 	*p++= 0;
-      make_definition (q);
+      make_definition ((U_CHAR *)q);
     }
   }
 
   /* Do defines specified with -D.  */
   for (i = 1; i < new_argc; i++)
     if (pend_defs[i])
-      make_definition (pend_defs[i]);
+      make_definition ((U_CHAR *)pend_defs[i]);
 
   /* Do undefines specified with -U.  */
   for (i = 1; i < new_argc; i++)
     if (pend_undefs[i])
-      make_undef (pend_undefs[i]);
+      make_undef ((U_CHAR *)pend_undefs[i]);
 
   /* Unless -fnostdinc,
      tack on the standard include file dirs to the specified list */
@@ -1516,7 +1519,7 @@ main (argc, argv)
       bufp += cnt;
       if (bsize == size) {	/* Buffer is full! */
         bsize *= 2;
-        fp->buf = (U_CHAR *) xrealloc (fp->buf, bsize + 2);
+        fp->buf = (U_CHAR *) xrealloc ((char *)fp->buf, bsize + 2);
 	bufp = fp->buf + size;	/* May have moved */
       }
     }
@@ -1623,7 +1626,7 @@ void trigraph_pcp (FILE_BUF *buf)
   int len;
 
   fptr = bptr = sptr = buf->buf;
-  while ((sptr = (U_CHAR *) index (sptr, '?')) != NULL) {
+  while ((sptr = (U_CHAR *) index ((char *)sptr, '?')) != NULL) {
     if (*++sptr != '?')
       continue;
     switch (*++sptr) {
@@ -2519,6 +2522,8 @@ hashcollision:
     case T_ELIF:
       str = "elif";
       break;
+    default:
+      break;
     }
     error_with_line (line_for_error (if_stack->lineno),
 		     "unterminated #%s conditional", str);
@@ -2670,7 +2675,7 @@ long handle_directive (FILE_BUF *ip, FILE_BUF *op)
    * routine, after moving the input pointer up to the next line.
    */
   for (kt = directive_table; kt->length > 0; kt++) {
-    if (kt->length == ident_length && !strncmp (kt->name, ident, ident_length)) {
+    if (kt->length == ident_length && !strncmp (kt->name, (char *)ident, ident_length)) {
       register U_CHAR *buf;
       register U_CHAR *limit = ip->buf + ip->length;
       long unterminated = 0;
@@ -3135,7 +3140,7 @@ get_filename:
   /* If specified file name is absolute, just open it.  */
 
   if (*fbeg == '/' || *fbeg == '\\' || *fbeg == ':') {
-    strncpy (fname, fbeg, flen);
+    strncpy (fname, (char *)fbeg, flen);
     fname[flen] = 0;
 
 #ifndef QDOS
@@ -3157,7 +3162,7 @@ get_filename:
       } else {
 	fname[0] = 0;
       }
-      strncat (fname, fbeg, flen);
+      strncat (fname, (char *)fbeg, flen);
 #ifdef VMS
       /* Change this 1/2 Unix 1/2 VMS file specification into a
          full VMS file specification */
@@ -3194,7 +3199,7 @@ get_filename:
   }
 
   if (f < 0) {
-    strncpy (fname, fbeg, flen);
+    strncpy (fname, (char *)fbeg, flen);
     fname[flen] = 0;
 #ifdef QDOS
     QDOS_errno = _oserr;
@@ -3208,7 +3213,7 @@ get_filename:
 		 fend - fbeg, fbeg);
       else
 	{
-	  deps_output (fbeg, fend - fbeg);
+	  deps_output ((char *)fbeg, fend - fbeg);
 	  deps_output (" ", 0);
 	}
     }
@@ -3323,7 +3328,7 @@ int  finclude (int f, char *fname, FILE_BUF *op)
       bufp += i;
       if (bsize == st_size) {	/* Buffer is full! */
 	  bsize *= 2;
-	  basep = (U_CHAR *) xrealloc (basep, bsize + 2);
+	  basep = (U_CHAR *) xrealloc ((char *)basep, bsize + 2);
 	  bufp = basep + st_size;	/* May have moved */
 	}
     }
@@ -3404,7 +3409,7 @@ void do_define (U_CHAR *buf, U_CHAR *limit)
     error ("invalid macro name '%s'", msg);
 #endif
   } else {
-    if (! strncmp (symname, "defined", 7) && sym_length == 7)
+    if (! strncmp ((char *)symname, "defined", 7) && sym_length == 7)
 #ifndef QDOS
       error ("defining `defined' as a macro");
 #else
@@ -3500,7 +3505,7 @@ void do_define (U_CHAR *buf, U_CHAR *limit)
 	msg = (U_CHAR *) alloca (sym_length + 20);
 	bcopy (symname, msg, sym_length);
 	strcpy ((char *) (msg + sym_length), " redefined");
-	warning (msg);
+	warning ((char *)msg);
       }
       /* Replace the old definition.  */
       hp->type = T_MACRO;
@@ -3532,7 +3537,7 @@ long compare_defs (DEFINITION *d1, DEFINITION *d2)
     return 1;
   for (a1 = d1->pattern, a2 = d2->pattern; a1 && a2;
        a1 = a1->next, a2 = a2->next) {
-    if (!((a1->nchars == a2->nchars && ! strncmp (p1, p2, a1->nchars))
+    if (!((a1->nchars == a2->nchars && ! strncmp ((char *)p1, (char *)p2, a1->nchars))
 	  || ! comp_def_part (first, p1, a1->nchars, p2, a2->nchars, 0))
 	|| a1->argno != a2->argno
 	|| a1->stringify != a2->stringify
@@ -3779,7 +3784,7 @@ DEFINITION * collect_expansion (U_CHAR *buf, U_CHAR *end, long nargs, struct arg
 
 	  if (arg->name[0] == c
 	      && arg->length == id_len
-	      && strncmp (arg->name, id_beg, id_len) == 0) {
+	      && strncmp ((char *)arg->name, (char *)id_beg, id_len) == 0) {
 	    /* make a pat node for this arg and append it to the end of
 	       the pat list */
 	    tpat = (struct reflist *) xmalloc (sizeof (struct reflist));
@@ -3880,7 +3885,7 @@ void do_line (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op)
   /* The Newline at the end of this line remains to be processed.
      To put the next line at the specified line number,
      we must store a line number now that is one less.  */
-  new_lineno = atoi (bp) - 1;
+  new_lineno = atoi ((char *)bp) - 1;
 
   /* skip over the line number.  */
   while (isdigit (*bp))
@@ -3936,7 +3941,7 @@ void do_line (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op)
       &fname_table[hashf (fname, fname_length, FNAME_HASHSIZE)];
     for (hp = *hash_bucket; hp != NULL; hp = hp->next)
       if (hp->length == fname_length &&
-	  strncmp (hp->value.cpval, fname, fname_length) == 0) {
+	  strncmp (hp->value.cpval, (char *)fname, fname_length) == 0) {
 	ip->fname = hp->value.cpval;
 	break;
       }
@@ -3972,7 +3977,7 @@ void do_undef (U_CHAR *buf)
 
   SKIP_WHITE_SPACE (buf);
 
-  if (! strncmp (buf, "defined", 7) && ! is_idchar[buf[7]])
+  if (! strncmp ((char *)buf, "defined", 7) && ! is_idchar[buf[7]])
 #ifndef QDOS
     warning ("undefining `defined'");
 #else
@@ -4041,7 +4046,7 @@ void do_pragma (U_CHAR *buf)
 {
   while (*buf == ' ' || *buf == '\t')
     buf++;
-  if (!strncmp (buf, "once", 4))
+  if (!strncmp ((char *)buf, "once", 4))
     do_once ();
   return;
 }
@@ -4148,7 +4153,7 @@ long eval_if_expression (U_CHAR *buf, long length)
   HASHNODE *save_defined;
   long value;
 
-  save_defined = install ("defined", -1, T_SPEC_DEFINED, 0, -1);
+  save_defined = install ((U_CHAR *)"defined", -1, T_SPEC_DEFINED, 0, -1);
   temp_obuf = expand_to_temp_buffer (buf, buf + length, 0);
   delete_macro (save_defined);	/* clean up special symbol */
 
@@ -4194,7 +4199,7 @@ void do_xifdef (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, struct directive *keyw
 
   conditional_skip (ip, skip, T_IF);
   return;
-  op;        /* to avoid not ref warning */
+  op = op;        /* to avoid not ref warning */
 }
 
 /*
@@ -4325,7 +4330,7 @@ void skip_if_group (FILE_BUF *ip, long any)
 
       for (kt = directive_table; kt->length >= 0; kt++) {
 	IF_STACK_FRAME *temp;
-	if (strncmp (cp, kt->name, kt->length) == 0
+	if (strncmp ((char *)cp, (char *)kt->name, kt->length) == 0
 	    && !is_idchar[cp[kt->length]]) {
 
 	  /* If we are asked to return on next directive,
@@ -4367,6 +4372,8 @@ void skip_if_group (FILE_BUF *ip, long any)
 	    if_stack = if_stack->next;
 	    free (temp);
 	    break;
+    default:
+      break;
 	  }
 	  break;
 	}
@@ -5052,7 +5059,7 @@ char * macarg (struct argdata *argptr)
       final_start = bufsize;
       bufsize += bp - ip->bufp;
       extra += newlines;
-      buffer = (U_CHAR *) xrealloc (buffer, bufsize + extra + 1);
+      buffer = (U_CHAR *) xrealloc ((char *)buffer, bufsize + extra + 1);
       bcopy (ip->bufp, buffer + bufsize - (bp - ip->bufp), bp - ip->bufp);
       ip->bufp = bp;
       ip->lineno += newlines;
@@ -5469,7 +5476,7 @@ long grow_outbuf (FILE_BUF *obuf, long needed)
   if (minsize > obuf->length)
     obuf->length = minsize;
 
-  if ((p = (U_CHAR *) xrealloc (obuf->buf, obuf->length)) == NULL)
+  if ((p = (U_CHAR *) xrealloc ((char *)obuf->buf, obuf->length)) == NULL)
     memory_full ();
 
   obuf->bufp = p + (obuf->bufp - obuf->buf);
@@ -5558,7 +5565,7 @@ HASHNODE * lookup (U_CHAR *name, long len, long hash)
 
   bucket = hashtab[hash];
   while (bucket) {
-    if (bucket->length == len && strncmp (bucket->name, name, len) == 0)
+    if (bucket->length == len && strncmp ((char *)bucket->name, (char *)name, len) == 0)
       return bucket;
     bucket = bucket->next;
   }
@@ -5711,7 +5718,7 @@ void dump_arg_n (DEFINITION *defn, long argnum)
 {
   register U_CHAR *p = defn->argnames;
   while (argnum + 1 < defn->nargs) {
-    p = (U_CHAR *) index (p, ' ') + 1;
+    p = (U_CHAR *) index ((char*)p, ' ') + 1;
     argnum++;
     }
 

@@ -314,14 +314,14 @@
 # define DSEPS "_"
 #endif /* QDOS */
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 # define DOT '.'
 # define DOTS "."
 # define DSEP '/'
 # define DSEPS "/"
 # define ERR_OM 1
 # define ERR_BP 1
-#endif /* __unix */
+#endif /* defined(__unix__) || defined(__APPLE__) */
 
 #ifdef DOS_LIKE
 # define DOT '.'
@@ -529,7 +529,7 @@ int 	CheckCPU				_P_((void));
 #	define stricmp strcasecmp
 #  endif /* EPOC */
 # endif /* WIN32 */
-#ifndef __unix__
+#if !defined(__unix__) && !defined(__APPLE__)
 char *	stpcpy					_P_((char *, char *));
 #endif /* __unix__ */
 char *	strpbrk 				_P_((const char *, const char *));

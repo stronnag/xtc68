@@ -84,16 +84,16 @@ DO_XREF:
 	c = (code->nbits / 8) | 0x50;
 
 #endif
-	output(&c,1,1);
+	output((char *)&c,1,1);
 	c = 0x2B;
-	output(&c,1,1);
+	output((char *)&c,1,1);
 #ifndef XTC68
 	output( (char *)&segval , 2, 1);
 #else
 	output( swapw((char *)&segval, 1) , 2, 1);
 #endif
 	c = 0xFB;
-	output(&c,1,1);
+	output((char *)&c,1,1);
 	break;
   default:  /* Just write out the absolute value */
 #if !defined (UNIXHOST) && !defined(XTC68)
@@ -102,13 +102,13 @@ DO_XREF:
 #else
 	switch (code->nbits) {
 	case 8:
-		output2fb( mklowbyte(code->value.value), sizeof (char), 1 );
+		output2fb( (unsigned char *)mklowbyte(code->value.value), sizeof (char), 1 );
 		break;
 	case 16:
-		output2fb( mklowshort(code->value.value), sizeof (char), 2 );
+		output2fb( (unsigned char *)mklowshort(code->value.value), sizeof (char), 2 );
 		break;
 	case 32:
-		output2fb( mklowlong(code->value.value), sizeof (char), 4 );
+		output2fb( (unsigned char *)mklowlong(code->value.value), sizeof (char), 4 );
 		break;
 	}
 #endif

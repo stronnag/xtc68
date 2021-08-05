@@ -100,7 +100,7 @@ EXTERN char    copyright[]   INIT("(c) 1991 David J Walker");
  *
  *--------------------------------------------------------------------------/
 
-/*
+ *
  *  The generalised common part of a binary tree
  *  (or list - but then not all fields used)
  */

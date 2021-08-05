@@ -164,7 +164,7 @@ char *name;
     /*
      * First handle any extension
      */
-    if (ptr = has_extension (name)) {
+    if ((ptr = has_extension (name))) {
         if (!eflag) {
             *ptr = '\0';
         }

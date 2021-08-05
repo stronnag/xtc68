@@ -783,6 +783,7 @@ void	printstr ( char * str, ...)
  *---------------------------------------------------------------------------*/
 {
 	va_list  ap;
+    int res;
 
 	DBG(("PRINTSTR",0x11,"Enter"));
 	va_start(ap, str);
@@ -795,7 +796,7 @@ void	printstr ( char * str, ...)
 		}
 		else
 #else
-                    if(write( STDERR_FILENO, str, strlen(str))); // shut up Ubuntu's compiler
+        res = write( STDERR_FILENO, str, strlen(str));
 #endif
 		str = (char *)va_arg(ap, char *);
 	}

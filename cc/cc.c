@@ -35,6 +35,13 @@
 #include <libgen.h> /*(POSIX) */
 #endif
 
+#ifdef __APPLE__
+#include <targetconditionals.h>
+#if TARGET_OS_MAC
+#include <libgen.h>
+#endif /* TARGET_OS_MAC */
+#endif /* __APPLE__ */
+
 #include "cc.h"
 #ifdef WIN32
 #include <process.h>
@@ -705,9 +712,9 @@ int 	command_line (CC_PASSES_t * preopts,
 			switch (thispass)
 			{
 #ifndef QL
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 				case CPP_PASS:
-#endif /* __unix__ */
+#endif /* defined(__unix__) || defined(__APPLE__) */
 				case ASM_PASS:
 					add_args (&current_pass, "-o");
 					break;
@@ -792,7 +799,7 @@ int 	command_line (CC_PASSES_t * preopts,
 void	useage()
 /*		~~~~~~
  *	Simply print a usage message.
-/*--------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------------*/
 {
 	(void) printstr ("useage: ",CC," [options] filename[s]\n",NULL);
 	exit( -1 );

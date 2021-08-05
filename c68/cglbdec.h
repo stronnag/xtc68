@@ -22,7 +22,7 @@
  *        The next port will be a SPARC port
  */
 
-#ifndef _CGLBDEC_h
+#ifndef _CGLBDEC_H
 #define	_CGLBDEC_H
 
 extern FHANDLE input;		/* input source file */

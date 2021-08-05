@@ -161,7 +161,7 @@ void lprintf P1V (const char *, formatstr)
  *           determines whether to output the message.
  */
 /*PRINTFLIKE2 */
-void dprintf P2V (int, flag, const char *, formatstr)
+void dbgprintf P2V (int, flag, const char *, formatstr)
 {
     if (is_debugging (flag)) {
 	va_list ap;

@@ -246,13 +246,13 @@ static void putlen P1 (ILEN, l)
     case IL4:
 	oprintf (".L");
 	break;
-    case (ILEN) (IL4 + 1):
+    case (IL4 + 1):
 	oprintf (".S");
 	break;
-    case (ILEN) (IL8 + 1):
+    case (IL8 + 1):
 	oprintf (".D");
 	break;
-    case (ILEN) (IL12 + 1):
+    case (IL12 + 1):
 	oprintf (".X");
 	break;
     default:

@@ -220,7 +220,7 @@ extern void fatal P_ ((const char *, const char *, const char *,...));
 
 #ifdef CPU_DEFINED
 #ifdef DEBUG
-extern void dprintf P_ ((int, const char *,...));
+extern void dbgprintf P_ ((int, const char *,...));
 
 #endif /* DEBUG */
 extern void oprintf P_ ((const char *,...));
