@@ -6,6 +6,8 @@
 # from the original distribution runtime disk 1
 
 
+BINDIR=${1:-/usr/local/bin}
+
 if [ $(uname -o) != "Cygwin" ] ; then
   [ $(id -u) -eq  0 ] || exec sudo $0 $*
 fi
@@ -14,13 +16,13 @@ mkdir -p /usr/local/qdos/include/sys
 mkdir -p /usr/local/qdos/include/netinet/
 mkdir -p /usr/local/qdos/include/arpa/
 mkdir -p /usr/local/qdos/lib
-mkdir -p /usr/local/bin
+mkdir -p $BINDIR
 
 CP="cp -v"
 
 for B in as68/as68 c68/c68 cc/qcc cpp/qcpp ld/qld slb/slb slb/qdos-ar slb/qdos-ranlib
 do
-  $CP $B /usr/local/bin/
+  $CP $B $BINDIR
 done
 
 while read FILE
