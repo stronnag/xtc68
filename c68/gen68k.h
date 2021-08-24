@@ -384,8 +384,11 @@ enum ilength {
     IL1 = 1,
     IL2 = 2,
     IL4 = 4,
+    IL4p1 = 5,
     IL8 = 8,
-    IL12 = 12
+    IL8p1 = 9,
+    IL12 = 12,
+    IL12p1 = 13,
 };
 
 /* stack optimisations */

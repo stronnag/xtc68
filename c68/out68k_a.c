@@ -87,7 +87,7 @@ static SIZE align_type = 0L;
 static const char *prefix = "I_";
 static const char *comment = "!";
 
-static const char *opl[] =
+const char *opl[] =
 {
     "move",			/* op_move */
     "move.l",			/* op_moveq */

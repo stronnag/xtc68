@@ -371,7 +371,7 @@ NODEPTR ptr;
         return;
     }
 #endif
-    if (owner = ptr->owner) {
+    if ((owner = ptr->owner)) {
         if (owner->prev == ptr) {
             DBG(("KILL_NODE",0x1008,"Clearing LEFT node of owner at %ld (was %ld)",owner,owner->prev));
             owner->prev = (NODEPTR)NULL;
@@ -458,7 +458,7 @@ char *s;
 {
     STRINGPTR   n;
 
-    if (n=(STRINGPTR)Find_Node((NODEPTR)StringSpace,s)) {
+    if ((n=(STRINGPTR)Find_Node((NODEPTR)StringSpace,s))) {
         return (n->node.name);
     }
     return ((char *)NULL);

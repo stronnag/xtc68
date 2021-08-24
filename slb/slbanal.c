@@ -98,7 +98,7 @@ short   id;
     }
 
     sprintf(buffer,"%04x",((unsigned)id & 0xFFFF));
-    if (ptr = (IDPTR)Find_Node((NODEPTR)IdTree,buffer)) {
+    if ((ptr = (IDPTR)Find_Node((NODEPTR)IdTree,buffer))) {
         DBG(("FIND_ID",0x801,"Exit: Node name='%s'",ptr->name));
         return (ptr->name);
     }

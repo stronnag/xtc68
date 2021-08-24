@@ -79,15 +79,6 @@ PROG=c68
 CCFLAGS=-O2
 CFLAGS=$(CCFLAGS) $(CFLGS)
 LDFLAGS =
-ARCH := $(shell uname -m)
-ifeq ($(ARCH),x86_64)
-CFLAGS += -m32
-LDFLAGS += -m32
-endif
-ifeq ($(ARCH),amd64)
-CFLAGS += -m32
-LDFLAGS += -m32
-endif
 
 #------------------------------------------------------------------------------
 #	Source files common to all versions of c68/c386

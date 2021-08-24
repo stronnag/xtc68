@@ -452,7 +452,7 @@ int     replace_mode ()
     DBG(("REPLACE_MODE",0x41,"Enter"));
     while (get_modulename(libfp, modname) != EOF) {
         DBG(("REPLACE_MODE",0x44,"next module = '%s', stackreport=%ld",modname, 0));
-        if (ptr=search_list(modname)) {
+        if ((ptr=search_list(modname))) {
             DBG(("REPLACE_MODE",0x44,"replacing module '%s'",modname));
             if (vflag) {
                 eprintf ("replacing %s",modname);
@@ -494,7 +494,7 @@ int     extract_mode ()
     int reply = 0;
 
     while (get_modulename(libfp, modname) != EOF) {
-        if (ptr=search_list(modname)) {
+        if ((ptr=search_list(modname))) {
             if (vflag && actions) {
                 eprintf ("extracting '%s",ptr->node.name);
                 if (stricmp (modname, ptr->node.name))

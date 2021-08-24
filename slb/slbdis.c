@@ -570,7 +570,7 @@ char    *name;
     strcpy (databuf,"");
 
     while (printpass < 2)   {
-        Check_Label(gaddr, '\t');
+        Check_Label();
         w = gword();
         if (printpass > endflag) {
             endflag = printpass;

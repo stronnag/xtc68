@@ -138,7 +138,7 @@ void aspass1(void)
 #else
 	  l = 0x05FB;
 	  output((char *)&l, 2, 1); /* uses long so its OK */
-	  output2fb(swapl((unsigned char *)&bsssize, 4), 4, 1);
+	  output2fb((unsigned char *)swapl((char *)&bsssize, 4), 4, 1);
 #endif
 
 	}

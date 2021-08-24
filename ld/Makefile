@@ -5,15 +5,6 @@ OBJS = ld.o
 # We force an ia32 application to avoid having to fix numerous long assumptions
 CFLAGS = -DXTC68 -O2 -fsigned-char
 LDFLAGS =
-ARCH := $(shell uname -m)
-ifeq ($(ARCH),x86_64)
-CFLAGS += -m32
-LDFLAGS += -m32
-endif
-ifeq ($(ARCH),amd64)
-CFLAGS += -m32
-LDFLAGS += -m32
-endif
 
 PROG = qld
 

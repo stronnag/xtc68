@@ -142,13 +142,13 @@ XDEFPTR t;
      */
     if (Wflag) {
         lprintf ("%-15s",t->node.name);
-        if (fp = (LISTPTR)First_Node((NODEPTR)t->xdef)) {
+        if ((fp = (LISTPTR)First_Node((NODEPTR)t->xdef))) {
             if (! Next_Node((NODEPTR)fp)) {
                 lprintf (" defined in %-15s",fp->node.name);
             } else {
                 lprintf(" Multiple defines");
                 for ( fp=(LISTPTR)First_Node((NODEPTR)t->xdef) ;
-                            np=(LISTPTR)Next_Node((NODEPTR)fp) ;
+                            (np=(LISTPTR)Next_Node((NODEPTR)fp)) ;
                                     fp = (LISTPTR)Next_Node((NODEPTR)fp)) {
                     DBG(("PRINT_DEPENDS",0x108,"%s  :Multiple defines %s and %s\n",t->node.name, fp->node.name,np->node.name));
                     fprintf (Lflag ? stderr : listfp," in %s and %s", fp->node.name, np->node.name);

@@ -18,9 +18,7 @@
  */
 
 
-void pcrossw(w, cp)
-short w;
-char *cp;
+void pcrossw(short w, char *cp)
 {
 #ifdef HOST_LITTLE_ENDIAN
        *(short *)cp = (unsigned short) (w << 8) + (w >> 8);

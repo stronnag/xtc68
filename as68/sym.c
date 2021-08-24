@@ -267,10 +267,10 @@ putsym(p)
 #endif
 
         c = 0xFB;
-        output( &c, 1, 1);
+        output( (char *)&c, 1, 1);
         xdef = ( p->flags == DEFINED || p->flags == (DEFINED|GLOBAL)) ? 0 : 1;
         c = xdef ? 0x06 : 0x10;
-        output( &c, 1, 1);
+        output( (char *)&c, 1, 1);
         if(!xdef) {
           /* Output identifying ID */
           len = p->index + 1;

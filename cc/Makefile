@@ -68,15 +68,6 @@ PROG=qcc
 DEFINES = -DXTC68 -DENVVAR -DHAVE_BASENAME
 CFLAGS =  -O2
 LDFLAGS =
-ARCH := $(shell uname -m)
-ifeq ($(ARCH),x86_64)
-CFLAGS += -m32
-LDFLAGS += -m32
-endif
-ifeq ($(ARCH),amd64)
-CFLAGS += -m32
-LDFLAGS += -m32
-endif
 #--------------------------------------------------------------
 #     CPOC front-end when hosted on LINUX
 #CC = gcc
