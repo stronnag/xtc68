@@ -6,8 +6,9 @@
 
 
 #  ... for compiling on MINIX
-CFLAGS =  -I. -O2 -c
-LDFLAGS =
+LDFLAGS += $(CFLAGS)
+CFLAGS +=  -I. -O2
+
 
 LIBS =
 
@@ -31,7 +32,7 @@ slb :   ${OBJ}
 	${CC} ${LDFLAGS} -oslb ${OBJ} ${LIBS}
 
 .c.o:
-	${CC} ${CFLAGS} ${DEFINES} $<
+	${CC} ${CFLAGS} ${DEFINES} -c $<
 
 clean :
 	${RM} -f ${OBJ} *_i *_s ${PROG}

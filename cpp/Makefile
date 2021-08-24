@@ -2,7 +2,7 @@ BIN =
 
 APFLAGS=  -DXTC68 -DCPLUSPLUS
 
-CFLAGS =  -O2 $(APFLAGS)
+CFLAGS +=  -O2 $(APFLAGS)
 LDFLAGS =
 
 OBJ = version.o cexp.o cccp.o

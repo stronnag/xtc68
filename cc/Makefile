@@ -66,8 +66,9 @@ INDENTFLAGS= -bad -br -ce -di8 -i4 -npsl
 #     CC (XTC68 version) for QDOS when hosted on LINUX
 PROG=qcc
 DEFINES = -DXTC68 -DENVVAR -DHAVE_BASENAME
-CFLAGS =  -O2
-LDFLAGS =
+LDFLAGS += $(CFLAGS)
+CFLAGS +=  -O2
+
 #--------------------------------------------------------------
 #     CPOC front-end when hosted on LINUX
 #CC = gcc
