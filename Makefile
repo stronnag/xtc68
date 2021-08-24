@@ -1,3 +1,7 @@
+# Top level makefile
+# Note you can build 32bit binaries on x86-64 by
+# CFLAGS=-m32 make
+
 DIRS = as68  c68  cc  cpp  ld  slb
 CLEANDIRS = $(DIRS:%=clean-%)
 

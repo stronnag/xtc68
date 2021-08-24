@@ -77,8 +77,9 @@ PROG=c68
 #	-Wredundant-decls -Wnested-externs
 #------------------------------------------------------------------------------
 CCFLAGS=-O2
-CFLAGS=$(CCFLAGS) $(CFLGS)
-LDFLAGS =
+LDFLAGS += $(CFLAGS)
+CFLAGS += $(CCFLAGS) $(CFLGS)
+
 
 #------------------------------------------------------------------------------
 #	Source files common to all versions of c68/c386
