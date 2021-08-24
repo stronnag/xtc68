@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Install header files to /usr/local/qdos/include and sub-directories
 # Install libraries to /usr/local/qdos/lib
