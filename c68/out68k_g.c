@@ -196,12 +196,12 @@ static void putconst P1 (const EXPR *, ep)
     switch (ep->nodetype) {
     case en_autocon:
     case en_icon:
-	oprintf ("%ld", ep->v.i);
+	oprintf ("%d", ep->v.i);
 	break;
 #ifndef FLOAT_BOOTSTRAP
 #ifdef FLOAT_MFFP
     case en_fcon:
-	oprintf ("0x%lx", genffp (ep->v.f));
+	oprintf ("0x%x", genffp (ep->v.f));
 	break;
 #endif /* FLOAT_MFFP */
 #endif /* FLOAT_BOOTSTRAP */
@@ -287,15 +287,15 @@ static void putamode P2 (const ADDRESS *, ap, ILEN, len)
 	    i_val = ap->u.offset->v.i;
 	    switch (len) {
 	    case IL1:
-		i_val &= (IVAL) 0x000000ffL;
+		i_val &= (IVAL) 0x000000ff;
 		break;
 	    case IL2:
-		i_val &= (IVAL) 0x0000ffffL;
+		i_val &= (IVAL) 0x0000ffff;
 		break;
 	    default:
 		break;
 	    }
-	    oprintf ("%ld", i_val);
+	    oprintf ("%d", i_val);
 	    break;
 	}
 	/*FALLTHRU */
@@ -303,42 +303,42 @@ static void putamode P2 (const ADDRESS *, ap, ILEN, len)
 	putconst (ap->u.offset);
 	break;
     case am_dreg:
-	oprintf ("d%d", (int) ap->preg);
+	oprintf ("d%d", (int32_t) ap->preg);
 	break;
     case am_areg:
-	oprintf ("a%d", (int) ap->preg - (int) A0);
+	oprintf ("a%d", (int32_t) ap->preg - (int32_t) A0);
 	break;
     case am_freg:
-	oprintf ("fp%d", (int) ap->preg - (int) FP0);
+	oprintf ("fp%d", (int32_t) ap->preg - (int32_t) FP0);
 	break;
     case am_ind:
-	oprintf ("a%d@", (int) ap->preg - (int) A0);
+	oprintf ("a%d@", (int32_t) ap->preg - (int32_t) A0);
 	break;
     case am_ainc:
-	oprintf ("a%d@+", (int) ap->preg - (int) A0);
+	oprintf ("a%d@+", (int32_t) ap->preg - (int32_t) A0);
 	break;
     case am_adec:
-	oprintf ("a%d@-", (int) ap->preg - (int) A0);
+	oprintf ("a%d@-", (int32_t) ap->preg - (int32_t) A0);
 	break;
     case am_indx:
-	oprintf ("a%d@(", (int) ap->preg - (int) A0);
+	oprintf ("a%d@(", (int32_t) ap->preg - (int32_t) A0);
 	putconst (ap->u.offset);
 	oprintf (")");
 	break;
     case am_indx2:
-	oprintf ("a%d@(", (int) ap->preg - (int) A0);
+	oprintf ("a%d@(", (int32_t) ap->preg - (int32_t) A0);
 	putconst (ap->u.offset);
-	oprintf (",d%d:l)", (int) ap->sreg);
+	oprintf (",d%d:l)", (int32_t) ap->sreg);
 	break;
     case am_indx3:
-	oprintf ("a%d@(", (int) ap->preg - (int) A0);
+	oprintf ("a%d@(", (int32_t) ap->preg - (int32_t) A0);
 	putconst (ap->u.offset);
-	oprintf (",a%d:l)", (int) ap->sreg - (int) A0);
+	oprintf (",a%d:l)", (int32_t) ap->sreg - (int32_t) A0);
 	break;
     case am_indx4:
-	oprintf ("a%d@(", (int) ap->preg - (int) A0);
+	oprintf ("a%d@(", (int32_t) ap->preg - (int32_t) A0);
 	putconst (ap->u.offset);
-	oprintf (",d%d:w)", (int) ap->sreg);
+	oprintf (",d%d:w)", (int32_t) ap->sreg);
 	break;
     case am_indxpc:
 	oprintf ("pc@(");
@@ -348,7 +348,7 @@ static void putamode P2 (const ADDRESS *, ap, ILEN, len)
     case am_indx2pc:
 	oprintf ("pc@(");
 	putconst (ap->u.offset);
-	oprintf (",a%d:l)", (int) ap->preg - (int) A0);
+	oprintf (",a%d:l)", (int32_t) ap->preg - (int32_t) A0);
 	break;
     case am_rmask:
 	put_rmask (ap->u.mask);
@@ -393,11 +393,11 @@ PRIVATE void put_code P1 (const CODE *, ip)
  */
 static void put_mask P1 (REGMASK, mask)
 {
-    if (mask & (REGMASK) ((1L << (int) FP0) | (1L << (int) FP1) | (1L << (int) FP2) | (1L << (int) FP3) |
-			  (1L << (int) FP4) | (1L << (int) FP5) | (1L << (int) FP6) | (1L << (int) FP7))) {
-	oprintf ("#0x%04lx", mask >> (int) FP0);
+    if (mask & (REGMASK) ((1L << (int32_t) FP0) | (1L << (int32_t) FP1) | (1L << (int32_t) FP2) | (1L << (int32_t) FP3) |
+			  (1L << (int32_t) FP4) | (1L << (int32_t) FP5) | (1L << (int32_t) FP6) | (1L << (int32_t) FP7))) {
+	oprintf ("#0x%04x", mask >> (int32_t) FP0);
     } else {
-	oprintf ("#0x%04lx", mask);
+	oprintf ("#0x%04x", mask);
     }
 }
 
@@ -467,21 +467,21 @@ static void put_header P2 (enum e_gt, gtype, SIZE, al)
 PRIVATE void put_byte P1 (UVAL, val)
 {
     put_header (bytegen, alignment_of_type (tp_char));
-    oprintf ("0x%lx", val & OxffUL);
+    oprintf ("0x%x", val & OxffU);
     outcol += 4;
 }
 
 PRIVATE void put_word P1 (UVAL, val)
 {
     put_header (wordgen, alignment_of_type (tp_short));
-    oprintf ("0x%lx", val & OxffffUL);
+    oprintf ("0x%x", val & OxffffU);
     outcol += 6;
 }
 
 PRIVATE void put_dword P1 (UVAL, val)
 {
     put_header (longgen, alignment_of_type (tp_long));
-    oprintf ("0x%lx", val);
+    oprintf ("0x%x", val);
     outcol += 10;
 }
 
@@ -576,7 +576,7 @@ PRIVATE void put_storage P1 (SYM *, sp)
     } else {
 	oprintf ("\t.comm\t%s", outlate (nameof (sp)));
     }
-    oprintf (",%ld%s", typeof (sp)->size, newline);
+    oprintf (",%d%s", typeof (sp)->size, newline);
 }
 
 
