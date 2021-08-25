@@ -62,6 +62,7 @@
 #include <varargs.h>
 #endif /* HAS_STDARG */
 
+#include <stdint.h>
 /*
  *   For NON-ANSI systems.....
  */
@@ -292,7 +293,7 @@ typedef unsigned char BITSIZE;	/* size of a bitfield */
 typedef struct sblock BLOCK;	/* scope table */
 typedef enum e_bt BTYPE;	/* basic type */
 typedef unsigned char CHAR;	/* input character */
-typedef long IVAL;		/* signed integral value */
+typedef int32_t IVAL;		/* signed integral value */
 typedef unsigned int LABEL;	/* internal label */
 typedef unsigned int LEVEL;	/* scope level */
 typedef unsigned char QUALIFIER;	/* type qualifiers */
@@ -308,7 +309,7 @@ typedef struct sym SYM;		/* symbol entry */
 typedef struct stab TABLE;	/* symbol table */
 typedef enum e_sym TOKEN;	/* scanner token */
 typedef struct typ TYP;		/* type entry */
-typedef unsigned long UVAL;	/* unsigned integral value */
+typedef uint32_t UVAL;	/* unsigned integral value */
 typedef struct func FUNC;	/* function entry */
 typedef struct structure STRUCT;	/* struct/union entry */
 typedef struct reg_use REGUSAGE;	/* register usage on function calls */
