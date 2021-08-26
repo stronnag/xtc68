@@ -38,7 +38,7 @@
 #------------------------------------------------------------------------
 
 
-PROG=cc
+#PROG=cc
 RM=rm -fv
 ZIP=zip
 D=/
@@ -170,3 +170,7 @@ zipbin:
 zipsrc:
 	-$(RM) ccsrc$(S)zip
 	$(ZIP) ccsrc$(S)zip makefile cc$(S)pr $(SRC) $(HDR) cc$(S)1 cc$(S)ds?
+
+install: $(PROG)
+	install -d $(prefix)
+	install $(PROG) $(prefix)
