@@ -137,7 +137,7 @@ int main(int ac, char **av) {
   if (inf) {
     char *p, *q;
     int fd;
-    QLDIR_t qd;
+    QLDIR_t qd ={0};
     short nlen;
     struct stat s;
 
@@ -190,6 +190,7 @@ int main(int ac, char **av) {
             lseek(fd, -1 * sizeof(qd), SEEK_CUR);
             break;
           }
+          memset(&qd, 0, sizeof(qd));
         }
       } else {
         fd = open(secret, O_CREAT | O_WRONLY, 0666);
