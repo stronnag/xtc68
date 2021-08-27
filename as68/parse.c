@@ -818,7 +818,7 @@ Uexpr(void)
 EXPR
 Yfactor(void)
 {
-	EXPR val;
+     EXPR val = {NULL,0};
 
 	switch ( token ) {
 	case NUMBER:
@@ -852,7 +852,7 @@ Yfactor(void)
 		}
 	default:
 		Yerror( "illegal expression" );
-	}
+        }
 	token = yylex();
 	return val;
 }

@@ -306,7 +306,6 @@ static OPTIONS *optsarray[] =
 /*ARGSUSED2 */
 static void uniq_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
 {
-    arg = arg;			/* keep compiler quiet */
     if (set) {
 	*(optptr->u1.ip) = 1;
     } else {
@@ -447,7 +446,6 @@ void list_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
 
 void chip_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
 {
-    arg = arg;			/* keep compiler quiet */
     if (set) {
 #ifdef MULTIPLE_ASSEMBLERS
 	Funcs = (struct funcs *) optptr->u1.value;
@@ -465,7 +463,6 @@ static void help_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
 {
     OPTIONS **optpptr;
 
-    arg = arg;			/* keep compiler quiet */
     if (set) {
 	message (MSG_USAGE, PROGNAME);
 	for (optpptr = optsarray; *optpptr; optpptr++) {

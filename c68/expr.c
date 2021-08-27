@@ -512,7 +512,7 @@ static const CHAR *get_stringlit P1 (LABEL, lab)
  */
 static EXPR *mk_stringlit P2 (const CHAR *, s, size_t, len)
 {
-    STREE  *p, *q;
+    STREE  *p, *q=NULL;
     STRING *lp;
     int     local_global = global_flag;
     int     result = 0;
@@ -571,9 +571,9 @@ static EXPR *mk_stringlit P2 (const CHAR *, s, size_t, len)
 	if (q == NIL_STREE) {
 	    strtree = p;
 	} else if (result < 0) {
-	    q->less = p;
+             q->less = p;
 	} else {
-	    q->more = p;
+             q->more = p;
 	}
     }
     global_flag = local_global;
@@ -1049,7 +1049,6 @@ static const CHAR *check_scanf P5 (const CHAR *, fname, int, num, const CHAR *, 
 	}
 	return NIL_CHAR;
     }
-    pos = pos;			/* stops compilers generating warning about pos not being used */
 
     for (; *fstr; fstr++) {
 	suppress = 0;
@@ -1197,7 +1196,7 @@ static EXPR *parmlist P2 (EXPR *, ep, const BLOCK *, block)
 	int     num;
 	const CHAR *(*func) P_ ((const CHAR *, int, const CHAR *, enum fpos *, const TYP *));
     };
-    struct pflike *pf;
+    struct pflike *pf=NULL;
     static struct pflike printflike[] =
     {
 	{&fprintf_name, 2, check_printf},

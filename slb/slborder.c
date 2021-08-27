@@ -210,7 +210,7 @@ XDEFPTR t;
     if ((Wflag || Yflag) && linepos) {
         End_Of_Line();
     }
-nextlevel:
+
     if (t->node.next) {
         DBG (("PRINT_DEPENDS",0x108,"... following next link to node at %ld",(long)t->node.next));
         Print_Depends((XDEFPTR)t->node.next);

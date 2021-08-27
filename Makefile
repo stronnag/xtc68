@@ -9,6 +9,9 @@ INSTALLDIRS = $(DIRS:%=install-%)
 prefix ?= /usr/local/bin
 export prefix
 
+CFLAGS += -Wall
+export CFLAGS
+
 all: $(DIRS)
 $(DIRS):
 	$(MAKE) -C $@

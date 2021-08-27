@@ -314,6 +314,7 @@ static BOOL is_label_used_in_expr P2 (EXPR *, ep, LABEL, label)
     }
 }
 
+#if 0 // caller is #if 0 below
 /*
  * Returns false if ip2 alters the flags used by the conditional jump
  * in ip.
@@ -322,6 +323,7 @@ static BOOL is_flags_unchanged P2 (CODE *, ip, CODE *, ip2)
 {
     return (op_flags[ip2->opcode] & (SET_FLAGS|USE_FLAGS)) == 0;
 }
+#endif
 
 /*
  * Returns false if the <ea> does not use the label specified.
@@ -1811,8 +1813,6 @@ static void peep_uctran P1 (CODE *, ip)
  */
 static void peep_bxx P1 (CODE *, ip)
 {
-    CODE   *target;
-    LABEL   label = ip->oper1->u.offset->v.l;
     static OPCODE revcond[] =
     {
 	op_bne, op_beq,
@@ -1848,7 +1848,8 @@ static void peep_bxx P1 (CODE *, ip)
      * instruction provided it didn't affect the conditions on which the
      * branch is taken.
      */
-
+    CODE   *target;
+    LABEL   label = ip->oper1->u.offset->v.l;
     target = find_label (label);
     /* now skip forward over identical instruction sequences */
     while (is_same_instruction (ip->fwd, target->fwd) && is_flags_unchanged (ip, ip->fwd)) {

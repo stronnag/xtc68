@@ -1144,7 +1144,7 @@ int yylex (void)
 
   /* It is a name.  See how long it is.  */
 
-  for (namelen = 0; is_idchar[tokstart[namelen]]; namelen++)
+  for (namelen = 0; is_idchar[(int)tokstart[namelen]]; namelen++)
     ;
 
   lexptr += namelen;

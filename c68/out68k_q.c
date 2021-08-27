@@ -689,8 +689,6 @@ static void put_align P1 (SIZE, al)
  */
 PRIVATE void put_epilogue P2 (SYM *, sp, LABEL, label)
 {
-    sp = sp;			/* keep the compiler quiet */
-    label = label;		/* keep the compiler quiet */
 }
 
 PRIVATE void nl P0 (void)

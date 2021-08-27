@@ -226,7 +226,7 @@ void ieee_double P3 (const RVAL *, dp, unsigned long *, p, BOOL, bigendian)
 void ieee_longdouble P3 (const RVAL *, dp, unsigned long *, p, BOOL, bigendian)
 {
 /*KDW --- needs more work */
-    unsigned long mantissa1, mantissa2, mantissa3;
+    unsigned long mantissa1, mantissa2, mantissa3 = 0;
     unsigned long sign;
     int     exponent = LD_BIAS;
     BOOL    flag;

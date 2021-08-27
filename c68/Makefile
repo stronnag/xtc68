@@ -9,7 +9,6 @@
 
 RM=rm -f
 #CFLGS=  -g
-CFLGS=  -DNDEBUG -O2
 
 # cxref flags
 CXFLAGS=-d -l -s
@@ -76,10 +75,9 @@ PROG=c68
 #	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \
 #	-Wredundant-decls -Wnested-externs
 #------------------------------------------------------------------------------
-CCFLAGS=-O2
-LDFLAGS += $(CFLAGS)
-CFLAGS += $(CCFLAGS) $(CFLGS)
 
+LDFLAGS += $(CFLAGS)
+CFLAGS += -DNDEBUG -O2
 
 #------------------------------------------------------------------------------
 #	Source files common to all versions of c68/c386

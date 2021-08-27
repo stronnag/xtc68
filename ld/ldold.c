@@ -728,21 +728,27 @@ void xdef_dir(int   body_flag)
  */
 void define_dir(void)
 {
-
-   strupr(sy.string);
+#ifndef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+     strupr(sy.string);
    if (sy.id>0)
    {
-      if (sy.id>MAX_PDEF)
-            halt(11, "XDEF symbols");
-      strncpy(pdef_name[sy.id],sy.string,MAX_LEN-1);
-	  pdef_name[sy.id][MAX_LEN-1]=0;
+        if (sy.id>MAX_PDEF)
+             halt(11, "XDEF symbols");
+        strncpy(pdef_name[sy.id],sy.string,MAX_LEN-1);
+        pdef_name[sy.id][MAX_LEN-1]=0;
    }
    else
    {
-      if (-sy.id>MAX_NDEF) halt(5);
-      strncpy(ndef_name[-sy.id],sy.string,MAX_LEN-1);
-	  ndef_name[-sy.id][MAX_LEN-1] = 0;
+        if (-sy.id>MAX_NDEF) halt(5);
+        strncpy(ndef_name[-sy.id],sy.string,MAX_LEN-1);
+        ndef_name[-sy.id][MAX_LEN-1] = 0;
    }
+#ifndef __clang__
+#pragma GCC diagnostic pop
+#endif
    nxsy();
 }
 
@@ -1406,7 +1412,7 @@ void write_prog(void)
    int dspace;
 #endif
    int      handle, bss_size;
-   int      n,h,psize;
+   int      n,h,psize=0;
    SECTION  *sec;
    char     *start,*endcode;
    char c = 0;
@@ -1487,7 +1493,7 @@ void write_prog(void)
    }
 	if(psize & 1)
         {/* Write an extra byte of zero to even up the program file */
-            int res = write(handle,&c,1); // shut up ubuntu compiler ...
+             write(handle,&c,1); // shut up ubuntu compiler ...
         }
    /* Read the QDOS header information */
    bss_size -= (endcode - start );
@@ -1509,10 +1515,9 @@ void write_prog(void)
 #ifdef XTC68
     {
        char x[4];
-       int res;
-       res = write(handle, "XTcc", 4);
+       write(handle, "XTcc", 4);
        out_long(x, dspace);
-       res = write(handle, x, 4);
+       write(handle, x, 4);
 #if defined(__unix__) || defined(__APPLE__)
        fchmod(handle, S_IRUSR |S_IWUSR);
 #endif
@@ -1730,7 +1735,7 @@ void command_line(int   *xac, char  ***xav, char **paths, char *lib_arr)
 int main(int   argc, char  **argv)
 {
    char *paths[NUM_SPATHS+2], *lib_arr;
-   int err_code=0, i;
+   int i;
 #ifdef QDOS
    mem_size=500*1024; buf_size=200*1024;
 #else
@@ -1804,21 +1809,18 @@ int main(int   argc, char  **argv)
       if (list_file!=stdout)
          fprintf(list_file,"Undefined Symbols: %8d\n",undefd_sym);
       fprintf(stderr,"Undefined Symbols: %8d\n",undefd_sym);
-      err_code=-1;
    }
    if (double_sym)
    {
       if (list_file!=stdout)
          fprintf(list_file,"Multiply defined : %8d\n",double_sym);
       fprintf(stderr,"Multiply defined : %8d\n",double_sym);
-      err_code=-1;
    }
    if (range_err)
    {
       if (list_file!=stdout)
          fprintf(list_file,"Range errors     : %8d\n",range_err);
       fprintf(stderr,"Range errors     : %8d\n",range_err);
-      err_code=-1;
    }
 
    if (verbose_flag)
@@ -1827,8 +1829,5 @@ int main(int   argc, char  **argv)
         fprintf(list_file,"\nLink completed\n");
 
    if (lstng_flag) fclose(list_file);
-#ifdef VMS
-    err_code = 1;
-#endif
    return 0;
 }

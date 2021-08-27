@@ -1317,7 +1317,7 @@ char *argv[];
 	struct FILE_LIST *nameptr;
 	char inname[MAX_FNAME], outname[MAX_FNAME], workbuf[MAX_FNAME];
 	char *p, **ptrptr;
-	int 	ret;
+	int 	ret = 0;
 
 	DBG_INIT();
 #ifdef QDOS
@@ -1744,7 +1744,7 @@ X_FILE:
 	DBG(("MAIN",0x18,"Is link required?  dolink=%d",dolink));
 	if(dolink == 0)
 	{
-		exit (ret);
+             exit (ret);
 	}
         if (dolink && *OUTNAME)
         {
@@ -1762,7 +1762,7 @@ X_FILE:
 		 *	files at this point
 		 */
 		for (ptrptr=passes[DEL_PASS].p_optbuf.argv ;
-				ptrptr != NULL && *ptrptr!= NULL != 0 ;
+                     (ptrptr != NULL) && (*ptrptr != NULL) ;
 					ptrptr++)
 		{
 			(void) unlink (*ptrptr);
