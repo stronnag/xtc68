@@ -795,7 +795,10 @@ void	printstr ( char * str, ...)
 		}
 		else
 #else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
                      write( STDERR_FILENO, str, strlen(str));
+#pragma GCC diagnostic pop
 #endif
 		str = (char *)va_arg(ap, char *);
 	}

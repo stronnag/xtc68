@@ -1491,9 +1491,11 @@ void write_prog(void)
         halt(10);
       }
    }
-	if(psize & 1)
-        {/* Write an extra byte of zero to even up the program file */
-             write(handle,&c,1); // shut up ubuntu compiler ...
+	if(psize & 1) { // Write an extra byte of zero to even up the program file
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+             write(handle,&c,1);
+#pragma GCC diagnostic pop
         }
    /* Read the QDOS header information */
    bss_size -= (endcode - start );
@@ -1515,9 +1517,13 @@ void write_prog(void)
 #ifdef XTC68
     {
        char x[4];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
        write(handle, "XTcc", 4);
        out_long(x, dspace);
        write(handle, x, 4);
+#pragma GCC diagnostic pop
+
 #if defined(__unix__) || defined(__APPLE__)
        fchmod(handle, S_IRUSR |S_IWUSR);
 #endif
