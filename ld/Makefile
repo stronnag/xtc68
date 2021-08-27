@@ -17,3 +17,7 @@ ld.o:	ldold.c
 	$(CC) $(CFLAGS) -c -o ld.o ldold.c
 clean:
 	rm -f *.o $(PROG)
+
+install: $(PROG)
+	install -d $(prefix)
+	install $(PROG) $(prefix)

@@ -1,4 +1,4 @@
-BIN =
+PROG = qcpp
 
 APFLAGS=  -DXTC68 -DCPLUSPLUS
 
@@ -7,10 +7,14 @@ LDFLAGS =
 
 OBJ = version.o cexp.o cccp.o
 
-all: 	qcpp
+all: 	$(PROG)
 
-qcpp: $(OBJ)
+$(PROG): $(OBJ)
 	$(CC) $(CFLAGS) -oqcpp $(OBJ)
 
 clean:
 	rm -f *.o qcpp
+
+install: $(PROG)
+	install -d $(prefix)
+	install $(PROG) $(prefix)

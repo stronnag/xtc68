@@ -4,6 +4,10 @@
 
 DIRS = as68  c68  cc  cpp  ld  slb
 CLEANDIRS = $(DIRS:%=clean-%)
+INSTALLDIRS = $(DIRS:%=install-%)
+
+prefix ?= /usr/local/bin
+export prefix
 
 all: $(DIRS)
 $(DIRS):
@@ -14,10 +18,11 @@ clean: $(CLEANDIRS)
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 
-install:
-	@echo
-	@echo "**** You can use install.sh to install in /usr/local ****"
+install: $(INSTALLDIRS)
+
+$(INSTALLDIRS):
+	$(MAKE) -C $(@:install-%=%) install
 
 .PHONY: subdirs $(DIRS)
 .PHONY: subdirs $(CLEANDIRS)
-.PHONY: all clean
+.PHONY: all clean install

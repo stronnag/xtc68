@@ -52,3 +52,7 @@ slbanal.$O  :   slb.h
 slbutil.$O  :   slb.h
 slbdis.$O   :   slb.h
 slbrefs.$O  :   slb.h
+
+install: $(PROG) qdos-ar qdos-ranlib
+	install -d $(prefix)
+	install $^ $(prefix)
