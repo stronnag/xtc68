@@ -60,8 +60,8 @@ CBUF * cget (unsigned short seg)
 CBUF *
 generate(short n, short act, long val, SYM *psym)
 {
-       register CLIST *xc;
-       register CBUF *cp;
+       register CLIST *xc = NULL;
+       register CBUF *cp = NULL;
 
        if ( act == GENRELOC && psym == (SYM *) NULL )
                act = GENVALUE;
@@ -98,11 +98,11 @@ generate(short n, short act, long val, SYM *psym)
        }
 
        if ( xc->cnt == CBLEN || (act == GENBRNCH && xc->cnt >= CBLEN-1) ) {
-               xc->next = ALLO(CLIST);
-               xc = xc->next;
-               *( dot.flags == TXT ? &txtptr : &datptr ) = xc;
-               xc->cnt = 0;
-               xc->next = (CLIST *) NULL;
+            xc->next = ALLO(CLIST);
+            xc = xc->next;
+            *( dot.flags == TXT ? &txtptr : &datptr ) = xc;
+            xc->cnt = 0;
+            xc->next = (CLIST *) NULL;
        }
 
        cp = &xc->cblock[xc->cnt++];

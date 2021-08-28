@@ -87,24 +87,9 @@ PRIVATE char *fmts[] = { "d%d", "a%d", "(a%d)", "(a%d)+", "-(a%d)" };
 
 PRIVATE char databuf[20];
 PRIVATE long gaddr;
-PRIVATE int gisize, gjmp;
+PRIVATE int gisize;
 PRIVATE long modfstart;	        /* File position of start of module */
 PRIVATE int  endflag;
-
-
-/*============================================================= ADD_LABEL */
-PRIVATE
-void    Add_Label (name,type)
-/*      ~~~~~~~~
- *  This is used to add a new label to the current list. If a label
- *  already exists at this point then merely check that the name is
- *  still the same and the type is the OK.
- *------------------------------------------------------------------------*/
-char  *name;
-int   type;
-{
-    return;
-}
 
 
 /*============================================================ CHECK_LABEL */
@@ -438,45 +423,6 @@ int opm, reg, m, r;
 }
 
 
-/*======================================================== ADDR_TO_NAME */
-PRIVATE
-char *  addr_to_name (rel_addr, off_p)
-/*      ~~~~~~~~~~~~
- *  This is used to convert a relative address in a module
- *  into a label.
- *
- *  During pass 1, a local label should be generated the address
- *  is relative to a section name.
- *---------------------------------------------------------------------*/
-long rel_addr, *off_p;
-{
-    DBG (("ADDR_TO_NAME",0x101,"Enter: rel_addr=%ld, off_p=%ld",rel_addr, off_p));
-#if 0
-    int r = nsyms;
-
-    while (l < r) {
-        i = (l + r) >> 1;
-        if (rel_addr < nbufp[i].n_value)
-            r = i;
-        else if (rel_addr > nbufp[i].n_value)
-            l = i + 1;
-        else
-            break;
-    }
-    if (l == nsyms || r == 0)   {
-        *off_p = rel_addr;
-        return "_start";
-    }
-    if (rel_addr < nbufp[i].n_value)
-        i--;
-    *off_p = rel_addr - nbufp[i].n_value;
-    return nbufp[i].n_name;
-#else
-        return "_start";
-#endif
-}
-
-
 /*============================================================ SYMBOLIC */
 PRIVATE
 void    symbolic (long addr, char sep)
@@ -485,11 +431,10 @@ void    symbolic (long addr, char sep)
  *  followed by the seperator (if any)
  *-----------------------------------------------------------------------*/
 {
-    extern long saddr, eaddr;
-
     if (printpass) {
         DBG (("SYMBOLIC", 0x101, "Enter: addr=%ld, sep=%c",addr,sep));
 #if 0
+        extern long saddr, eaddr;
         if (addr < saddr || addr > eaddr) {
             lprintf("0x%lx%c", addr, sep);
             return;
@@ -513,7 +458,7 @@ void    Long_Label(char sep)
  *  external reference.
  *----------------------------------------------------------------------*/
 {
-     long    value, offset;
+     long    value;
      char    buffer[10];
 
      DBG(("LONG_LABEL",0x401,"Enter:"));
@@ -544,7 +489,6 @@ void    Long_Label(char sep)
              DBG(("LONG_LABEL",0x408,"... XREF"));
              strcat(databuf,"<-XREF->");
              Get_LongWord();
-             offset = LongWord;
              Get_TruncRule();
              lprintf ("LONG_LABEL%c",sep);
       }

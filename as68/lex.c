@@ -301,9 +301,9 @@ int yyprocess(char c)
 		return ERR;
 	case '$':
 		c = yygetc();
-		if ( c >= '0' && c <= '9' ||
-				c >= 'a' && c <= 'f' ||
-						c >= 'A' && c <= 'F' ) {
+		if (( c >= '0' && c <= '9') ||
+                    (c >= 'a' && c <= 'f') ||
+                    (c >= 'A' && c <= 'F')) {
 			yyungetc( c );
 			return 0;
 		}
@@ -331,6 +331,6 @@ void yymodify( buf )
 	register char *cp;
 
 	for ( cp = buf; *cp; cp++ )
-		if ( isupper( *cp ) )
+             if ( isupper( (int)*cp ) )
 			*cp = toupper( *cp );
 }

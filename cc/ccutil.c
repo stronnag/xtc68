@@ -783,7 +783,6 @@ void	printstr ( char * str, ...)
  *---------------------------------------------------------------------------*/
 {
 	va_list  ap;
-    int res;
 
 	DBG(("PRINTSTR",0x11,"Enter"));
 	va_start(ap, str);
@@ -796,7 +795,10 @@ void	printstr ( char * str, ...)
 		}
 		else
 #else
-        res = write( STDERR_FILENO, str, strlen(str));
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+                     write( STDERR_FILENO, str, strlen(str));
+#pragma GCC diagnostic pop
 #endif
 		str = (char *)va_arg(ap, char *);
 	}

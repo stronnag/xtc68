@@ -567,8 +567,8 @@ U_CHAR is_hor_space[256];
 /* table to tell if c is horizontal or vertical space.  */
 U_CHAR is_space[256];
 
-#define SKIP_WHITE_SPACE(p) do { while (is_hor_space[*p]) p++; } while (0)
-#define SKIP_ALL_WHITE_SPACE(p) do { while (is_space[*p]) p++; } while (0)
+#define SKIP_WHITE_SPACE(p) do { while (is_hor_space[(int)*p]) p++; } while (0)
+#define SKIP_ALL_WHITE_SPACE(p) do { while (is_space[(int)*p]) p++; } while (0)
 
 long errors = 0;                        /* Error counter for exit code */
 
@@ -722,17 +722,6 @@ char * xcalloc (long number, long size)
 
 
 
-/* Handler for SIGPIPE.  */
-
-#ifndef DOS_LIKE
-static void
-pipe_closed ()
-{
-  fatal ("output pipe has been closed");
-}
-#endif
-
-
 /* Initialize syntactic classifications of characters.  */
 
 void initialize_char_syntax (void)
@@ -1193,7 +1182,7 @@ main (argc, argv)
 
       case 'D':
         {
-          char *p, *p1;
+          char *p=NULL, *p1;
 
           if (new_argv[i][2] != 0)
             p = new_argv[i] + 2;
@@ -2505,7 +2494,7 @@ hashcollision:
      if there was an unterminated successful conditional.  */
  ending:
   if (if_stack != ip->if_stack) {
-    char *str;
+    char *str = NULL;
     switch (if_stack->type) {
     case T_IF:
       str = "if";
@@ -4199,7 +4188,6 @@ void do_xifdef (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, struct directive *keyw
 
   conditional_skip (ip, skip, T_IF);
   return;
-  op = op;        /* to avoid not ref warning */
 }
 
 /*

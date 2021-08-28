@@ -357,9 +357,7 @@ int    main (int  argc, char **argv)
  *----------------------------------------------------------------------*/
 
 {
-    extern  int  optind;
-    extern  char *optarg;
-    int     exit_status;
+    int     exit_status = 0;
     time_t  nowtime;
 
 #ifdef LIBDEBUG

@@ -76,7 +76,7 @@ int     remove_list (modname)
  *--------------------------------------------------------------------------*/
 char *  modname;
 {
-    LISTPTR ptr, oldptr;
+    LISTPTR ptr, oldptr=NULL;
 
     DBG(("REMOVE_LIST",0x801,"Enter: modname=%s",modname));
     for (ptr = filelist ; ptr ; ptr = (LISTPTR)ptr->node.next ) {
@@ -530,4 +530,3 @@ int     split_mode ()
     }
     return (reply);
 }
-

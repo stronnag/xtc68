@@ -96,7 +96,7 @@
  * documents paths which it should be impossible to reach
  */
 
-#define	CANNOT_REACH_HERE()	assert(0)
+#define	CANNOT_REACH_HERE()	__builtin_unreachable()
 
 /*
  * the tokens returned from lexical analysis
