@@ -62,6 +62,7 @@
 #include <varargs.h>
 #endif /* HAS_STDARG */
 
+#include <stdint.h>
 /*
  *   For NON-ANSI systems.....
  */
@@ -292,7 +293,7 @@ typedef unsigned char BITSIZE;	/* size of a bitfield */
 typedef struct sblock BLOCK;	/* scope table */
 typedef enum e_bt BTYPE;	/* basic type */
 typedef unsigned char CHAR;	/* input character */
-typedef long IVAL;		/* signed integral value */
+typedef int32_t IVAL;		/* signed integral value */
 typedef unsigned int LABEL;	/* internal label */
 typedef unsigned int LEVEL;	/* scope level */
 typedef unsigned char QUALIFIER;	/* type qualifiers */
@@ -308,7 +309,7 @@ typedef struct sym SYM;		/* symbol entry */
 typedef struct stab TABLE;	/* symbol table */
 typedef enum e_sym TOKEN;	/* scanner token */
 typedef struct typ TYP;		/* type entry */
-typedef unsigned long UVAL;	/* unsigned integral value */
+typedef uint32_t UVAL;	/* unsigned integral value */
 typedef struct func FUNC;	/* function entry */
 typedef struct structure STRUCT;	/* struct/union entry */
 typedef struct reg_use REGUSAGE;	/* register usage on function calls */
@@ -688,20 +689,20 @@ struct options {
  *   we can #define to the appropriate value depending on the compiler.
  */
 #ifdef __STDC__
-#define Ox0UL		(0x0UL)
-#define Ox1UL		(0x1UL)
-#define	OxffUL		(0xffUL)
-#define	OxffffUL	(0xffffUL)
-#define	Ox8000UL	(0x8000UL)
-#define	Ox00010000UL	(0x00010000UL)
-#define	Ox001fffffUL	(0x001fffffUL)
-#define	Ox007fffffUL	(0x007fffffUL)
-#define	Ox00ffffffUL	(0x00ffffffUL)
-#define	Ox01ffffffUL	(0x01ffffffUL)
-#define	Ox80000000UL	(0x80000000UL)
-#define	Ox7fffffffUL	(0x7fffffffUL)
-#define	OxffffffffUL	(0xffffffffUL)
-#define	OxffefffffUL	(0xffefffffUL)
+#define Ox0UL		(0x0)
+#define Ox1UL		(0x1)
+#define	OxffUL		(0xff)
+#define	OxffffUL	(0xffff)
+#define	Ox8000UL	(0x8000)
+#define	Ox00010000UL	(0x00010000)
+#define	Ox001fffffUL	(0x001fffff)
+#define	Ox007fffffUL	(0x007fffff)
+#define	Ox00ffffffUL	(0x00ffffff)
+#define	Ox01ffffffUL	(0x01ffffff)
+#define	Ox80000000UL	(0x80000000)
+#define	Ox7fffffffUL	(0x7fffffff)
+#define	OxffffffffUL	(0xffffffff)
+#define	OxffefffffUL	(0xffefffff)
 #else
 #define Ox0UL		((unsigned long)0x0)
 #define Ox1UL		((unsigned long)0x1)
