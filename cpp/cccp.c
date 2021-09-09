@@ -538,25 +538,29 @@ void do_if (U_CHAR *buf, U_CHAR *limit);
 void do_error (U_CHAR *buf, U_CHAR *limit);
 
 #define DOPROC void (*)(U_CHAR *, U_CHAR *, FILE_BUF *, struct directive *)
-
+#pragma GCC diagnostic push
+#ifndef __clang__
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 struct directive directive_table[] = {
-  {  6, (DOPROC) do_define, "define", T_DEFINE, 0, 1},
-  {  2, (DOPROC) do_if, "if", T_IF},
-  {  5, (DOPROC) do_xifdef, "ifdef", T_IFDEF},
-  {  6, (DOPROC) do_xifdef, "ifndef", T_IFNDEF},
-  {  5, (DOPROC) do_endif, "endif", T_ENDIF},
-  {  4, (DOPROC) do_else, "else", T_ELSE},
-  {  4, (DOPROC) do_elif, "elif", T_ELIF},
-  {  4, (DOPROC) do_line, "line", T_LINE},
-  {  7, (DOPROC) do_include, "include", T_INCLUDE, 1},
-  {  5, (DOPROC) do_undef, "undef", T_UNDEF},
-  {  5, (DOPROC) do_error, "error", T_ERROR},
+     {  6, (DOPROC) do_define, "define", T_DEFINE, 0, 1, 0},
+     {  2, (DOPROC) do_if, "if", T_IF, 0, 0, 0},
+     {  5, (DOPROC) do_xifdef, "ifdef", T_IFDEF, 0, 0, 0},
+     {  6, (DOPROC) do_xifdef, "ifndef", T_IFNDEF, 0, 0, 0},
+     {  5, (DOPROC) do_endif, "endif", T_ENDIF, 0, 0, 0},
+     {  4, (DOPROC) do_else, "else", T_ELSE, 0, 0, 0},
+     {  4, (DOPROC) do_elif, "elif", T_ELIF, 0, 0, 0},
+     {  4, (DOPROC) do_line, "line", T_LINE, 0, 0, 0},
+     {  7, (DOPROC) do_include, "include", T_INCLUDE, 1, 0, 0},
+     {  5, (DOPROC) do_undef, "undef", T_UNDEF, 0, 0, 0},
+     {  5, (DOPROC) do_error, "error", T_ERROR, 0, 0, 0},
 #ifdef SCCS_DIRECTIVE
-  {  4, (DOPROC) do_sccs, "sccs", T_SCCS},
+     {  4, (DOPROC) do_sccs, "sccs", T_SCCS, 0, 0, 0},
 #endif
   {  6, (DOPROC)do_pragma, "pragma", T_PRAGMA, 0, 0, 1},
-  {  -1, NULL, "", T_UNUSED},
+  {  -1, NULL, "", T_UNUSED, 0, 0, 0},
 };
+#pragma GCC diagnostic pop
 
 /* table to tell if char can be part of a C identifier. */
 U_CHAR is_idchar[256];
@@ -917,8 +921,8 @@ main (argc, argv)
      int argc;
      char **argv;
 {
-  long st_mode;
-  long st_size;
+  long st_mode = 0;
+  long st_size = 0;
   char *in_fname, *out_fname;
   long f, i;
   FILE_BUF *fp;
@@ -1246,11 +1250,11 @@ main (argc, argv)
      if (dirtmp->fname[strlen(dirtmp->fname)-1] == '_')
         dirtmp->fname[strlen(dirtmp->fname)-1] = '\0';
 #endif
-	    if (strlen (dirtmp->fname) > max_include_len)
-	      max_include_len = strlen (dirtmp->fname);
-	    if (ignore_srcdir && first_bracket_include == 0)
-	      first_bracket_include = dirtmp;
-	    }
+     if ((long)strlen (dirtmp->fname) > max_include_len)
+          max_include_len = strlen (dirtmp->fname);
+     if (ignore_srcdir && first_bracket_include == 0)
+          first_bracket_include = dirtmp;
+          }
 	}
 	break;
 
@@ -1274,7 +1278,7 @@ main (argc, argv)
 	  out_fname = "";
 	  break;
 	}	/* else fall through into error */
-
+        __attribute__((fallthrough));
       default:
 #ifndef QDOS
 	fatal ("Invalid option `%s'", new_argv[i]);
@@ -2306,7 +2310,7 @@ specialchar:
       ibp--;
       obp--;
       redo_char = 1;
-
+      __attribute__((fallthrough));
     default:
 
 randomchar:
@@ -4158,7 +4162,7 @@ long eval_if_expression (U_CHAR *buf, long length)
  * then do or don't skip to the #endif/#else/#elif depending
  * on what directive is actually being processed.
  */
-void do_xifdef (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, struct directive *keyword)
+void do_xifdef (U_CHAR *buf, U_CHAR *limit, __attribute__((unused))FILE_BUF *op, struct directive *keyword)
 {
   long skip;
   FILE_BUF *ip = &instack[indepth];
@@ -4339,8 +4343,9 @@ void skip_if_group (FILE_BUF *ip, long any)
 	    break;
 	  case T_ELSE:
 	  case T_ENDIF:
-	    if (pedantic && if_stack != save_if_stack)
-	      validate_else (bp);
+               if (pedantic && if_stack != save_if_stack)
+                    validate_else (bp);
+               __attribute__((fallthrough));
 	  case T_ELIF:
 	    if (if_stack == instack[indepth].if_stack) {
 	      error ("#%s not within a conditional", kt->name);

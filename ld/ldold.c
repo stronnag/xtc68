@@ -1626,9 +1626,10 @@ void command_line(int   *xac, char  ***xav, char **paths, char *lib_arr)
                            mem_size *= 1024;
                        break;
                    }
-				default:
-                                    fprintf( stderr, "Invalid Option: '%s'\n",argv[i]);
-                                    break;
+                   __attribute__((fallthrough));
+           default:
+                fprintf( stderr, "Invalid Option: '%s'\n",argv[i]);
+                break;
            }
            if(clrarg)
                argv[i] = NULL;

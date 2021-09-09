@@ -79,7 +79,7 @@ static void swap P_ ((STMT *));
 
 void addoptinfo P2 (SYM *, sp, STORAGE, sc)
 {
-    TYP    *tp = typeof (sp);
+     TYP    *tp = TYPEOF (sp);
 
     switch (tp->type) {
     case bt_pointer32:
@@ -611,7 +611,7 @@ static EXPR *unsymbolnode P1 (EXPR *, ep)
     switch (ep->nodetype) {
     case en_sym:
 	sp = ep->v.sp;
-	tp = typeof (sp);
+	tp = TYPEOF (sp);
 	switch (storageof (sp)) {
 	case sc_static:
 	    if (!is_func (tp)) {

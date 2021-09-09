@@ -256,6 +256,7 @@ FILE * lstfp;
             case SROFF_SOURCE:
                     DBG(("COPY_MODULE",0x4004,"SROFF_SOURCE character"));
                     error (18,ftell(lbfp));
+                    __attribute__((fallthrough));
             case SROFF_XREF:
                     DBG(("COPY_MODULE",0x4004,"SROFF_XREF character"));
                     outchar( SROFF_FLAG, newfp);    /* Output the directive */

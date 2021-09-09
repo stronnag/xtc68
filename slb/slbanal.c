@@ -5,7 +5,7 @@
  *
  * (c) Copyright 1991 David J. Walker
  *     Email:  d.j.walker.lon4905@oasis.icl.co.uk
- * 
+ *
  *     Permission to copy and/or distribute granted under the
  *     following conditions:
  *
@@ -104,7 +104,7 @@ short   id;
     }
     sprintf (buffer,"Id=$%04x",id);
     DBG(("FIND_ID",0x801,"Exit: '%s'",buffer));
-    return (buffer);              
+    return (buffer);
 }
 
 
@@ -115,7 +115,7 @@ char  * Get_Id()
  *  Read in an ID from the source file.
  *  If possible, convert it to a text string represenetation,
  *  otherwise return a hex string form
- * 
+ *
  *  NOTE. id = 0 is a special case refering to Program Counter relative
  *----------------------------------------------------------------------*/
 {
@@ -136,9 +136,9 @@ char  * Get_LongWord()
  *  N.B.  The next call will overwrite the string, so save it if required.
  *-------------------------------------------------------------------------*/
 {
-    LongWord = ((inchar(libfp) << 24) 
-                    + (inchar(libfp) << 16) 
-                    + (inchar(libfp) << 8) 
+    LongWord = ((inchar(libfp) << 24)
+                    + (inchar(libfp) << 16)
+                    + (inchar(libfp) << 8)
                     + inchar(libfp));
     sprintf (LongText,"$%08lx",LongWord);
     DBG(("GET_LONGWORD",0xF01,"%s",LongText));
@@ -305,7 +305,7 @@ char *  modname;
     DBG(("ANALYSE_NODULE",0x801,"Enter: module=%s, File position = %d",modname,(int)ftell(fp)));
     Free_Ids();
     TextBuf[0] = '\0';
-    
+
     lprintf ("SLB Module Analysis - SROFF format:  Module = %s\n\n",modname);
     filestart = ftell (fp) - strlen(modname) - 3;
     if (filestart > 0 ) {
@@ -313,7 +313,7 @@ char *  modname;
     }
     lprintf ("00000 SOURCE: %s\n", modname);
     PrintCount = 0;
-                   
+
     while ((inchar (fp)) != EOF) {
         if (PrintCount == 0)
             lprintf ("%05.5lx ",ftell(fp)-1);
@@ -326,6 +326,7 @@ char *  modname;
                         Start_Directive();
                         lprintf ("ILLEGAL DIRECTIVE:  %02.2x at %ld", ch, ftell(fp));
                         error (20);
+                        __attribute__((fallthrough));
                 case SROFF_FLAG:
                         DBG(("ANALYSE_MODULE",0x801,"... FB - another SROFF_FLAG"));
                         Data_Char();
@@ -367,7 +368,7 @@ char *  modname;
                 case SROFF_XREF:
                         DBG(("ANALYSE_MODULE",0x801,"... XREF Directive"));
                         Start_Directive();
-                        lprintf ("XREF: "); 
+                        lprintf ("XREF: ");
                         Get_LongWord();
                         Get_TruncRule();
                         lprintf(TruncOps);
@@ -377,7 +378,7 @@ char *  modname;
                         lprintf (TruncRule);
                         lprintf ("\n");
                         if (ch != 0xFB) {
-                            lprintf ("Illegal XREF at %ld (char=%02.2x)\n", 
+                            lprintf ("Illegal XREF at %ld (char=%02.2x)\n",
                                     ftell(fp), ch);
                             error (20);
                         }
@@ -386,7 +387,7 @@ char *  modname;
                         DBG(("ANALYSE_MODULE",0x801,"... DEFINE Directive"));
                         Start_Directive();
                         lprintf ("DEFINE:  %s", Get_Id());
-                        lprintf ("  %s = %s\n", 
+                        lprintf ("  %s = %s\n",
                                 (Id < 0) ? "Section" : "Symbol", Get_String());
                         Add_Id (Id, String);
                         break;
@@ -459,4 +460,3 @@ int     Analyse_Mode ()
     DBG(("ANALYSE_MODE",0x41,"Exit"));
     return (filelist == NULL ? reply : -1);
 }
-

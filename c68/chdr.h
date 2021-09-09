@@ -550,7 +550,7 @@ struct sym {
 #define	nameof(s)		((s)->name)
 #define	nextsym(s)		((s)->next)
 #define	storageof(s)		((s)->storage_class)
-#define	typeof(s)		((s)->tp)
+#define TYPEOF(s)               ((s)->tp)
 #define	visibilityof(s)		((s)->visibility)
 
 #define	set_level(s,l)		((s)->level = (l))

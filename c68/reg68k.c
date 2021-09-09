@@ -723,7 +723,7 @@ void freeop P1 (const ADDRESS *, ap)
  *   The least recently allocate register first.
  *   The most recently allocated register last.
  */
-void temp_inv P1 (REGUSAGE *, regusage)
+void temp_inv P1 (__attribute__((unused))REGUSAGE *, regusage)
 {
     DEEP    deep;
 

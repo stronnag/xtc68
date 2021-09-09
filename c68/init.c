@@ -146,7 +146,7 @@ static SIZE roundup P2 (SIZE, size, SIZE, algn)
 
 SIZE calculate_offset P4 (SYM *, sp, SIZE, offset, STORAGE, def_sc, BOOL, promoted)
 {
-    TYP    *tp = typeof (sp);
+    TYP    *tp = TYPEOF (sp);
     SIZE    size;
 
     switch (storageof (sp)) {
@@ -239,12 +239,12 @@ SIZE calculate_offset P4 (SYM *, sp, SIZE, offset, STORAGE, def_sc, BOOL, promot
 	     * arrays and functions are never passed. They are really
 	     * Pointers
 	     */
-	  lab:if (is_derived_type (typeof (sp))) {
+	  lab:if (is_derived_type (TYPEOF (sp))) {
 		global_flag++;
-		set_type (sp, copy_type (typeof (sp)));
+		set_type (sp, copy_type (TYPEOF (sp)));
 		global_flag--;
-		typeof (sp)->state &= (STATE) ~(unsigned) STATE_DERIVED;
-		typeof (sp)->size = tp->size;
+		TYPEOF (sp)->state &= (STATE) ~(unsigned) STATE_DERIVED;
+		TYPEOF (sp)->size = tp->size;
 	    }
 	    /*FALLTHRU */
 	default:
@@ -266,7 +266,7 @@ SIZE calculate_offset P4 (SYM *, sp, SIZE, offset, STORAGE, def_sc, BOOL, promot
 
 SIZE doinit P2 (SYM *, sp, SIZE, offset)
 {
-    TYP    *tp = typeof (sp);
+    TYP    *tp = TYPEOF (sp);
 
 #ifdef CPU_DEFINED
     LABEL   label;
@@ -403,7 +403,7 @@ SIZE doinit P2 (SYM *, sp, SIZE, offset)
 	case sc_auto:
 	case sc_global:
 	case sc_static:
-	    if (is_const_qualified (typeof (sp))) {
+	    if (is_const_qualified (TYPEOF (sp))) {
 		message (WARN_CONSTINIT, nameof (sp));
 	    }
 	    break;
@@ -600,7 +600,7 @@ static SIZE initunion P2 (TYP *, tp, BOOL, brace_seen)
 	return 0L;
     }
     check_brace (brace_seen);
-    nbytes = inittype (typeof (sp));
+    nbytes = inittype (TYPEOF (sp));
 #ifdef CPU_DEFINED
     for (; nbytes < tp->size; nbytes++)
 	put_byte (Ox0UL);
@@ -643,7 +643,7 @@ static SIZE initstruct P2 (TYP *, tp, BOOL, brace_seen)
 	}
 #ifdef CPU_DEFINED
 	nbytes = alignfield (nbytes, sp->value.i);
-	nbytes += inittype (typeof (sp));
+	nbytes += inittype (TYPEOF (sp));
 #endif /* CPU_DEFINED */
 	sp = nextsym (sp);
 	if (lastst != tk_comma || sp == NIL_SYM) {

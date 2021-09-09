@@ -785,8 +785,8 @@ extern enum reg_class regno_reg_class[];
 	if (regs_ever_live[regno] && ! call_used_regs[regno])		\
 	  offset += 4;							\
       offset -= 4;							\
-      ADDR = plus_constant (regs, offset + (DEPTH)); } }		\
-
+      ADDR = plus_constant (regs, offset + (DEPTH)); } }
+
 /* Addressing modes, and classification of registers for them.  */
 
 #define HAVE_POST_INCREMENT

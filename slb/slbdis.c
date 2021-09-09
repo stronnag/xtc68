@@ -274,7 +274,7 @@ long    glong()
 
 /*================================================================ RELADDR */
 PRIVATE
-void    reladdr (char sep)
+void    reladdr (__attribute__((unused))char sep)
 /*      ~~~~~~~
  *  Called when a relative address is expected.
  *  Converts a relative address into a name.
@@ -498,12 +498,10 @@ void    Long_Label(char sep)
 
 /*====================================================== DISASM_MODULE */
 PUBLIC
-long    disasm_module (fp, name)
+long    disasm_module (FILE *fp, __attribute__((unused))char *name)
 /*      ~~~~~~~~~~~~~
  *  This is the main control for the disassembly process
  *----------------------------------------------------------------------*/
-FILE    *fp;
-char    *name;
 {
     unsigned int w, m1, m2, r1, r2, op;
     char ds;

@@ -4438,6 +4438,7 @@ PRIVATE void g_return P2 (const EXPR *, stmtexp, TYP *, tp)
 	    break;
 	}
 	/*FALLTHRU */
+        __attribute__((fallthrough));
 #endif /* FLOAT_IEEE */
 
 #ifdef FLOAT_MFFP
@@ -4696,7 +4697,7 @@ PRIVATE void g_flush P1 (SYM *, sp)
 {
     put_literals ();
     if (sp) {
-	put_cseg (alignment_of_type (typeof (sp)));
+	put_cseg (alignment_of_type (TYPEOF (sp)));
 	put_name (sp);
     }
     flush_peep (peep_option);
@@ -5263,14 +5264,16 @@ PRIVATE EXPR *g_transform P1 (EXPR *, ep)
 	    case bt_schar:
 	    case bt_short:
 	    case bt_int16:
-		if (!fpu_option)
-		    /*FALLTHRU */
-	    case bt_charu:
+                 if (!fpu_option)
+                     __attribute__((fallthrough));
+                      /*FALLTHRU */
+            case bt_charu:
 	    case bt_uchar:
 	    case bt_ushort:
 	    case bt_uint16:
 		    ep->v.p[0] = mk_node (en_cast, ep->v.p[0], NIL_EXPR, tp_long);
 		/* FALLTHRU */
+                    __attribute__((fallthrough));
 #ifdef FLOAT_IEEE
 	    case bt_int32:
 	    case bt_long:
@@ -5303,14 +5306,16 @@ PRIVATE EXPR *g_transform P1 (EXPR *, ep)
 	    case bt_schar:
 	    case bt_short:
 	    case bt_int16:
-		if (!fpu_option)
-		    /*FALLTHRU */
+                 if (!fpu_option)
+                     __attribute__((fallthrough));
+                      /*FALLTHRU */
 	    case bt_charu:
 	    case bt_uchar:
 	    case bt_ushort:
 	    case bt_uint16:
 		    ep->v.p[0] = mk_node (en_cast, ep->v.p[0], NIL_EXPR, tp_long);
 		/* FALLTHRU */
+                    __attribute__((fallthrough));
 #ifdef FLOAT_IEEE
 	    case bt_int32:
 	    case bt_long:
@@ -5349,6 +5354,7 @@ PRIVATE EXPR *g_transform P1 (EXPR *, ep)
 	    case bt_uint16:
 		ep->v.p[0] = mk_node (en_cast, ep->v.p[0], NIL_EXPR, tp_long);
 		/* FALLTHRU */
+                __attribute__((fallthrough));
 #ifdef FLOAT_IEEE
 	    case bt_int32:
 	    case bt_long:
@@ -5560,7 +5566,7 @@ PRIVATE void g_terminate P0 (void)
 /*
  *   Returns the current register usage.
  */
-PRIVATE REGUSAGE *g_regusage P1(TYP *, tp)
+PRIVATE REGUSAGE *g_regusage P1(__attribute__((unused)) TYP *, tp)
 {
     return reg_usage;
 }

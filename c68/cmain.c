@@ -304,7 +304,7 @@ static OPTIONS *optsarray[] =
 /*****************************************************************************/
 
 /*ARGSUSED2 */
-static void uniq_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
+static void uniq_option P3 (BOOL, set, OPTION *, optptr, __attribute__((unused))const char *, arg)
 {
     if (set) {
 	*(optptr->u1.ip) = 1;
@@ -436,7 +436,7 @@ void set_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
 }
 
 /*ARGSUSED2 */
-void list_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
+void list_option P3 (BOOL, set, OPTION *, optptr, __attribute__((unused))const char *, arg)
 {
     if (!set) {
 	eprintf ("-%s", optptr->text);
@@ -444,7 +444,7 @@ void list_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
     }
 }
 
-void chip_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
+void chip_option P3 (BOOL, set, OPTION *, optptr, __attribute__((unused))const char *, arg)
 {
     if (set) {
 #ifdef MULTIPLE_ASSEMBLERS
@@ -459,7 +459,7 @@ void chip_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
 }
 
 /*ARGSUSED2 */
-static void help_option P3 (BOOL, set, OPTION *, optptr, const char *, arg)
+static void help_option P3 (BOOL, set, OPTION *, optptr, __attribute__((unused))const char *, arg)
 {
     OPTIONS **optpptr;
 

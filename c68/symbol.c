@@ -67,7 +67,7 @@ static void check_same P2 (const SYM *, sp1, const SYM *, sp2)
 	(!is_member (sp1) && is_member (sp2))) {
 	return;
     }
-    if (!is_equal_type (typeof (sp1), typeof (sp2))) {
+    if (!is_equal_type (TYPEOF (sp1), TYPEOF (sp2))) {
 	message (ERR_REDECL, nameof (sp1));
     }
 }
@@ -230,7 +230,7 @@ static void append P3 (SYM **, ptr_sp, TABLE *, scope_tab, SYM **, hashtab)
 	    sp1 = global_search (sp1);
 	    if (sp1 != NIL_SYM) {
 		check_same (sp, sp1);
-		set_type (sp, typeof (sp1));
+		set_type (sp, TYPEOF (sp1));
 		set_storage (sp, storageof (sp1));
 		sp->value = sp1->value;
 		sp->status |= sp1->status;
@@ -246,13 +246,13 @@ static void append P3 (SYM **, ptr_sp, TABLE *, scope_tab, SYM **, hashtab)
 		sp1->status &= (STATUS) ~((unsigned) SYM_OUTSCOPE);
 	    }
 	    check_same (sp, sp1);
-	    set_type (sp1, composite_type (typeof (sp1), typeof (sp)));
-	    if (is_func (typeof (sp))) {
+	    set_type (sp1, composite_type (TYPEOF (sp1), TYPEOF (sp)));
+	    if (is_func (TYPEOF (sp))) {
 		sp1->status |= sp->status;
 		if (is_global (sp)) {
-		    typeof (sp1)->state &= (STATE) (~(unsigned) STATE_ANSI);
-		    if (is_ansi (typeof (sp))) {
-			set_ansi (typeof (sp1));
+		    TYPEOF (sp1)->state &= (STATE) (~(unsigned) STATE_ANSI);
+		    if (is_ansi (TYPEOF (sp))) {
+			set_ansi (TYPEOF (sp1));
 		    }
 		}
 	    }
@@ -267,7 +267,7 @@ static void append P3 (SYM **, ptr_sp, TABLE *, scope_tab, SYM **, hashtab)
 		    message (ERR_REDECL, nameof (sp));
 		    break;
 		case sc_typedef:
-		    if (is_equal_type (typeof (sp), typeof (sp1))) {
+		    if (is_equal_type (TYPEOF (sp), TYPEOF (sp1))) {
 			message (WARN_REDECL, nameof (sp));
 		    } else {
 			message (ERR_REDECL, nameof (sp));
@@ -314,9 +314,9 @@ static void append P3 (SYM **, ptr_sp, TABLE *, scope_tab, SYM **, hashtab)
 		    message (ERR_REDECL, nameof (sp));
 		    return;
 		case sc_static:
-		    if (trad_option || !is_func (typeof (sp))) {
+		    if (trad_option || !is_func (TYPEOF (sp))) {
 			message (ERR_REDECL, nameof (sp));
-		    } else if (is_func (typeof (sp))) {
+		    } else if (is_func (TYPEOF (sp))) {
 			message (WARN_GLOBAL, nameof (sp));
 		    }
 		    break;
@@ -337,7 +337,7 @@ static void append P3 (SYM **, ptr_sp, TABLE *, scope_tab, SYM **, hashtab)
 		    message (ERR_REDECL, nameof (sp));
 		    return;
 		case sc_external:
-		    if (is_object_type (typeof (sp))) {
+		    if (is_object_type (TYPEOF (sp))) {
 			message (ERR_LINKAGE, nameof (sp));
 		    } else {
 			message (WARN_EXTERN, nameof (sp));
@@ -530,7 +530,7 @@ void endblock P0 (void)
 #endif
 
     for (sp = symbolsof (block); sp != NIL_SYM; sp = nextsym (sp)) {
-	TYP    *tp = typeof (sp);
+	TYP    *tp = TYPEOF (sp);
 
 	switch (storageof (sp)) {
 	case sc_global:

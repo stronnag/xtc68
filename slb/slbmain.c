@@ -475,6 +475,7 @@ MAINTOPT:
     case 1:
         if ( (maintflag + analflag) == 1)
             break;
+        __attribute__((fallthrough));
     default:
         DBG(("MAIN",0x14,"Incompatible actions - count=%d, maintflag=%d, analflag=%d",actions,maintflag,analflag));
         eprintf ("Incompatible combination of actions specified\n");

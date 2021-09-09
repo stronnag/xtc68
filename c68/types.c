@@ -665,7 +665,7 @@ static BOOL is_compatible_proto P2 (BLOCK *, block1, BLOCK *, block2)
 	return TRUE;
     }
     while ((sp1 != NIL_SYM) && (sp2 != NIL_SYM)) {
-	if (!is_compatible_type (typeof (sp1), typeof (sp2))) {
+	if (!is_compatible_type (TYPEOF (sp1), TYPEOF (sp2))) {
 	    return FALSE;
 	}
 	sp1 = nextsym (sp1);
@@ -683,7 +683,7 @@ static BOOL is_equal_proto P2 (SYM *, sp1, SYM *, sp2)
 	return TRUE;
     }
     while ((sp1 != NIL_SYM) && (sp2 != NIL_SYM)) {
-	if (!is_equal_type (typeof (sp1), typeof (sp2))) {
+	if (!is_equal_type (TYPEOF (sp1), TYPEOF (sp2))) {
 	    return FALSE;
 	}
 	sp1 = nextsym (sp1);
@@ -818,8 +818,8 @@ TYP    *composite_type P2 (TYP *, tp1, TYP *, tp2)
 	 *   Now combine the type information for the function parameters
 	 */
 	while (sp1 != NIL_SYM && sp2 != NIL_SYM) {
-	    set_type (sp1, composite_type (typeof (sp1), typeof (sp2)));
-	    set_type (sp2, typeof (sp1));
+	    set_type (sp1, composite_type (TYPEOF (sp1), TYPEOF (sp2)));
+	    set_type (sp2, TYPEOF (sp1));
 	    sp1 = nextsym (sp1);
 	    sp2 = nextsym (sp2);
 	}
@@ -986,7 +986,7 @@ BOOL is_incomplete_type P1 (TYP *, tp)
 	    /* the tag must be in the tag table */
 	    SYM    *sp = tag_search (nameoftype (tp));
 
-	    tp->size = typeof (sp)->size;
+	    tp->size = TYPEOF (sp)->size;
 	    return is_incomplete_type (tp);
 	}
 	return TRUE;
@@ -1276,7 +1276,7 @@ SIZE alignment_of_type P1 (const TYP *, tp)
 	    /* align structures to the alignment of the worst aligned member */
 	    algn = g_alignments[bt_char];;
 	    for (sp = membersof (tp); sp != NIL_SYM; sp = nextsym (sp)) {
-		al = alignment_of_type (typeof (sp));
+		al = alignment_of_type (TYPEOF (sp));
 		if (al > algn) {
 		    algn = al;
 		}
