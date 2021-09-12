@@ -686,42 +686,39 @@ void memory_full (void)
   fatal ("Memory exhausted.");
 }
 
-char *xmalloc (long size)
+static void *xmalloc (long size)
 {
-  char *ptr = malloc (size);
+     void *ptr = malloc (size);
 #if 0
   fprintf(stderr,"fmalloc %ld %lx\n", size, ptr);
 #endif
 #ifdef QDOS
   assert(stackcheck());
 #endif
-  if (ptr != 0) return (ptr);
+  if (ptr != NULL) return (ptr);
   memory_full ();
-  return 0;
+  return NULL;
 }
 
-char * xrealloc (char *old, size_t size)
+static void *xrealloc (char *old, size_t size)
 {
-  register char *ptr = realloc (old, size);
+     void *ptr = realloc (old, size);
 #ifdef QDOS
   assert(stackcheck());
 #endif
-  if (ptr != 0) return (ptr);
+  if (ptr != NULL) return (ptr);
   memory_full ();
-  return 0;
+  return NULL;
 }
 
-char * xcalloc (long number, long size)
+void *xcalloc (long number, long size)
 {
-  long total = number * size;
-  char *ptr = malloc (total);
-  if (ptr != 0) {
-      bzero (ptr, total);
-      return ptr;
-    }
-
-  memory_full ();
-  return 0;
+     void *ptr = calloc (number, size);
+     if (ptr != NULL) {
+          return ptr;
+     }
+     memory_full ();
+     return NULL;
 }
 
 
