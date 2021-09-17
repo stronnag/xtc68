@@ -634,7 +634,7 @@ PRIVATE void put_pointer P1 (const EXPR *, ep)
 
 PRIVATE void put_storage P1 (SYM *, sp)
 {
-    SIZE    al = alignment_of_type (typeof (sp));
+    SIZE    al = alignment_of_type (TYPEOF (sp));
 
     put_bseg (al);
     if (is_static (sp)) {
@@ -642,7 +642,7 @@ PRIVATE void put_storage P1 (SYM *, sp)
     } else {
 	put_name (sp);
     }
-    oprintf ("\t.space\t%d%s", typeof (sp)->size, newline);
+    oprintf ("\t.space\t%d%s", TYPEOF (sp)->size, newline);
 }
 
 
@@ -688,7 +688,7 @@ static void put_align P1 (SIZE, al)
 /*
  * output any function epilogue code
  */
-PRIVATE void put_epilogue P2 (SYM *, sp, LABEL, label)
+PRIVATE void put_epilogue P2 (__attribute__((unused))SYM *, sp, __attribute__((unused))LABEL, label)
 {
 }
 

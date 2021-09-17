@@ -131,14 +131,18 @@ SRCEXTR=cmains$(S)c c86${S}dsw c86${S}dsp c68${S}dsw c68${S}dsp \
 #------------------------------------------------------------------------------
 #	Object files common to all c68/c386 variants
 OBJ = 	analyze$(S)$(O) cglbdef$(S)$(O) cmain$(S)$(O) decl$(S)$(O) expr$(S)$(O) extern$(S)$(O) \
-	genicode$(S)$(O) genstmt$(S)$(O) genutil$(S)$(O) getsym$(S)$(O) init$(S)$(O) \
+	 genstmt$(S)$(O) genutil$(S)$(O) getsym$(S)$(O) init$(S)$(O) \
 	intexpr$(S)$(O)  list$(S)$(O) memmgt$(S)$(O) msgout$(S)$(O) optimize$(S)$(O) \
 	 outgen$(S)$(O) stmt$(S)$(O) symbol$(S)$(O) system$(S)$(O) types$(S)$(O)
 
+OBJX = genicode$(S)$(O)
+
 #	Object files specific to Motorola 680X0 variants
-OBJ68K =flow68k$(S)$(O) gen68k$(S)$(O) genffp$(S)$(O) genieee$(S)$(O) \
-	peep68k$(S)$(O) out68k_a$(S)$(O) out68k_c$(S)$(O) out68k_g$(S)$(O) \
+OBJ68K =gen68k$(S)$(O) genffp$(S)$(O) genieee$(S)$(O) \
+	peep68k$(S)$(O) out68k_a$(S)$(O) \
 	out68k_q$(S)$(O) reg68k$(S)$(O)
+
+OBJ68KX = flow68k$(S)$(O) out68k_c$(S)$(O) out68k_g$(S)$(O)
 
 #	Object files specific to INTEL variants
 OBJX86 =peepx86$(S)$(O) regx86$(S)$(O) \
@@ -162,8 +166,11 @@ OBJC30 =flowc30$(S)$(O) genc30$(S)$(O) peepc30$(S)$(O) outc30_r$(S)$(O) \
 OBJPPC =genppc$(S)$(O) peepppc$(S)$(O) outppc$(S)$(O) regppc$(S)$(O)
 
 #	All object files
-OBJS   =$(OBJ) $(OBJ68K) $(OBJX86) $(OBJ386) $(OBJ86) $(OBJARM) $(OBJC30) \
-	$(OBJPPC)
+OBJS   =$(OBJ) $(OBJ68K)
+
+# Not needed for xtc68, removed
+#$(OBJX86) $(OBJ386) $(OBJ86) $(OBJARM) $(OBJC30) \
+#	$(OBJPPC)
 
 #------------------------------------------------------------------------------
 #	The following is only required if your library does not

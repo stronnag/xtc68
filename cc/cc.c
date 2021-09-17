@@ -1039,7 +1039,7 @@ ADD_MORE:
 					exit (-1);
 				}
 				/* FALLTHRU */
-
+                                __attribute__((fallthrough));
 		case ACTION_GWASS:
 				DBG(("PARAMETERS",0x12,"   (ACTION_GWASS)"));
 				if (CheckCPU() < 0x20)
@@ -1067,6 +1067,7 @@ ADD_MORE:
 
 #endif /* QDOS */
 #endif /* QL */
+                                break;
 
 		case ACTION_PATH:
 				DBG(("PARAMETERS",0x12,"   (ACTION_PATH)"));

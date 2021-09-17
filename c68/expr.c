@@ -673,7 +673,7 @@ EXPR   *mk_ref P2 (EXPR *, ep, TYP *, tp)
 
 EXPR   *mk_symnode P1 (SYM *, sp)
 {
-    EXPR   *ep = mk_enode (en_sym, typeof (sp));
+    EXPR   *ep = mk_enode (en_sym, TYPEOF (sp));
 
     ep->v.sp = sp;
     return ep;
@@ -696,10 +696,11 @@ static EXPR *deref P2 (EXPR *, ep, TYP *, tp)
     switch (tp->type) {
     case bt_func:		/* ANSI - functions automatically dereferenced */
 #ifndef SYNTAX_CORRECT
-	if (trad_option) {
+         if (trad_option) {
 	    message (ERR_DEREF);
 	}
 	/* FALLTHRU */
+         __attribute__((fallthrough));
 #endif /* SYNTAX_CORRECT */
     case bt_char:
     case bt_charu:
@@ -790,7 +791,7 @@ static EXPR *nameref P0 (void)
     TYP    *tp;
 
     sp = identifier ();
-    tp = typeof (sp);
+    tp = TYPEOF (sp);
     symbol_used (sp);
     switch (storageof (sp)) {
     case sc_register:
@@ -803,6 +804,7 @@ static EXPR *nameref P0 (void)
 	    message (ERR_IMPLICITADDR, nameof (sp));
 	}
 	/* FALLTHRU */
+        __attribute__((fallthrough));
 #endif /* SYNTAX_CORRECT */
     case sc_static:
     case sc_global:
@@ -1037,7 +1039,7 @@ static const CHAR *check_printf P5 (const CHAR *, fname, int, num, const CHAR *,
     return fstr;
 }
 
-static const CHAR *check_scanf P5 (const CHAR *, fname, int, num, const CHAR *, fstr, enum fpos *, pos, const TYP *, ptp)
+static const CHAR *check_scanf P5 (const CHAR *, fname, int, num, const CHAR *, fstr, __attribute__((unused))enum fpos *, pos, const TYP *, ptp)
 {
     int     suppress;
     CHAR    optional;
@@ -1243,13 +1245,13 @@ static EXPR *parmlist P2 (EXPR *, ep, const BLOCK *, block)
 	    while ((sp1 != NIL_SYM) && (is_const (sp1) || is_member (sp1)))
 		sp1 = nextsym (sp1);
 
-	    if (sp1 == NIL_SYM || is_void (typeof (sp1))) {
+	    if (sp1 == NIL_SYM || is_void (TYPEOF (sp1))) {
 		message (ERR_COUNTPARAM, fname);
-	    } else if (!is_ellipsis (typeof (sp1))) {
-		if (is_array_type (typeof (sp1))) {
+	    } else if (!is_ellipsis (TYPEOF (sp1))) {
+		if (is_array_type (TYPEOF (sp1))) {
 		    ep2 = implicit_castop (ep2, tp_pointer);
 		} else {
-		    ep2 = implicit_castop (ep2, typeof (sp1));
+		    ep2 = implicit_castop (ep2, TYPEOF (sp1));
 		}
 	    }
 	}
@@ -1264,7 +1266,7 @@ static EXPR *parmlist P2 (EXPR *, ep, const BLOCK *, block)
 	case bt_short:
 	case bt_ushort:
 	case bt_float:
-	    if (sp1 == NIL_SYM || is_ellipsis (typeof (sp1))) {
+	    if (sp1 == NIL_SYM || is_ellipsis (TYPEOF (sp1))) {
 		TYP    *tp1 = promote_type (tp);
 
 #ifndef SYNTAX_CORRECT
@@ -1297,12 +1299,12 @@ static EXPR *parmlist P2 (EXPR *, ep, const BLOCK *, block)
 	}
 #endif /*FORMAT_CHECK */
 
-	if (sp1 != NIL_SYM && !is_ellipsis (typeof (sp1))) {
+	if (sp1 != NIL_SYM && !is_ellipsis (TYPEOF (sp1))) {
 	    /*
 	     * Check to see if this would cause a problem if compiled by a
 	     * K&R compiler.
 	     */
-	    tp = promote_type (typeof (sp1));
+	    tp = promote_type (TYPEOF (sp1));
 	    tp2 = promote_type (tp2);
 	    if (is_array_type (tp)) {
 		tp = tp_pointer;
@@ -1327,7 +1329,7 @@ static EXPR *parmlist P2 (EXPR *, ep, const BLOCK *, block)
     /* skip enumeration constants etc. */
     while ((sp1 != NIL_SYM) && (is_const (sp1) || is_member (sp1)))
 	sp1 = nextsym (sp1);
-    if (sp1 != NIL_SYM && !is_ellipsis (typeof (sp1)) && !is_void (typeof (sp1))) {
+    if (sp1 != NIL_SYM && !is_ellipsis (TYPEOF (sp1)) && !is_void (TYPEOF (sp1))) {
 	message (ERR_COUNTPARAM, fname);
     }
 #ifdef FORMAT_CHECK
@@ -1529,8 +1531,8 @@ static EXPR *primary P0 (void)
 		    } else {
 			ep = mk_node (en_deref, ep, NIL_EXPR, tp_pointer);
 		    }
-		    tp = qualify_type (typeof (sp),
-				(QUALIFIER) (tp->qual | typeof (sp)->qual));
+		    tp = qualify_type (TYPEOF (sp),
+				(QUALIFIER) (tp->qual | TYPEOF (sp)->qual));
 		    ep1 = mk_icon (sp->value.i, tp_long);
 		    ep = mk_node (en_add, ep, ep1, mk_type (tp_pointer, tp));
 		    ep = cond_deref (ep, tp);
@@ -2982,6 +2984,7 @@ static EXPR *asnop P0 (void)
 		    break;
 		}
 		/*FALLTHRU */
+                __attribute__((fallthrough));
 #endif /* FLOAT_SUPPORT */
 	    default:
 		ep2 = implicit_castop (ep2, ep1->etp);
@@ -3087,6 +3090,7 @@ static EXPR *condition P1 (EXPR *, ep)
 #ifndef SYNTAX_CORRECT
 	message (WARN_ASSIGN);
 	/*FALLTHRU */
+        __attribute__((fallthrough));
 #endif /* SYNTAX_CORRECT */
     default:
 	ep = mk_node (en_test, ep, NIL_EXPR, tp_int);

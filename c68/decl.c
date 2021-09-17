@@ -248,7 +248,7 @@ static BOOL is_typedef_symbol P1 (const CHAR *, str)
 
 static void check_stdarg P1 (SYM *, sp)
 {
-    TYP    *tp = typeof (sp);
+    TYP    *tp = TYPEOF (sp);
 
     if (is_register (sp) || is_array_type (tp)) {
 	message (WARN_STDARG);
@@ -273,10 +273,10 @@ static void check_stdarg P1 (SYM *, sp)
 
 static void check_tag P2 (SYM *, sp, TYP *, tp)
 {
-    switch (typeof (sp)->type) {
+    switch (TYPEOF (sp)->type) {
     case bt_struct:
     case bt_union:
-	if (is_same_type (typeof (sp), tp)) {
+	if (is_same_type (TYPEOF (sp), tp)) {
 	    return;
 	}
 	break;
@@ -312,9 +312,9 @@ static void check_function_declaration P1 (SYM *, sp)
     case sc_global:		/* no specifier */
     case sc_external:		/* extern specifier */
     case sc_static:		/* static specifier */
-	tp = typeof(sp);
+	tp = TYPEOF(sp);
 	if (tp != NULL) {
-	    tp = returned_type (typeof (sp));
+	    tp = returned_type (TYPEOF (sp));
 	    if (tp != NULL && !is_void (tp)) {
 		check_complete (tp);
 	    }
@@ -332,7 +332,7 @@ static void check_function_definition P1 (SYM *, sp)
      *       other than array.
      */
 
-    TYP    *tp = returned_type (typeof (sp));
+    TYP    *tp = returned_type (TYPEOF (sp));
 
     switch (tp->type) {
     case bt_func:
@@ -373,24 +373,24 @@ static void check_parameters P2 (BLOCK *, block, SYM *, sp)
 {
     SYM    *sp1, *sp2 = sym_search (nameof (sp));
 
-    if ((sp2 == NIL_SYM) || !is_func (typeof (sp2))) {
+    if ((sp2 == NIL_SYM) || !is_func (TYPEOF (sp2))) {
 	return;			/* no function definition */
     }
     sp1 = symbolsof (block);
-    sp2 = parametersof (typeof (sp2));
+    sp2 = parametersof (TYPEOF (sp2));
     if (sp2 == NIL_SYM) {
 	return;			/* no prototype on function definition */
     }
     if (sp1 == NIL_SYM) {
-	if (!is_equal_type (tp_void, typeof (sp2))) {
+	if (!is_equal_type (tp_void, TYPEOF (sp2))) {
 	    message (ERR_PROTO, nameof (sp));
 	}
 	sp2 = nextsym (sp2);
     }
     while ((sp1 != NIL_SYM) && (sp2 != NIL_SYM)) {
-	if (!is_equal_type (promote_type (typeof (sp1)), promote_type (typeof (sp2)))) {
+	if (!is_equal_type (promote_type (TYPEOF (sp1)), promote_type (TYPEOF (sp2)))) {
 	    message (ERR_PROTO, nameof (sp));
-	} else if (!is_equal_type (promote_type (typeof (sp1)), typeof (sp2))) {
+	} else if (!is_equal_type (promote_type (TYPEOF (sp1)), TYPEOF (sp2))) {
 	    message (ERR_PROTODEF, nameof (sp));
 	}
 	sp1 = nextsym (sp1);
@@ -409,7 +409,7 @@ static SYM *declare P2 (SYM *, sp, STORAGE, sc)
 {
     BOOL    func_body;
 
-    switch (typeof (sp)->type) {
+    switch (TYPEOF (sp)->type) {
     case bt_func:
 	func_body = (lastst == tk_begin || lastst == kw_register ||
 		     lastst == kw_auto || is_type_name (lastst));
@@ -555,7 +555,7 @@ TYP    *type_name P0 (void)
 	case tk_openbr:
 	case tk_openpa:
 	    sp = declarator (sc, tp);
-	    tp = typeof (sp);
+	    tp = TYPEOF (sp);
 	    break;
 	default:
 	    break;
@@ -592,15 +592,15 @@ static void parameter_type_list P0 (void)
 	    sc = sc_parms;
 	}
 	sp = declarator (sc, tp);
-	if (is_func (typeof (sp))) {
+	if (is_func (TYPEOF (sp))) {
 	    /*
 	     * Functions which are passed as a parameter are really
 	     * pointers to a function.
 	     */
-	    set_type (sp, mk_type (tp_pointer, typeof (sp)));
+	    set_type (sp, mk_type (tp_pointer, TYPEOF (sp)));
 	}
 	sym_append (&sp);
-	if (lastst != tk_comma || is_void (typeof (sp))) {
+	if (lastst != tk_comma || is_void (TYPEOF (sp))) {
 	    break;
 	}
 	getsym ();
@@ -763,7 +763,7 @@ static TYP *enum_specifier P1 (STORAGE, sc)
 	    getsym ();
 	    if (is_local_scope (sp) || lastst != tk_begin) {
 		check_tag (sp, tp_int);
-		tp = typeof (sp);
+		tp = TYPEOF (sp);
 #ifndef SYNTAX_CORRECT
 		if (lastst == tk_semicolon) {
 		    message (ERR_INCOMPLETE, "enum");
@@ -813,25 +813,25 @@ static SIZE struct_declarator_list P3 (TYP *, tp, SIZE, offset, TYP *, stp)
 	case tk_star:
 	case tk_openpa:
 	    sp = declarator (sc_member, tp);
-	    check_complete (typeof (sp));
+	    check_complete (TYPEOF (sp));
 #ifndef SYNTAX_CORRECT
-	    if (is_func (typeof (sp))) {
+	    if (is_func (TYPEOF (sp))) {
 		message (ERR_FUNC);
 	    }
 #endif /* SYNTAX_CORRECT */
 	    if (lastst != tk_colon) {
 		switch (stp->type) {
 		case bt_struct:
-		    al = align (typeof (sp), offset + size);
+		    al = align (TYPEOF (sp), offset + size);
 		    sp->value.i = offset + size + al;
 		    field_append (&sp);
-		    size += typeof (sp)->size + al;
+		    size += TYPEOF (sp)->size + al;
 		    break;
 		case bt_union:
-		    al = align (typeof (sp), offset);
+		    al = align (TYPEOF (sp), offset);
 		    sp->value.i = offset + al;
 		    field_append (&sp);
-		    size = typeof (sp)->size + al;
+		    size = TYPEOF (sp)->size + al;
 		    break;
 		default:
 		    CANNOT_REACH_HERE ();
@@ -839,7 +839,7 @@ static SIZE struct_declarator_list P3 (TYP *, tp, SIZE, offset, TYP *, stp)
 		bit_next = 0;
 		break;
 	    }
-	    tp = typeof (sp);
+	    tp = TYPEOF (sp);
 	    /*FALLTHRU */
 	case tk_colon:
 	    getsym ();
@@ -888,22 +888,22 @@ static SIZE struct_declarator_list P3 (TYP *, tp, SIZE, offset, TYP *, stp)
 		}
 #endif /* SYNTAX_CORRECT */
 		set_type (sp, copy_type (tp));
-		typeof (sp)->type =
+		TYPEOF (sp)->type =
 		    (BTYPE) (is_signed_type (tp) ? bt_bitfield : bt_ubitfield);
-		typeof (sp)->size = tp_int->size;
-		set_bit_width (typeof (sp), (BITSIZE) bit_width);
+		TYPEOF (sp)->size = tp_int->size;
+		set_bit_width (TYPEOF (sp), (BITSIZE) bit_width);
 		if (bitfield_option) {
-		    set_bit_offset (typeof (sp), (BITSIZE) (int_bits - bit_offset - bit_width));
+		    set_bit_offset (TYPEOF (sp), (BITSIZE) (int_bits - bit_offset - bit_width));
 		} else {
-		    set_bit_offset (typeof (sp), (BITSIZE) bit_offset);
+		    set_bit_offset (TYPEOF (sp), (BITSIZE) bit_offset);
 		}
 		if (bit_offset > 0) {
 		    offset -= tp_int->size;	/* shares space with previous field */
 		}
-		al = align (typeof (sp), offset + size);
+		al = align (TYPEOF (sp), offset + size);
 		sp->value.i = offset + size + al;
 		field_append (&sp);
-		size += typeof (sp)->size + al;
+		size += TYPEOF (sp)->size + al;
 		if (bit_offset > 0) {
 		    size -= tp_int->size;
 		}
@@ -1091,7 +1091,7 @@ static TYP *struct_or_union_specifier P1 (STORAGE, sc)
 		}
 	    }
 	}
-	tp = typeof (sp);
+	tp = TYPEOF (sp);
 	size = tp->size;
 	if (lastst == tk_begin) {
 #ifndef SYNTAX_CORRECT
@@ -1274,10 +1274,11 @@ static TYP *declaration_specifiers P2 (STORAGE *, storage, STORAGE, def_sc)
 	case kw_auto:
 	case kw_typedef:
 #ifndef SYNTAX_CORRECT
-	    if (def_sc == sc_parms) {
+             if (def_sc == sc_parms) {
 		message (ERR_ILLCLASS);
 	    }
 	    /*FALLTHRU */
+             __attribute__((fallthrough));
 #endif /* SYNTAX_CORRECT */
 	case kw_register:
 #ifndef SYNTAX_CORRECT
@@ -1300,7 +1301,7 @@ static TYP *declaration_specifiers P2 (STORAGE *, storage, STORAGE, def_sc)
 		done = TRUE;
 		continue;
 	    }
-	    tp = typeof (sp);
+	    tp = TYPEOF (sp);
 #ifndef SYNTAX_CORRECT
 	    if (tp->qual & qualifier) {
 		message (ERR_QUALIFIER);
@@ -1372,8 +1373,8 @@ static TYP *declaration_specifiers P2 (STORAGE *, storage, STORAGE, def_sc)
 	    /*FALLTHRU */
 #endif /* SYNTAX_CORRECT */
 #endif /* EXTENSION */
-
-	    /* type qualifiers */
+            __attribute__((fallthrough));
+            /* type qualifiers */
 	case kw_const:
 	case kw_volatile:
 #ifdef TOPSPEED
@@ -1586,7 +1587,7 @@ static SYM *direct_declarator P2 (STORAGE, sc, TYP *, tp)
 	    sp = declarator (sc, NIL_TYP);
 	    needpunc (tk_closepa);
 	    tp = direct_declarator_tail (sp, tp);
-	    tp1 = typeof (sp);
+	    tp1 = TYPEOF (sp);
 	    if (tp1 != NIL_TYP) {
 		for (; tp1->btp; tp1 = tp1->btp)
 		    /* nothing */ ;
@@ -1594,7 +1595,7 @@ static SYM *direct_declarator P2 (STORAGE, sc, TYP *, tp)
 	    } else {
 		set_type (sp, tp);
 	    }
-	    size_type (typeof (sp));
+	    size_type (TYPEOF (sp));
 	}
 	return sp;
     default:
@@ -1602,7 +1603,7 @@ static SYM *direct_declarator P2 (STORAGE, sc, TYP *, tp)
 	sp = mk_sym ((const CHAR *) "", sc, tp);
 	break;
     }
-    set_type (sp, direct_declarator_tail (sp, typeof (sp)));
+    set_type (sp, direct_declarator_tail (sp, TYPEOF (sp)));
     return sp;
 }
 
@@ -1670,15 +1671,15 @@ static BLOCK *get_parameters P1 (SYM *, sp)
     BLOCK  *block, *block2;
     SYM    *sp1, *sp2;
 
-    block = parameters (typeof (sp));
-    if (is_ansi (typeof (sp))) {
+    block = parameters (TYPEOF (sp));
+    if (is_ansi (TYPEOF (sp))) {
 #ifndef SYNTAX_CORRECT
 	if (lastst == tk_begin) {
 	    /*
 	     * Parameters to function definitions must have a name
 	     */
 	    for (sp2 = symbolsof (block); sp2 != NIL_SYM; sp2 = nextsym (sp2)) {
-		if (is_void (typeof (sp2)) || is_ellipsis (typeof (sp2))) {
+		if (is_void (TYPEOF (sp2)) || is_ellipsis (TYPEOF (sp2))) {
 		    break;
 		}
 		if (nameof (sp2) == NIL_CHAR || nameof (sp2)[0] == (CHAR) 0) {
@@ -1694,7 +1695,7 @@ static BLOCK *get_parameters P1 (SYM *, sp)
 	VOIDCAST declaration_list (sc_parms, 0L);
 
 	block2 = endparamblock ();
-	set_parameters (typeof (sp), &init_block);
+	set_parameters (TYPEOF (sp), &init_block);
 
 #ifndef SYNTAX_CORRECT
 	/*
@@ -1716,7 +1717,7 @@ static BLOCK *get_parameters P1 (SYM *, sp)
 		set_type (sp1, tp_int);
 	    } else {
 		set_storage (sp1, storageof (sp2));
-		set_type (sp1, typeof (sp2));
+		set_type (sp1, TYPEOF (sp2));
 		sp1->value.i = sp2->value.i;
 		symbol_set (sp1);
 	    }
@@ -1809,7 +1810,7 @@ static SIZE declaration P3 (STORAGE, sc, STORAGE, def_sc, SIZE, offset)
 		return offset;
 	    }
 	    sp = declarator (sc, tp);
-	    switch (typeof (sp)->type) {
+	    switch (TYPEOF (sp)->type) {
 		BLOCK  *block;
 
 	    case bt_func:
@@ -1824,7 +1825,7 @@ static SIZE declaration P3 (STORAGE, sc, STORAGE, def_sc, SIZE, offset)
 		     * Functions which are passed as a parameter are really
 		     * pointers to a function.
 		     */
-		    set_type (sp, mk_type (tp_pointer, typeof (sp)));
+		    set_type (sp, mk_type (tp_pointer, TYPEOF (sp)));
 		}
 		if (lastst == tk_begin) {
 		    /* function declaration */
@@ -1853,7 +1854,7 @@ static SIZE declaration P3 (STORAGE, sc, STORAGE, def_sc, SIZE, offset)
 		if (def_sc == sc_auto) {
 		    switch (storageof (sp)) {
 		    default:
-			check_complete (typeof (sp));
+			check_complete (TYPEOF (sp));
 #ifdef CPU_DEFINED
 			addoptinfo (sp, def_sc);
 #endif /* CPU_DEFINED */

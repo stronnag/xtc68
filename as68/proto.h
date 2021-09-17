@@ -9,7 +9,7 @@ extern void error (int, char *);
 extern char *allocate(unsigned long);
 extern char *myreallocate(char *, unsigned long);
 extern void setflags(int, char **);
-extern void output (char *, int, int);
+extern void output (char *, size_t, size_t);
 extern void output2fb (unsigned char *, int, int);
 extern void my_free (char *);
 extern void bufhead(void);

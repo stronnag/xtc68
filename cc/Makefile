@@ -65,7 +65,7 @@ INDENTFLAGS= -bad -br -ce -di8 -i4 -npsl
 #--------------------------------------------------------------
 #     CC (XTC68 version) for QDOS when hosted on LINUX
 PROG=qcc
-DEFINES = -DXTC68 -DENVVAR -DHAVE_BASENAME
+DEFINES = -DXTC68 -DENVVAR -DHAVE_BASENAME -DQL
 LDFLAGS += $(CFLAGS)
 CFLAGS +=  -O2
 

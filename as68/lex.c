@@ -245,6 +245,7 @@ int yyprocess(char c)
 			}
 		}
 		error( line, "non-terminated comment");
+                __attribute__((fallthrough));
 
 	case '\'':
 		do_star = 0;

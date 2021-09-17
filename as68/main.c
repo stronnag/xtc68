@@ -236,11 +236,9 @@ void setflags(ac,av)
 	}
 }
 
-void output( buffer, size, nitems )
-	char *buffer;
-	int size, nitems;
+void output( char * buffer, size_t size, size_t nitems )
 {
-	if ( fwrite( buffer, size, nitems, stdout ) != nitems )
+     if ( fwrite( buffer, size, nitems, stdout ) != nitems )
 		error( 0, "trouble writing object file" );
 }
 

@@ -1513,6 +1513,7 @@ void getsym P0 (void)
 		    break;
 		}
 		/*FALLTHRU */
+                __attribute__((fallthrough));
 #endif /* EXTENSION */
 	    default:
 		lastst = tk_divide;

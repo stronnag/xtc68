@@ -533,6 +533,7 @@ BOOL is_equal_address P2 (ADDRESS *, ap1, ADDRESS *, ap2)
 	    default:
 		return FALSE;
 	    }
+            __attribute__((fallthrough));
 	default:
 	    return FALSE;
 	}
@@ -790,7 +791,7 @@ static BOOL was_move_redundant P3 (CODE *, ip, CODE *, ip2, BOOL, memory)
  * along the code list (following all branches) to determine
  * whether the destination is required before being overwritten.
  */
-static BOOL is_move_redundant P3 (CODE *, ip, CODE *, ip2, BOOL, memory)
+static BOOL is_move_redundant P3 (__attribute__((unused))CODE *, ip, __attribute__((unused))CODE *, ip2, __attribute__((unused))BOOL, memory)
 {
 #if 0				/* currently not fully working */
     BOOL    result, altered, overwritten;

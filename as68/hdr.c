@@ -60,9 +60,9 @@ void headers(void)
 
 #else   /* QDOS */
 
-static char txt_hdr[] = { 0xFB, 0x10, 0xFF, 0xFF, 4, 'T', 'E', 'X', 'T' };
-static char data_hdr[] = { 0xFB, 0x10, 0xFF, 0xFE, 4, 'D', 'A', 'T', 'A' };
-static char bss_hdr[] = { 0xFB, 0x10, 0xFF, 0xFD, 5, 'U', 'D', 'A', 'T','A' };
+static unsigned char txt_hdr[] = { 0xFB, 0x10, 0xFF, 0xFF, 4, 'T', 'E', 'X', 'T' };
+static unsigned char data_hdr[] = { 0xFB, 0x10, 0xFF, 0xFE, 4, 'D', 'A', 'T', 'A' };
+static unsigned char bss_hdr[] = { 0xFB, 0x10, 0xFF, 0xFD, 5, 'U', 'D', 'A', 'T','A' };
 extern long txtsize, datsize, bsssize;
 
 /* Output headers in GST object file format */
@@ -84,9 +84,8 @@ void headers(void)
   output2fb((unsigned char *)ofile, strlen(ofile), 1);
 
   /* Define the standard symbols for TEXT (-1), DATA (-2), and BSS (-3) */
-  output( txt_hdr, 9, 1);
-  output( data_hdr, 9, 1);
-  output( bss_hdr, 10, 1);
+  output( (char *)txt_hdr, 9, 1);
+  output( (char *)data_hdr, 9, 1);
+  output( (char *)bss_hdr, 10, 1);
 }
 #endif /* QDOS */
-

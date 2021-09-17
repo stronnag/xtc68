@@ -569,8 +569,14 @@ yyreduce:
     }
 #endif
 
+  // As the sign-compare appears to be deliberate
+  // * Shutoff the warnings
+  // * Be explict and the size (so it works the same on 32 and 64)
 
-  switch (yyn) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
+     switch (yyn) {
 
 case 1:
 /*#line 75 "ccdir/cexp.y"*/
@@ -677,7 +683,7 @@ case 18:
 /*#line 154 "ccdir/cexp.y"*/
 { yyval.integer.unsignedp = 0;
 			  if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-			    yyval.integer.value = (unsigned) yyvsp[-2].integer.value <= yyvsp[0].integer.value;
+			    yyval.integer.value = (unsigned long) yyvsp[-2].integer.value <= yyvsp[0].integer.value;
 			  else
 			    yyval.integer.value = yyvsp[-2].integer.value <= yyvsp[0].integer.value; ;
     break;}
@@ -685,7 +691,7 @@ case 19:
 /*#line 160 "ccdir/cexp.y"*/
 { yyval.integer.unsignedp = 0;
 			  if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-			    yyval.integer.value = (unsigned) yyvsp[-2].integer.value >= yyvsp[0].integer.value;
+			    yyval.integer.value = (unsigned long) yyvsp[-2].integer.value >= yyvsp[0].integer.value;
 			  else
 			    yyval.integer.value = yyvsp[-2].integer.value >= yyvsp[0].integer.value; ;
     break;}
@@ -693,7 +699,7 @@ case 20:
 /*#line 166 "ccdir/cexp.y"*/
 { yyval.integer.unsignedp = 0;
 			  if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-			    yyval.integer.value = (unsigned) yyvsp[-2].integer.value < yyvsp[0].integer.value;
+			    yyval.integer.value = (unsigned long) yyvsp[-2].integer.value < yyvsp[0].integer.value;
 			  else
 			    yyval.integer.value = yyvsp[-2].integer.value < yyvsp[0].integer.value; ;
     break;}
@@ -701,7 +707,7 @@ case 21:
 /*#line 172 "ccdir/cexp.y"*/
 { yyval.integer.unsignedp = 0;
 			  if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-			    yyval.integer.value = (unsigned) yyvsp[-2].integer.value > yyvsp[0].integer.value;
+			    yyval.integer.value = (unsigned long) yyvsp[-2].integer.value > yyvsp[0].integer.value;
 			  else
 			    yyval.integer.value = yyvsp[-2].integer.value > yyvsp[0].integer.value; ;
     break;}
@@ -749,6 +755,7 @@ case 30:
 			  yyval.integer.unsignedp = 0; ;
     break;}
 }
+#pragma GCC diagnostic pop
    /* the action file gets copied in in place of this dollarsign */
 /*#line 362 "bison.simple"*/
 

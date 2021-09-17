@@ -9,7 +9,7 @@ INSTALLDIRS = $(DIRS:%=install-%)
 prefix ?= /usr/local/bin
 export prefix
 
-CFLAGS += -Wall
+CFLAGS += -Wall -Wextra -pedantic
 export CFLAGS
 
 all: $(DIRS)

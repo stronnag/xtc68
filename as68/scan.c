@@ -298,6 +298,7 @@ getnum( s )
                         base = 16;
                         break;
                 }
+         __attribute__((fallthrough));
 #endif
         case '@':
                 base = 8;

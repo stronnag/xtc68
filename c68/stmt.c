@@ -693,6 +693,7 @@ static STMT *statement P0 (void)
 	    snp = labelstmt ();
 	    break;
 	}
+        __attribute__((fallthrough));
 	/* else fall through to process expression */
     default:
 #ifndef SYNTAX_CORRECT
@@ -755,7 +756,7 @@ void funcbody P2 (SYM *, sp, BLOCK *, block)
     init_node = NIL_EXPR;
     old_global = global_flag;
     global_flag = 0;
-    ret_type = returned_type (typeof (sp));
+    ret_type = returned_type (TYPEOF (sp));
 
 #ifdef CPU_DEFINED
     return_block = tp_pointer->size;	/* return address */
@@ -766,7 +767,7 @@ void funcbody P2 (SYM *, sp, BLOCK *, block)
     poffset = return_block;
 
     for (sp1 = symbolsof (block); sp1; sp1 = nextsym (sp1)) {
-	poffset = calculate_offset (sp1, poffset, sc_parms, !is_ansi (typeof (sp)));
+	poffset = calculate_offset (sp1, poffset, sc_parms, !is_ansi (TYPEOF (sp)));
 	addoptinfo (sp1, sc_parms);
     }
 #endif /* CPU_DEFINED */

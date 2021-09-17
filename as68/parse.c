@@ -196,6 +196,7 @@ VOID Yinstruction(void)
 		asciz = 1;
 		yywidth = 8;
 		/* FALL THROUGH */
+                __attribute__((fallthrough));
 #endif
 	case _DC:
 		size = yywidth;
@@ -464,7 +465,7 @@ Yoperand(void)
 {
 	register OPERAND *op;
 	register int reg, inx;
-	int short_abs = 0;
+        volatile int short_abs = 0;
 
 	EXPR val;
 
@@ -850,7 +851,8 @@ Yfactor(void)
 		if ( funny_state == 2 ) {
 			longjmp( YYopbuf, 1 );
 		}
-	default:
+                __attribute__((fallthrough));
+        default:
 		Yerror( "illegal expression" );
         }
 	token = yylex();
