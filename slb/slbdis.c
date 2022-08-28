@@ -37,9 +37,8 @@
 #include "slb.h"
 #include <stdarg.h>
 #include <stdint.h>
-#ifndef WIN32
-#include <byteswap.h>
-#else
+
+#if defined(WIN32) || defined(__clang__)
 static uint16_t bswap_16(uint16_t val) {
   return (uint16_t)(val << 8) + (val >> 8);
 }
@@ -47,6 +46,8 @@ static uint32_t bswap_32(uint32_t val) {
   return (uint32_t)(((uint32_t)bswap_16(val & 0xffff) << 16) |
                     (uint32_t)bswap_16(val >> 16));
 }
+#else
+#include <byteswap.h>
 #endif
 
 PRIVATE short gword         _PROTOTYPE((void));
