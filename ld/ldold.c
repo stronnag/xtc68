@@ -146,8 +146,8 @@ typedef struct section
   struct section *sec_next;
   short          sec_id; /* -1 = TEXT, -2 = DATA, -3 = BSS */
   char           *sec_start;
-  intptr_t           sec_length;
-  intptr_t           sec_oldlen;
+  long           sec_length;
+  long           sec_oldlen;
   intptr_t          sec_fxref;
   intptr_t          sec_xptr;
   MOD_ITEM       *sec_module; /* List of modules contributing to this section */
@@ -325,7 +325,7 @@ void statistic(void)
    (void) fprintf(list_file,"---------------------------\n");
    for (s=sec_liste;s!=NULL;s=s->sec_next)
       (void) fprintf(list_file,
-                     "%-9s %8" PRIxPTR " %8" PRIx64 "\n",s->sec_name,s->sec_start-membot,s->sec_length);
+                     "%-9s %8" PRIxPTR " %8lx\n",s->sec_name,s->sec_start-membot,s->sec_length);
    fprintf(list_file,"---------------------------\n");
 }
 
@@ -1059,7 +1059,7 @@ void module(void)
       if (lstng_flag)
       {
          if (i++>3) { fprintf(list_file,"\n"); i=0; }
-         fprintf(list_file," %8.8s=%08" PRId64 "X",
+         fprintf(list_file," %8.8s=%08lX",
                  sec->sec_name,sec->sec_length-sec->sec_oldlen);
       }
       sec->sec_oldlen=sec->sec_length;
@@ -1812,9 +1812,9 @@ int main(int   argc, char  **argv)
        fprintf(list_file,"--------------------\n");
 
        fprintf(list_file,
-               "Memory Usage     = %7" PRId64 "%%\n",(code_ptr-membot)*100/mem_size);
+               "Memory Usage     = %7ld%%\n",(long)(code_ptr-membot)*100/mem_size);
        fprintf(list_file,
-          "Buffer Usage     = %7" PRId64" %%\n",(module_max-module_buffer)*100/buf_size);
+               "Buffer Usage     = %7ld%%\n",(long)(module_max-module_buffer)*100/buf_size);
        fprintf(list_file,"--------------------\n");
     }
    list_xsy(xsy_ll,1);
