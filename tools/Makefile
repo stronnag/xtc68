@@ -15,5 +15,5 @@ clean:
 	rm -f qls qcp
 
 install: qls qcp
-	install -d $(prefix)
-	install qls qcp $(prefix)
+	install -d $(prefix)/bin
+	install qls qcp $(prefix)/bin

@@ -36,7 +36,18 @@
 
 #include "slb.h"
 #include <stdarg.h>
-#include <arpa/inet.h>
+#include <stdint.h>
+#ifndef WIN32
+#include <byteswap.h>
+#else
+static uint16_t bswap_16(uint16_t val) {
+  return (uint16_t)(val << 8) + (val >> 8);
+}
+static uint32_t bswap_32(uint32_t val) {
+  return (uint32_t)(((uint32_t)bswap_16(val & 0xffff) << 16) |
+                    (uint32_t)bswap_16(val >> 16));
+}
+#endif
 
 PRIVATE short gword         _PROTOTYPE((void));
 PRIVATE long  glong         _PROTOTYPE((void));
@@ -248,7 +259,7 @@ short   gword()
 
     DBG(("GWORD",0x1001,"enter:"));
     reply = (short)get_data(2);
-    reply = ntohs(reply);
+    reply = bswap_16(reply);
     gaddr += 2;
     DBG(("GWORD",0x1001,"Exit: reply=%04.4x",reply));
     return (reply);
@@ -266,7 +277,7 @@ long    glong()
 
     DBG(("GLONG",0x1001,"Enter:"));
     reply = get_data(4);
-    reply = ntohl(reply);
+    reply = bswap_32(reply);
     gaddr += 4;
     DBG(("GLONG",0x1001,"Exit: reply=%08.8c",reply));
     return (reply);

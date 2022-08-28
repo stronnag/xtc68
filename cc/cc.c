@@ -28,12 +28,12 @@
  */
 
 /* for basename() --- see the man page for GNU v. POSIX versions */
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 #include <string.h>
 #include <unistd.h>
-#ifdef  __FreeBSD__
+//#ifdef  __FreeBSD__
 #include <libgen.h> /*(POSIX) */
-#endif
+//#endif
 
 #ifdef __APPLE__
 #include <targetconditionals.h>
@@ -773,7 +773,7 @@ int 	command_line (CC_PASSES_t * preopts,
 	 *	pass back the result of running the program if the system()
 	 *	call is used - the result is always 0!
 	 */
-	ret = _spawnvp(_P_WAIT,current_pass.argv[0],current_pass.argv);
+	ret = _spawnvp(_P_WAIT,current_pass.argv[0],(const char *const *)current_pass.argv);
 #elif QDOS
 	/*
 	 *	On QDOS we can use the execv() family of routines as these
@@ -1629,7 +1629,7 @@ X_FILE:
 			cp = &passes[pass];
 			if (pass != last_pass)
 			{
-				(void) strcpy( outname, basename( inname )); /* Get its basename */
+                          (void) strcpy( outname, basename( inname )); /* Get its basename */
 			}
 			else
 			{

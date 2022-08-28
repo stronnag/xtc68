@@ -362,5 +362,5 @@ pkzip:
 	pkzip $(PROG)src$(S)zip $(HDR68K) $(HDRX86) $(HDR386) $(HDR86) $(HDRARM) $(HDRC30) $(HDRPPC)
 
 install: $(PROG)
-	install -d $(prefix)
-	install $(PROG) $(prefix)
+	install -d $(prefix)/bin
+	install $(PROG) $(prefix)/bin

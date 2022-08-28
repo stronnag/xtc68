@@ -15,7 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
-
+#include <stdint.h>
+#include <inttypes.h>
 
 typedef struct _sym {
 	struct _sym *next;
@@ -23,7 +24,7 @@ typedef struct _sym {
 		char here[8];
 		long stix[2];
 	} name;
-	long value;
+	intptr_t value;
 	unsigned short index;
 	unsigned short flags;
 	unsigned short access;
@@ -31,7 +32,7 @@ typedef struct _sym {
 
 typedef struct {
 	struct _sym *psym;
-	long value;
+  intptr_t value;
 } EXPR;
 
 /*
@@ -194,5 +195,3 @@ struct _branch {
 #ifndef GENERIC
 extern  long  dottxt;
 #endif /* GENERIC */
-
-

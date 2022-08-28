@@ -2,7 +2,7 @@ PROG = qcpp
 
 APFLAGS=  -DXTC68 -DCPLUSPLUS
 
-CFLAGS +=  -O2 $(APFLAGS)
+CFLAGS +=  -O2 $(APFLAGS) -DPREFIX="$(prefix)"
 LDFLAGS =
 
 OBJ = version.o cexp.o cccp.o
@@ -16,5 +16,5 @@ clean:
 	rm -f *.o qcpp
 
 install: $(PROG)
-	install -d $(prefix)
-	install $(PROG) $(prefix)
+	install -d $(prefix)/bin
+	install $(PROG) $(prefix)/bin

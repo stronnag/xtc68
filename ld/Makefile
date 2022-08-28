@@ -14,10 +14,10 @@ $(PROG): $(OBJS)
 	$(CC) $(CFLAGS) -o $(PROG) $(OBJS)
 
 ld.o:	ldold.c
-	$(CC) $(CFLAGS) -c -o ld.o ldold.c
+	$(CC) $(CFLAGS) -DPREFIX="$(prefix)" -c -o ld.o ldold.c
 clean:
 	rm -f *.o $(PROG)
 
 install: $(PROG)
-	install -d $(prefix)
-	install $(PROG) $(prefix)
+	install -d $(prefix)/bin
+	install $(PROG) $(prefix)/bin

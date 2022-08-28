@@ -1,3 +1,5 @@
+ #define _GNU_SOURCE
+
 /*
  *						cc.h
  *						~~~~
@@ -529,11 +531,6 @@ int 	CheckCPU				_P_((void));
 #	define stricmp strcasecmp
 #  endif /* EPOC */
 # endif /* WIN32 */
-#if !defined(__unix__) && !defined(__APPLE__)
-char *	stpcpy					_P_((char *, char *));
-#endif /* __unix__ */
-char *	strpbrk 				_P_((const char *, const char *));
-char *	strrpbrk				_P_((char *, char *));
 #endif /* QDOS */
 
 #ifdef JDBG

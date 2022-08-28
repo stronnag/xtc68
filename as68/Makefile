@@ -29,5 +29,5 @@ clean:
 	rm -f *.o as68
 
 install: as68
-	install -d $(prefix)
-	install as68 $(prefix)
+	install -d $(prefix)/bin
+	install as68 $(prefix)/bin

@@ -228,7 +228,7 @@ VOID Yinstruction(void)
 				ldp->minus = lp->sym2;
 				ldp->constant = lp->u.val.value;
 
-				generate(size, GENLDIFF, (long) ldp, NULL);
+				generate(size, GENLDIFF, (intptr_t) ldp, NULL);
 			}
 #endif /* LABELDIFF */
 			free( (char *) lp );

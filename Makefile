@@ -6,7 +6,7 @@ DIRS = as68  c68  cc  cpp  ld  slb
 CLEANDIRS = $(DIRS:%=clean-%)
 INSTALLDIRS = $(DIRS:%=install-%)
 
-prefix ?= /usr/local/bin
+prefix ?= /usr/local
 export prefix
 
 CFLAGS += -Wall -Wextra -pedantic

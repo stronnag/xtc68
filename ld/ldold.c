@@ -54,6 +54,9 @@ Dec 89              QDOS port done by Jeremy Allison
 # endif
 #endif
 
+#define XSTR(s) STR(s)
+#define STR(s) #s
+
 char _prog_name[] = "ld";
 char _version[] = "v1.22";
 char _copyright[] = " QL 68000 SROFF Linker\n";
@@ -96,7 +99,7 @@ long _stackmargin = 1024L;
 #define MAX_NDEF   30
 #define BLEN     1024
 #define XMAX       10
-#define NUM_SPATHS 9
+#define NUM_SPATHS 16
 
 #define MIN_DATASPACE   100
 
@@ -118,38 +121,38 @@ typedef struct oper
 
 /* Program symbol */
 typedef struct symbol
-   {
-      short          length;
-      O___DIRECT       directive;
-      char           string[81];
-      long           longword;
-      short          id;
-      char           trunc_rule;
-      unsigned char  data_byte;
-      short          n_xref;
-      OPER           xref_oper[XMAX];
-   } SYMBOL;
+{
+     short          length;
+     O___DIRECT       directive;
+     char           string[81];
+     intptr_t           longword;
+     short          id;
+     char           trunc_rule;
+     unsigned char  data_byte;
+     short          n_xref;
+     OPER           xref_oper[XMAX];
+} SYMBOL;
 
 /* Module list */
 typedef struct mod_item
-   {
-      struct mod_item   *mod_next;
-      char              mod_name[2];
-   } MOD_ITEM;
+{
+  struct mod_item   *mod_next;
+  char              mod_name[2];
+} MOD_ITEM;
 
 /* Section, TEXT, DATA or BSS */
 typedef struct section
-   {
-      struct section *sec_next;
-      short          sec_id; /* -1 = TEXT, -2 = DATA, -3 = BSS */
-      char           *sec_start;
-      long           sec_length;
-      long           sec_oldlen;
-      long           sec_fxref;
-      long           sec_xptr;
-      MOD_ITEM       *sec_module; /* List of modules contributing to this section */
-      char           sec_name[MAX_LEN];
-   } SECTION;
+{
+  struct section *sec_next;
+  short          sec_id; /* -1 = TEXT, -2 = DATA, -3 = BSS */
+  char           *sec_start;
+  intptr_t           sec_length;
+  intptr_t           sec_oldlen;
+  intptr_t          sec_fxref;
+  intptr_t          sec_xptr;
+  MOD_ITEM       *sec_module; /* List of modules contributing to this section */
+  char           sec_name[MAX_LEN];
+} SECTION;
 
 /* XDEF symbol */
 typedef struct xsym
@@ -322,7 +325,7 @@ void statistic(void)
    (void) fprintf(list_file,"---------------------------\n");
    for (s=sec_liste;s!=NULL;s=s->sec_next)
       (void) fprintf(list_file,
-         "%-9s %8" PRIxPTR " %8lX\n",s->sec_name,s->sec_start-membot,s->sec_length);
+                     "%-9s %8" PRIxPTR " %8" PRIx64 "\n",s->sec_name,s->sec_start-membot,s->sec_length);
    fprintf(list_file,"---------------------------\n");
 }
 
@@ -772,7 +775,7 @@ SECTION *def_section   (char *name)
    if (!stricmp(sec->sec_name,"BSS")) sec->sec_id=-3;
    if (!stricmp(sec->sec_name,"UDATA")) sec->sec_id=-3;
    sec->sec_fxref = 0;      /* jh was NULL */
-   sec->sec_xptr  = (long)&sec->sec_fxref;
+   sec->sec_xptr  = (intptr_t)&sec->sec_fxref;
    app_sec(sec_lptr,sec);
    return(sec);
 }
@@ -922,7 +925,7 @@ void xref_dir(void)
       }
    }
    *((XREF**)curr_sec->sec_xptr) = x;
-   curr_sec->sec_xptr = (long)&x->xref_next;
+   curr_sec->sec_xptr = (intptr_t)&x->xref_next;
    code_ptr += sy.trunc_rule & 7;
    if (code_ptr >= memend)
       halt(1);
@@ -1011,7 +1014,7 @@ void chunk(void)
    {
       sect_command();
       body();
-      if (((long)code_ptr&1) && code_ptr>=neustart)
+      if (((intptr_t)code_ptr&1) && code_ptr>=neustart)
       {
          if (code_ptr>=memend) halt(1);
          *code_ptr++='\0';
@@ -1056,7 +1059,7 @@ void module(void)
       if (lstng_flag)
       {
          if (i++>3) { fprintf(list_file,"\n"); i=0; }
-         fprintf(list_file," %8.8s=%08lX",
+         fprintf(list_file," %8.8s=%08" PRId64 "X",
                  sec->sec_name,sec->sec_length-sec->sec_oldlen);
       }
       sec->sec_oldlen=sec->sec_length;
@@ -1119,8 +1122,8 @@ void calc_xref(XREF  *x, char  *c, char *modname)
    if (x->xref_trunc & 32) value -=c-membot;
    switch(x->xref_trunc & 7)
    {
-      case 4 : if (((long)c)&1) halt(1); out_long (c, value); break;
-      case 2 : if (((long)c)&1) halt(1); out_short (c, value);
+   case 4 : if (((intptr_t)c)&1) halt(1); out_long (c, value); break;
+   case 2 : if (((intptr_t)c)&1) halt(1); out_short (c, value);
                if (x->xref_trunc & 8)
                {
                   if (value<-32768L || value>32767L)
@@ -1711,10 +1714,20 @@ void command_line(int   *xac, char  ***xav, char **paths, char *lib_arr)
        char *ldd = getenv("QLLIB");
        if(ldd == NULL)
        {
-#if defined(__unix__) || defined(__APPLE__)
-           ldd = strdup("/usr/local/qdos/lib/");
+#if defined(__unix__) || defined(__APPLE__) || defined(__MINGW32__)
+#ifdef PREFIX
+         char* pfx = XSTR(PREFIX);
+         if (strlen(pfx) > 0) {
+           ldd = malloc(strlen(pfx) + 16);
+           strcpy(ldd, pfx);
+           strcat(ldd, "/qdos/lib/");
+           paths[num_paths++] = ldd;
+         }
+#endif
+         // fallback
+         ldd = strdup("/usr/local/qdos/lib/");
 #else
-           ldd = strdup("c:/qllib/");
+         ldd = strdup("c:/qllib/");
 #endif
        }
        {
@@ -1799,9 +1812,9 @@ int main(int   argc, char  **argv)
        fprintf(list_file,"--------------------\n");
 
        fprintf(list_file,
-          "Memory Usage     = %7ld%%\n",(code_ptr-membot)*100/mem_size);
+               "Memory Usage     = %7" PRId64 "%%\n",(code_ptr-membot)*100/mem_size);
        fprintf(list_file,
-          "Buffer Usage     = %7ld%%\n",(module_max-module_buffer)*100/buf_size);
+          "Buffer Usage     = %7" PRId64" %%\n",(module_max-module_buffer)*100/buf_size);
        fprintf(list_file,"--------------------\n");
     }
    list_xsy(xsy_ll,1);
