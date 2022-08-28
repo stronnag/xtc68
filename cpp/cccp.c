@@ -2904,7 +2904,7 @@ void special_symbol ( HASHNODE *hp, FILE_BUF *op)
 
   case T_CONST:
     buf = (char *) alloca (4 * sizeof (long));
-    sprintf (buf, "%" PRId64 , hp->value.ival);
+    sprintf (buf, "%zd", hp->value.ival);
     break;
 
   case T_SPECLINE:
