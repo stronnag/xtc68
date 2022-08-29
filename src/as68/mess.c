@@ -14,9 +14,7 @@
 #include "jas.h"
 #include "proto.h"
 
-VOID geninst(sp)
-STMT *sp;
-{
+VOID geninst(STMT *sp) {
   register OPERAND *op;
   register char *cp;
   register short nbits = 0;
@@ -28,7 +26,6 @@ STMT *sp;
   extern int line;
   extern long newdot;
   extern int Optimize;
-  extern CBUF *generate();
 
   findinst(sp);
   eff[0] = eff[1] = (OPERAND *)NULL;
