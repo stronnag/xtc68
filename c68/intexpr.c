@@ -36,23 +36,22 @@
 /*
  *  floating point expression
  */
-void floatexpr P2 (TYP *, tp, RVAL *, fp)
-{
-    EXPR   *ep = exprnc ();
+void floatexpr P2(TYP *, tp, RVAL *, fp) {
+  EXPR *ep = exprnc();
 
-    if (ep != NIL_EXPR) {
-	ep = implicit_castop (ep, tp);
-	ep = constantopt (ep);
+  if (ep != NIL_EXPR) {
+    ep = implicit_castop(ep, tp);
+    ep = constantopt(ep);
 
-	if (is_fcon (ep)) {
-	    FASSIGN (*fp, ep->v.f);
-	    return;
-	}
+    if (is_fcon(ep)) {
+      FASSIGN(*fp, ep->v.f);
+      return;
     }
+  }
 #ifndef SYNTAX_CORRECT
-    message (ERR_CONSTFLOAT);
-    FASSIGN (*fp, F_one);
-    return;
+  message(ERR_CONSTFLOAT);
+  FASSIGN(*fp, F_one);
+  return;
 #endif /* SYNTAX_CORRECT */
 }
 #endif /* FLOAT_BOOTSTRAP */
@@ -61,41 +60,39 @@ void floatexpr P2 (TYP *, tp, RVAL *, fp)
 /*
  *  integer arithmetic expression
  */
-IVAL arithexpr P1 (TYP *, tp)
-{
-    EXPR   *ep = exprnc ();
+IVAL arithexpr P1(TYP *, tp) {
+  EXPR *ep = exprnc();
 
-    if (ep != NIL_EXPR) {
-	ep = implicit_castop (ep, tp);
-	ep = constantopt (ep);
-	if (is_icon (ep)) {
-	    return ep->v.i;
-	}
+  if (ep != NIL_EXPR) {
+    ep = implicit_castop(ep, tp);
+    ep = constantopt(ep);
+    if (is_icon(ep)) {
+      return ep->v.i;
     }
+  }
 #ifndef SYNTAX_CORRECT
-    message (ERR_CONSTINT);
-    getsym ();
+  message(ERR_CONSTINT);
+  getsym();
 #endif /* SYNTAX_CORRECT */
-    return 0L;
+  return 0L;
 }
 
-IVAL intexpr P0 (void)
-{
-    EXPR   *ep = exprnc ();
+IVAL intexpr P0(void) {
+  EXPR *ep = exprnc();
 
-    if (ep != NIL_EXPR) {
-	ep = constantopt (ep);
-	if (is_icon (ep)) {
-	    return ep->v.i;
-	}
+  if (ep != NIL_EXPR) {
+    ep = constantopt(ep);
+    if (is_icon(ep)) {
+      return ep->v.i;
     }
+  }
 #ifndef SYNTAX_CORRECT
-    message (ERR_CONSTINT);
-    /*
-     * any return value is wrong, but 1 is
-     * less likely than 0 to cause spurious
-     * errors later in the compilation.
-     */
+  message(ERR_CONSTINT);
+  /*
+   * any return value is wrong, but 1 is
+   * less likely than 0 to cause spurious
+   * errors later in the compilation.
+   */
 #endif /* SYNTAX_CORRECT */
-    return 1L;
+  return 1L;
 }

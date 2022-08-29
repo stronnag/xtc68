@@ -46,27 +46,41 @@
 
 #ifdef HAS_STDARG
 #include <stdarg.h>
-#define VA_START(a,s)	va_start(a,s)
+#define VA_START(a, s) va_start(a, s)
 #ifdef __STDC__
-#define P1V(t1, a1)			(t1 a1, ...)
-#define P2V(t1, a1, t2, a2)		(t1 a1, t2 a2, ...)
-#define P3V(t1, a1, t2, a2, t3, a3)	(t1 a1, t2 a2, t3 a3, ...)
+#define P1V(t1, a1) (t1 a1, ...)
+#define P2V(t1, a1, t2, a2) (t1 a1, t2 a2, ...)
+#define P3V(t1, a1, t2, a2, t3, a3) (t1 a1, t2 a2, t3 a3, ...)
 #else /* __STDC__ */
-#define P1V(t1, a1)			(a1) t1 a1;
-#define P2V(t1, a1, t2, a2)		(a1, a2, a3) t1 a1; t2 a2;
-#define P3V(t1, a1, t2, a2, t3, a3)	(a1, a2, a3) t1 a1; t2 a2; t3 a3;
+#define P1V(t1, a1) (a1) t1 a1;
+#define P2V(t1, a1, t2, a2)                                                                                                    \
+  (a1, a2, a3) t1 a1;                                                                                                          \
+  t2 a2;
+#define P3V(t1, a1, t2, a2, t3, a3)                                                                                            \
+  (a1, a2, a3) t1 a1;                                                                                                          \
+  t2 a2;                                                                                                                       \
+  t3 a3;
 #endif /* __STDC__ */
-#else /* HAS_STDARG */
+#else  /* HAS_STDARG */
 #include <varargs.h>
-#define VA_START(a,s)	va_start(a)
-#define P1V(t1, a1)			(a1, va_alist) t1 a1; va_dcl
-#define P2V(t1, a1, t2, a2)		(a1, a2, va_alist) t1 a1; t2 a2; va_dcl
-#define P3V(t1, a1, t2, a2, t3, a3)	(a1, a2, a3, va_alist) t1 a1; t2 a2; t3 a3; va_dcl
+#define VA_START(a, s) va_start(a)
+#define P1V(t1, a1)                                                                                                            \
+  (a1, va_alist) t1 a1;                                                                                                        \
+  va_dcl
+#define P2V(t1, a1, t2, a2)                                                                                                    \
+  (a1, a2, va_alist) t1 a1;                                                                                                    \
+  t2 a2;                                                                                                                       \
+  va_dcl
+#define P3V(t1, a1, t2, a2, t3, a3)                                                                                            \
+  (a1, a2, a3, va_alist) t1 a1;                                                                                                \
+  t2 a2;                                                                                                                       \
+  t3 a3;                                                                                                                       \
+  va_dcl
 #endif /* HAS_STDARG */
 
 /********************************************************* Macro Definitions */
 
-#define	WARN_LEVEL_MAX	((int)(sizeof(warnlevel)/sizeof(int))-1)
+#define WARN_LEVEL_MAX ((int)(sizeof(warnlevel) / sizeof(int)) - 1)
 
 /********************************************************** Static Variables */
 
@@ -75,19 +89,11 @@
  *   various levels of error/warning messages, and for warnings, whether
  *   the warning level allows messages to be output
  */
-static MSGNUM warnlevel[] =
-{
-    WARN_LEVEL1,
-    WARN_LEVEL2,
-    WARN_LEVEL3,
-    WARN_LEVEL4,
-    WARN_LEVEL5,
-    WARN_LEVEL6,
-    WARN_LEVEL7,
+static MSGNUM warnlevel[] = {WARN_LEVEL1, WARN_LEVEL2, WARN_LEVEL3, WARN_LEVEL4, WARN_LEVEL5, WARN_LEVEL6, WARN_LEVEL7,
 #ifdef FACIST
-    WARN_LEVEL8,
-#endif				/* FACIST */
-    MSG_BASE};
+                             WARN_LEVEL8,
+#endif /* FACIST */
+                             MSG_BASE};
 
 /*****************************************************************************/
 
@@ -96,14 +102,13 @@ static MSGNUM warnlevel[] =
  *   from the output routine to ensure that it was successful.
  */
 
-static void vprint P3 (FHANDLE, file, const char *, fmt, va_list, ap)
-{
-    if (vfprintf (file, fmt, ap) < 0) {
-	if (file != errfile) {
-	    message (MSG_WRITEFAIL);
-	}
-	exit (EXIT_SUCCESS);
+static void vprint P3(FHANDLE, file, const char *, fmt, va_list, ap) {
+  if (vfprintf(file, fmt, ap) < 0) {
+    if (file != errfile) {
+      message(MSG_WRITEFAIL);
     }
+    exit(EXIT_SUCCESS);
+  }
 }
 
 /*
@@ -111,13 +116,12 @@ static void vprint P3 (FHANDLE, file, const char *, fmt, va_list, ap)
  *           to stderr instead of stdout.
  */
 /*PRINTFLIKE1 */
-void eprintf P1V (const char *, formatstr)
-{
-    va_list ap;
+void eprintf P1V(const char *, formatstr) {
+  va_list ap;
 
-    VA_START (ap, formatstr);
-    vprint (errfile, formatstr, ap);
-    va_end (ap);
+  VA_START(ap, formatstr);
+  vprint(errfile, formatstr, ap);
+  va_end(ap);
 }
 
 #ifdef ICODE
@@ -126,13 +130,12 @@ void eprintf P1V (const char *, formatstr)
  *           to icode instead of stdout.
  */
 /*PRINTFLIKE1 */
-void iprintf P1V (const char *, formatstr)
-{
-    va_list ap;
+void iprintf P1V(const char *, formatstr) {
+  va_list ap;
 
-    VA_START (ap, formatstr);
-    vprint (listfile, formatstr, ap);
-    va_end (ap);
+  VA_START(ap, formatstr);
+  vprint(listfile, formatstr, ap);
+  va_end(ap);
 }
 
 #endif /* ICODE */
@@ -143,13 +146,12 @@ void iprintf P1V (const char *, formatstr)
  *           to list instead of stdout.
  */
 /*PRINTFLIKE1 */
-void lprintf P1V (const char *, formatstr)
-{
-    va_list ap;
+void lprintf P1V(const char *, formatstr) {
+  va_list ap;
 
-    VA_START (ap, formatstr);
-    vprint (listfile, formatstr, ap);
-    va_end (ap);
+  VA_START(ap, formatstr);
+  vprint(listfile, formatstr, ap);
+  va_end(ap);
 }
 
 #endif /* LIST */
@@ -161,18 +163,16 @@ void lprintf P1V (const char *, formatstr)
  *           determines whether to output the message.
  */
 /*PRINTFLIKE2 */
-void dbgprintf P2V (int, flag, const char *, formatstr)
-{
-    if (is_debugging (flag)) {
-	va_list ap;
+void dbgprintf P2V(int, flag, const char *, formatstr) {
+  if (is_debugging(flag)) {
+    va_list ap;
 
-	VA_START (ap, formatstr);
-	vprint (debugfile, formatstr, ap);
-	va_end (ap);
-    }
+    VA_START(ap, formatstr);
+    vprint(debugfile, formatstr, ap);
+    va_end(ap);
+  }
 }
 #endif /* DEBUG */
-
 
 #ifdef CPU_DEFINED
 /*
@@ -180,13 +180,12 @@ void dbgprintf P2V (int, flag, const char *, formatstr)
  *           to output instead of stdout.
  */
 /*PRINTFLIKE1 */
-void oprintf P1V (const char *, formatstr)
-{
-    va_list ap;
+void oprintf P1V(const char *, formatstr) {
+  va_list ap;
 
-    VA_START (ap, formatstr);
-    vprint (output, formatstr, ap);
-    va_end (ap);
+  VA_START(ap, formatstr);
+  vprint(output, formatstr, ap);
+  va_end(ap);
 }
 
 #endif /* CPU_DEFINED */
@@ -205,59 +204,58 @@ void oprintf P1V (const char *, formatstr)
  * by default promotions.
  */
 /*VARARGS1 */
-void message P1V (int, mnum)
-{
-    va_list ap;
-    MSGNUM  errtype;
-    MSGNUM  msgnum = (MSGNUM) mnum;
+void message P1V(int, mnum) {
+  va_list ap;
+  MSGNUM errtype;
+  MSGNUM msgnum = (MSGNUM)mnum;
 
-    VA_START (ap, mnum);
-    if (msgnum < MSG_BASE) {
-	/* In case of warning messages, check against warning level */
-	if (msgnum >= warnlevel[warn_option]) {
-	    /* warning level too low - ignore message */
-	    va_end (ap);
-	    return;
-	}
-	if (error_resync) {
-	    /* still resyncing after an error */
-	    va_end (ap);
-	    return;
-	}
-	if (msgnum < warnlevel[error_option]) {
-	    /* error being generated so restart resyncing */
-	    error_resync = ERROR_RESYNC;
-	}
-	eprintf (message_text (MSG_LINE), act_file, act_line);
-	errtype = (MSGNUM) (msgnum < warnlevel[error_option] ? MSG_ERROR : MSG_WARNING);
-	eprintf (message_text (errtype));
-	if (msgnum >= WARN_LEVEL1) {
-	    int     level;
-
-	    for (level = 1; (level <= WARN_LEVEL_MAX) && (msgnum >= warnlevel[level]); level++);
-	    eprintf (" [%d]", level);
-	}
-	eprintf (": ");
+  VA_START(ap, mnum);
+  if (msgnum < MSG_BASE) {
+    /* In case of warning messages, check against warning level */
+    if (msgnum >= warnlevel[warn_option]) {
+      /* warning level too low - ignore message */
+      va_end(ap);
+      return;
     }
-    /* finally we output text + newline */
-    vprint (errfile, message_text (msgnum), ap);
-    eprintf ("%s", newline);
-
+    if (error_resync) {
+      /* still resyncing after an error */
+      va_end(ap);
+      return;
+    }
     if (msgnum < warnlevel[error_option]) {
-	/*
-	 * Do not proceed if more than 'max_error_count' errors were detected.
-	 * 'max_error_count' should be high since each error might be reported
-	 * more than once
-	 */
-	if (++total_errors >= max_error_count) {
-	    message (MSG_MAXERROR);
-	    exit (EXIT_FAILURE);
-	}
-	code_option = FALSE;	/* stop generating code - syntax check only */
+      /* error being generated so restart resyncing */
+      error_resync = ERROR_RESYNC;
     }
-    va_end (ap);
-}
+    eprintf(message_text(MSG_LINE), act_file, act_line);
+    errtype = (MSGNUM)(msgnum < warnlevel[error_option] ? MSG_ERROR : MSG_WARNING);
+    eprintf(message_text(errtype));
+    if (msgnum >= WARN_LEVEL1) {
+      int level;
 
+      for (level = 1; (level <= WARN_LEVEL_MAX) && (msgnum >= warnlevel[level]); level++)
+        ;
+      eprintf(" [%d]", level);
+    }
+    eprintf(": ");
+  }
+  /* finally we output text + newline */
+  vprint(errfile, message_text(msgnum), ap);
+  eprintf("%s", newline);
+
+  if (msgnum < warnlevel[error_option]) {
+    /*
+     * Do not proceed if more than 'max_error_count' errors were detected.
+     * 'max_error_count' should be high since each error might be reported
+     * more than once
+     */
+    if (++total_errors >= max_error_count) {
+      message(MSG_MAXERROR);
+      exit(EXIT_FAILURE);
+    }
+    code_option = FALSE; /* stop generating code - syntax check only */
+  }
+  va_end(ap);
+}
 
 /*
  *   fatal() is called when a serious error has occurred within the
@@ -265,26 +263,25 @@ void message P1V (int, mnum)
  *   aid in determining what went wrong.
  */
 /*PRINTFLIKE3 */
-void fatal P3V (const char *, fname, const char *, routine, const char *, msg)
-{
-    va_list ap;
-    static BOOL beenhere = FALSE;
+void fatal P3V(const char *, fname, const char *, routine, const char *, msg) {
+  va_list ap;
+  static BOOL beenhere = FALSE;
 
-    VA_START (ap, msg);
-    if (!beenhere) {
-	beenhere = TRUE;
-	message (MSG_FATAL, fname, routine);
-	vprint (errfile, msg, ap);
-	message (MSG_MISSING);
+  VA_START(ap, msg);
+  if (!beenhere) {
+    beenhere = TRUE;
+    message(MSG_FATAL, fname, routine);
+    vprint(errfile, msg, ap);
+    message(MSG_MISSING);
 #ifdef CPU_DEFINED
-	g_flush (NIL_SYM);
+    g_flush(NIL_SYM);
 #endif /* CPU_DEFINED */
-    }
-    va_end (ap);
+  }
+  va_end(ap);
 #ifdef WIN32
 #ifdef _DEBUG
-	getchar();
+  getchar();
 #endif /* _DEBUG */
 #endif /* WIN32 */
-    exit (EXIT_FAILURE);
+  exit(EXIT_FAILURE);
 }

@@ -1,9 +1,9 @@
 /*
-   **   This module builds the compiler as one large C file.   Maybe the
-   **   optimizer can do a better job in this case!
-   **
-   **   This module will only work if only one code generator and one
-   **   assembler format is selected.
+ **   This module builds the compiler as one large C file.   Maybe the
+ **   optimizer can do a better job in this case!
+ **
+ **   This module will only work if only one code generator and one
+ **   assembler format is selected.
  */
 
 #include "config.h"
@@ -14,7 +14,7 @@ error, define only one assembler format
 #endif /* MULTIPLE_ASSEMBLERS */
 
 #ifdef MULTIPLE_PROCESSORS
-error.define only one processor type
+           error.define only one processor type
 #endif /* MULTIPLE_PROCESSORS */
 
 #include "analyze.c"

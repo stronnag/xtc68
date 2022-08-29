@@ -13,7 +13,7 @@
 #endif
 
 char *get_binary_path(void) {
-  char *dest = calloc(1,PATH_MAX);
+  char *dest = calloc(1, PATH_MAX);
   uint32_t size;
 #if defined(__linux__)
   realpath("/proc/self/exe", dest);
@@ -26,7 +26,7 @@ char *get_binary_path(void) {
   realpath("/proc/curproc/file", dest);
 #endif
   size = strlen(dest);
-  if(size > 0) {
+  if (size > 0) {
     return dest;
   } else {
     free(dest);
@@ -36,8 +36,8 @@ char *get_binary_path(void) {
 
 #ifdef APPDIR_TEST
 int main(int argc, char **argv) {
-  char* p = get_binary_path();
-  if(p != NULL) {
+  char *p = get_binary_path();
+  if (p != NULL) {
     printf("Path = %s\n", dirname(p));
     free(p);
   }

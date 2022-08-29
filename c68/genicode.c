@@ -39,595 +39,625 @@
 
 /********************************************************* Macro Definitions */
 
-#define	INDENTATION	2	/* number of columns to indent */
+#define INDENTATION 2 /* number of columns to indent */
 
 /*********************************************** Static Function Definitions */
 
-static void type P_ ((TYP *));
-static void g_icode P_ ((EXPR *, int));
+static void type P_((TYP *));
+static void g_icode P_((EXPR *, int));
 
 /*****************************************************************************/
 
-static void type P1 (TYP *, tp)
-{
-    iprintf (" %ld ", tp->size);
-    if (is_const_qualified (tp)) {
-	iprintf ("const ");
+static void type P1(TYP *, tp) {
+  iprintf(" %ld ", tp->size);
+  if (is_const_qualified(tp)) {
+    iprintf("const ");
+  }
+  if (is_volatile_qualified(tp)) {
+    iprintf("volatile ");
+  }
+  switch (tp->type) {
+  case bt_uchar:
+    iprintf("unsigned ");
+    /*FALLTHRU */
+  case bt_char:
+  case bt_charu:
+    iprintf("char ");
+    break;
+  case bt_schar:
+    iprintf("signed char ");
+    break;
+  case bt_ushort:
+    iprintf("unsigned ");
+    /*FALLTHRU */
+  case bt_short:
+    iprintf("short ");
+    break;
+  case bt_uint16:
+  case bt_uint32:
+    iprintf("unsigned ");
+    /*FALLTHRU */
+  case bt_int16:
+  case bt_int32:
+    iprintf("int ");
+    break;
+  case bt_ulong:
+    iprintf("unsigned ");
+    /*FALLTHRU */
+  case bt_long:
+    iprintf("long ");
+    break;
+  case bt_pointer16:
+  case bt_pointer32:
+    if (is_array_type(tp)) {
+      iprintf("array of ");
+    } else {
+      iprintf("pointer to ");
     }
-    if (is_volatile_qualified (tp)) {
-	iprintf ("volatile ");
-    }
-    switch (tp->type) {
-    case bt_uchar:
-	iprintf ("unsigned ");
-	/*FALLTHRU */
-    case bt_char:
-    case bt_charu:
-	iprintf ("char ");
-	break;
-    case bt_schar:
-	iprintf ("signed char ");
-	break;
-    case bt_ushort:
-	iprintf ("unsigned ");
-	/*FALLTHRU */
-    case bt_short:
-	iprintf ("short ");
-	break;
-    case bt_uint16:
-    case bt_uint32:
-	iprintf ("unsigned ");
-	/*FALLTHRU */
-    case bt_int16:
-    case bt_int32:
-	iprintf ("int ");
-	break;
-    case bt_ulong:
-	iprintf ("unsigned ");
-	/*FALLTHRU */
-    case bt_long:
-	iprintf ("long ");
-	break;
-    case bt_pointer16:
-    case bt_pointer32:
-	if (is_array_type (tp)) {
-	    iprintf ("array of ");
-	} else {
-	    iprintf ("pointer to ");
-	}
-	type (referenced_type (tp));
-	break;
-    case bt_struct:
-	iprintf ("struct ");
-	break;
-    case bt_union:
-	iprintf ("union ");
-	break;
-    case bt_func:
-	iprintf ("function returning ");
-	type (returned_type (tp));
-	break;
-    case bt_longdouble:
-	iprintf ("long ");
-	/*FALLTHRU */
-    case bt_double:
-	iprintf ("double ");
-	break;
-    case bt_float:
-	iprintf ("float ");
-	break;
-    case bt_void:
-	iprintf ("void ");
-	break;
-    case bt_bitfield:
-	iprintf ("int (bitfield) ");
-	break;
-    case bt_ubitfield:
-	iprintf ("unsigned int (bitfield) ");
-	break;
-    case bt_ellipsis:
-	iprintf ("... ");
-	break;
-    default:
-	FATAL ((__FILE__, "type", "illegal type %d", tp->type));
-    }
+    type(referenced_type(tp));
+    break;
+  case bt_struct:
+    iprintf("struct ");
+    break;
+  case bt_union:
+    iprintf("union ");
+    break;
+  case bt_func:
+    iprintf("function returning ");
+    type(returned_type(tp));
+    break;
+  case bt_longdouble:
+    iprintf("long ");
+    /*FALLTHRU */
+  case bt_double:
+    iprintf("double ");
+    break;
+  case bt_float:
+    iprintf("float ");
+    break;
+  case bt_void:
+    iprintf("void ");
+    break;
+  case bt_bitfield:
+    iprintf("int (bitfield) ");
+    break;
+  case bt_ubitfield:
+    iprintf("unsigned int (bitfield) ");
+    break;
+  case bt_ellipsis:
+    iprintf("... ");
+    break;
+  default:
+    FATAL((__FILE__, "type", "illegal type %d", tp->type));
+  }
 }
 
 /*
  * general expression evaluation. symbolic dump.
  */
-static void g_icode P2 (EXPR *, ep, int, indent)
-{
-    int     j;
+static void g_icode P2(EXPR *, ep, int, indent) {
+  int j;
 
-    for (j = indent; j >= 0; j--)
-	iprintf (" ");
-    if (ep == NIL_EXPR) {
-	iprintf ("*NULL%s", newline);
-	return;
-    }
-    switch (ep->nodetype) {
-    case en_icon:
-	iprintf ("*icon %ld", ep->v.i);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
+  for (j = indent; j >= 0; j--)
+    iprintf(" ");
+  if (ep == NIL_EXPR) {
+    iprintf("*NULL%s", newline);
+    return;
+  }
+  switch (ep->nodetype) {
+  case en_icon:
+    iprintf("*icon %ld", ep->v.i);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
 #ifdef FLOAT_SUPPORT
-    case en_fcon:
-	iprintf ("*fcon %20.10f", ep->v.f);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
+  case en_fcon:
+    iprintf("*fcon %20.10f", ep->v.f);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
 #endif /* FLOAT_SUPPORT */
-    case en_sym:
-	iprintf ("*sym %s", nameof (ep->v.sp));
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
-    case en_labcon:
-	iprintf ("*labcon L%u", (unsigned) ep->v.l);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
-    case en_nacon:
-	iprintf ("*nacon %s", ep->v.str);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
-    case en_autocon:
-	iprintf ("*autocon %ld", ep->v.i);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
-    case en_global:
-	iprintf ("*global %s", ep->v.str);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
-    case en_ref:
-	iprintf ("*ref");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_fieldref:
-	iprintf ("*fref (%d,%d)", (int) ep->v.bit.offset, (int) ep->v.bit.width);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_register:
-	iprintf ("*register %d", (int) ep->v.r);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
-    case en_uminus:
-	iprintf ("*uminus");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_compl:
-	iprintf ("*compl");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_add:
-	iprintf ("*add");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);
-	break;
-    case en_sub:
-	iprintf ("*sub");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_and:
-	iprintf ("*and");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_or:
-	iprintf ("*or");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_xor:
-	iprintf ("*xor");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_mul:
-	iprintf ("*mul");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_div:
-	iprintf ("*div");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_mod:
-	iprintf ("*mod");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_lsh:
-	iprintf ("*lsh");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_rsh:
-	iprintf ("*rsh");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asadd:
-	iprintf ("*asadd");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_assub:
-	iprintf ("*assub");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asand:
-	iprintf ("*asand");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asor:
-	iprintf ("*asor");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asxor:
-	iprintf ("*asxor");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_aslsh:
-	iprintf ("*aslsh");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asrsh:
-	iprintf ("*asrsh");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asmul:
-	iprintf ("*asmul");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asmul2:
-	iprintf ("*asmul2");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asdiv:
-	iprintf ("*asdiv");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asdiv2:
-	iprintf ("*asdiv2");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_asmod:
-	iprintf ("*asmod");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_assign:
-	iprintf ("*assign");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_ainc:
-	iprintf ("*ainc value=%ld", ep->v.p[1]->v.i);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_adec:
-	iprintf ("*adec value=%ld", ep->v.p[1]->v.i);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_land:
-	iprintf ("*land");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_lor:
-	iprintf ("*lor");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_eq:
-	iprintf ("*eq");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_ne:
-	iprintf ("*ne");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_lt:
-	iprintf ("*lt");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_le:
-	iprintf ("*le");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_gt:
-	iprintf ("*gt");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_ge:
-	iprintf ("*ge");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_test:
-	iprintf ("*test");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_not:
-	iprintf ("*not");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_cond:
-	iprintf ("*cond");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	ep = ep->v.p[1];
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	g_icode (ep->v.p[1], indent + INDENTATION);;
-	break;
-    case en_comma:
-	iprintf ("*comma");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	if (ep->v.p[1] != NIL_EXPR) {
-	    g_icode (ep->v.p[1], indent + INDENTATION);
-	} else {
-	    iprintf ("*null");
-	}
-	break;
-    case en_fcall:
-	iprintf ("*fcall");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	if (ep->v.p[1] != NIL_EXPR) {
-	    g_icode (ep->v.p[1], indent + INDENTATION);;
-	}
-	break;
-    case en_call:
-	iprintf ("*call");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	if (ep->v.p[1] != NIL_EXPR) {
-	    g_icode (ep->v.p[1], indent + INDENTATION);;
-	}
-	break;
-    case en_cast:
-	iprintf ("*cast");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_deref:
-	iprintf ("*deref");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	break;
-    case en_list:
-	iprintf ("*list");
-	type (ep->etp);
-	iprintf ("%s", newline);
-	g_icode (ep->v.p[0], indent + INDENTATION);
-	if (ep->v.p[1] != NIL_EXPR) {
-	    g_icode (ep->v.p[1], indent + INDENTATION);;
-	}
-	break;
-    case en_size:
-	iprintf ("*size %ld", ep->v.i);
-	type (ep->etp);
-	iprintf ("%s", newline);
-	break;
-    default:
-	FATAL ((__FILE__, "g_icode", "uncoded node %d", ep->nodetype));
+  case en_sym:
+    iprintf("*sym %s", nameof(ep->v.sp));
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
+  case en_labcon:
+    iprintf("*labcon L%u", (unsigned)ep->v.l);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
+  case en_nacon:
+    iprintf("*nacon %s", ep->v.str);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
+  case en_autocon:
+    iprintf("*autocon %ld", ep->v.i);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
+  case en_global:
+    iprintf("*global %s", ep->v.str);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
+  case en_ref:
+    iprintf("*ref");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_fieldref:
+    iprintf("*fref (%d,%d)", (int)ep->v.bit.offset, (int)ep->v.bit.width);
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_register:
+    iprintf("*register %d", (int)ep->v.r);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
+  case en_uminus:
+    iprintf("*uminus");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_compl:
+    iprintf("*compl");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_add:
+    iprintf("*add");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    break;
+  case en_sub:
+    iprintf("*sub");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_and:
+    iprintf("*and");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_or:
+    iprintf("*or");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_xor:
+    iprintf("*xor");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_mul:
+    iprintf("*mul");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_div:
+    iprintf("*div");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_mod:
+    iprintf("*mod");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_lsh:
+    iprintf("*lsh");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_rsh:
+    iprintf("*rsh");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asadd:
+    iprintf("*asadd");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_assub:
+    iprintf("*assub");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asand:
+    iprintf("*asand");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asor:
+    iprintf("*asor");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asxor:
+    iprintf("*asxor");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_aslsh:
+    iprintf("*aslsh");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asrsh:
+    iprintf("*asrsh");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asmul:
+    iprintf("*asmul");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asmul2:
+    iprintf("*asmul2");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asdiv:
+    iprintf("*asdiv");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asdiv2:
+    iprintf("*asdiv2");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_asmod:
+    iprintf("*asmod");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_assign:
+    iprintf("*assign");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_ainc:
+    iprintf("*ainc value=%ld", ep->v.p[1]->v.i);
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_adec:
+    iprintf("*adec value=%ld", ep->v.p[1]->v.i);
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_land:
+    iprintf("*land");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_lor:
+    iprintf("*lor");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_eq:
+    iprintf("*eq");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_ne:
+    iprintf("*ne");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_lt:
+    iprintf("*lt");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_le:
+    iprintf("*le");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_gt:
+    iprintf("*gt");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_ge:
+    iprintf("*ge");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_test:
+    iprintf("*test");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_not:
+    iprintf("*not");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_cond:
+    iprintf("*cond");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    ep = ep->v.p[1];
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    g_icode(ep->v.p[1], indent + INDENTATION);
+    ;
+    break;
+  case en_comma:
+    iprintf("*comma");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    if (ep->v.p[1] != NIL_EXPR) {
+      g_icode(ep->v.p[1], indent + INDENTATION);
+    } else {
+      iprintf("*null");
     }
+    break;
+  case en_fcall:
+    iprintf("*fcall");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    if (ep->v.p[1] != NIL_EXPR) {
+      g_icode(ep->v.p[1], indent + INDENTATION);
+      ;
+    }
+    break;
+  case en_call:
+    iprintf("*call");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    if (ep->v.p[1] != NIL_EXPR) {
+      g_icode(ep->v.p[1], indent + INDENTATION);
+      ;
+    }
+    break;
+  case en_cast:
+    iprintf("*cast");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_deref:
+    iprintf("*deref");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    break;
+  case en_list:
+    iprintf("*list");
+    type(ep->etp);
+    iprintf("%s", newline);
+    g_icode(ep->v.p[0], indent + INDENTATION);
+    if (ep->v.p[1] != NIL_EXPR) {
+      g_icode(ep->v.p[1], indent + INDENTATION);
+      ;
+    }
+    break;
+  case en_size:
+    iprintf("*size %ld", ep->v.i);
+    type(ep->etp);
+    iprintf("%s", newline);
+    break;
+  default:
+    FATAL((__FILE__, "g_icode", "uncoded node %d", ep->nodetype));
+  }
 }
 
-void genicse P1 (CSE *, olist)
-{
-    CSE    *csp;
-    EXPR   *ep;
+void genicse P1(CSE *, olist) {
+  CSE *csp;
+  EXPR *ep;
 
-    for (csp = olist; csp != NIL_CSE; csp = csp->next) {
-	ep = csp->exp;
+  for (csp = olist; csp != NIL_CSE; csp = csp->next) {
+    ep = csp->exp;
 #ifdef DEBUG
-	if (is_debugging (DEBUG_GLOBAL)) {
-	    iprintf ("%d:%s", (int) desire (csp), newline);
-	    g_icode (ep, INDENTATION);
-	}
-#endif
-	if (csp->reg != NO_REG) {	/* see if preload needed */
-	    iprintf ("register %d:%s", (int) csp->reg, newline);
-	    if (!is_lvalue (ep) || (ep->v.p[0]->v.i > 0L)) {
-		g_icode (ep, INDENTATION);
-	    }
-	}
+    if (is_debugging(DEBUG_GLOBAL)) {
+      iprintf("%d:%s", (int)desire(csp), newline);
+      g_icode(ep, INDENTATION);
     }
+#endif
+    if (csp->reg != NO_REG) { /* see if preload needed */
+      iprintf("register %d:%s", (int)csp->reg, newline);
+      if (!is_lvalue(ep) || (ep->v.p[0]->v.i > 0L)) {
+        g_icode(ep, INDENTATION);
+      }
+    }
+  }
 }
 
-void genicode P2 (STMT *, stmt, int, indent)
-{
-    int     j;
+void genicode P2(STMT *, stmt, int, indent) {
+  int j;
 
-    for (; stmt != NIL_STMT; stmt = stmt->next) {
-	for (j = indent; j >= 0; j--)
-	    iprintf (" ");
+  for (; stmt != NIL_STMT; stmt = stmt->next) {
+    for (j = indent; j >= 0; j--)
+      iprintf(" ");
 #ifdef DEBUGOPT
-	iprintf ("line %d: ", stmt->line);
+    iprintf("line %d: ", stmt->line);
 #endif /*DEBUGOPT */
-	switch (stmt->stype) {
-	case st_label:
-	    iprintf ("L%u:%s", (unsigned int) stmt->v2.l, newline);
-	    genicode (stmt->v1.s, indent);
-	    break;
-	case st_goto:
-	    iprintf ("$goto\tL%u%s", (unsigned int) stmt->v2.l, newline);
-	    break;
-	case st_expr:
-	    iprintf ("$expression%s", newline);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    break;
-	case st_return:
-	    iprintf ("$return%s", newline);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    break;
-	case st_if:
-	    iprintf ("$if%s", newline);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    genicode (stmt->s1, indent + INDENTATION);
-	    if (stmt->v1.s != NIL_STMT) {
-		genicode (stmt->v1.s, indent + INDENTATION);
-	    }
-	    break;
-	case st_while:
-	    iprintf ("$while%s", newline);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    genicode (stmt->s1, indent + INDENTATION);
-	    break;
-	case st_do:
-	    iprintf ("$do%s", newline);
-	    genicode (stmt->s1, indent + INDENTATION);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    break;
-	case st_for:
-	    iprintf ("$for%s", newline);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    g_icode (stmt->v1.e, indent + INDENTATION);
-	    g_icode (stmt->v2.e, indent + INDENTATION);
-	    genicode (stmt->s1, indent + INDENTATION);
-	    break;
-	case st_continue:
-	    iprintf ("$continue%s", newline);
-	    break;
-	case st_break:
-	    iprintf ("$break%s", newline);
-	    break;
-	case st_switch:
-	    iprintf ("$switch%s", newline);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    genicode (stmt->v1.s, indent + INDENTATION);
-	    break;
-	case st_compound:
-	    iprintf ("$compound%s", newline);
-	    genicode (stmt->s1, indent + INDENTATION);
-	    break;
-	case st_case:
-	    iprintf ("$case %ld:5%s", stmt->v2.i, newline);
-	    genicode (stmt->v1.s, indent + INDENTATION);
-	    break;
-	case st_default:
-	    iprintf ("$default:5%s", newline);
-	    genicode (stmt->v1.s, indent + INDENTATION);
-	    break;
+    switch (stmt->stype) {
+    case st_label:
+      iprintf("L%u:%s", (unsigned int)stmt->v2.l, newline);
+      genicode(stmt->v1.s, indent);
+      break;
+    case st_goto:
+      iprintf("$goto\tL%u%s", (unsigned int)stmt->v2.l, newline);
+      break;
+    case st_expr:
+      iprintf("$expression%s", newline);
+      g_icode(stmt->exp, indent + INDENTATION);
+      break;
+    case st_return:
+      iprintf("$return%s", newline);
+      g_icode(stmt->exp, indent + INDENTATION);
+      break;
+    case st_if:
+      iprintf("$if%s", newline);
+      g_icode(stmt->exp, indent + INDENTATION);
+      genicode(stmt->s1, indent + INDENTATION);
+      if (stmt->v1.s != NIL_STMT) {
+        genicode(stmt->v1.s, indent + INDENTATION);
+      }
+      break;
+    case st_while:
+      iprintf("$while%s", newline);
+      g_icode(stmt->exp, indent + INDENTATION);
+      genicode(stmt->s1, indent + INDENTATION);
+      break;
+    case st_do:
+      iprintf("$do%s", newline);
+      genicode(stmt->s1, indent + INDENTATION);
+      g_icode(stmt->exp, indent + INDENTATION);
+      break;
+    case st_for:
+      iprintf("$for%s", newline);
+      g_icode(stmt->exp, indent + INDENTATION);
+      g_icode(stmt->v1.e, indent + INDENTATION);
+      g_icode(stmt->v2.e, indent + INDENTATION);
+      genicode(stmt->s1, indent + INDENTATION);
+      break;
+    case st_continue:
+      iprintf("$continue%s", newline);
+      break;
+    case st_break:
+      iprintf("$break%s", newline);
+      break;
+    case st_switch:
+      iprintf("$switch%s", newline);
+      g_icode(stmt->exp, indent + INDENTATION);
+      genicode(stmt->v1.s, indent + INDENTATION);
+      break;
+    case st_compound:
+      iprintf("$compound%s", newline);
+      genicode(stmt->s1, indent + INDENTATION);
+      break;
+    case st_case:
+      iprintf("$case %ld:5%s", stmt->v2.i, newline);
+      genicode(stmt->v1.s, indent + INDENTATION);
+      break;
+    case st_default:
+      iprintf("$default:5%s", newline);
+      genicode(stmt->v1.s, indent + INDENTATION);
+      break;
 #ifdef ASM
-	case st_asm:
-	    iprintf ("$asm:%s", newline);
-	    g_icode (stmt->exp, indent + INDENTATION);
-	    break;
+    case st_asm:
+      iprintf("$asm:%s", newline);
+      g_icode(stmt->exp, indent + INDENTATION);
+      break;
 #endif /* ASM */
-	default:
-	    FATAL ((__FILE__, "genicode", "uncoded statement %d", stmt->stype));
-	}
+    default:
+      FATAL((__FILE__, "genicode", "uncoded statement %d", stmt->stype));
     }
+  }
 }
 #endif /* ICODE */

@@ -12,25 +12,25 @@
  */
 
 struct reserved {
-	char *name;
-	int token;
-	int value;
+  char *name;
+  int token;
+  int value;
 };
 
 struct lexacts {
-	unsigned acts;
-	int retval;
+  unsigned acts;
+  int retval;
 };
 
 struct lextab {
-	int select;
-	struct lexacts action;
+  int select;
+  struct lexacts action;
 };
 
 /*
  * Types of actions
  */
-#define L_SKIP  0x0
+#define L_SKIP 0x0
 #define L_TOKEN 0x01
 #define L_EXTRA 0x02
 #define L_BEGID 0x04

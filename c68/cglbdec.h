@@ -23,214 +23,214 @@
  */
 
 #ifndef _CGLBDEC_H
-#define	_CGLBDEC_H
+#define _CGLBDEC_H
 
-extern FHANDLE input;		/* input source file */
-extern FHANDLE output;		/* output assembler file */
-extern FHANDLE errfile;		/* error listing file */
+extern FHANDLE input;   /* input source file */
+extern FHANDLE output;  /* output assembler file */
+extern FHANDLE errfile; /* error listing file */
 
 #ifdef LIST
-extern FHANDLE listfile;	/* source listing file */
+extern FHANDLE listfile; /* source listing file */
 
 #endif /* LIST */
 #ifdef DEBUG
-extern FHANDLE debugfile;	/* output file for internal debugging */
+extern FHANDLE debugfile; /* output file for internal debugging */
 
-#endif /* DEBUG */
-extern LINE act_line;		/* current line number being processed */
-extern const CHAR *act_linetxt;	/* text of the current line */
-extern const CHAR *act_file;	/* current source file being processed */
-extern const CHAR *in_file;	/* initial source file being processed */
-extern LABEL nextlabel;		/* next internally generated label */
-extern const char *newline;	/* character(s) to use for a newline */
+#endif                          /* DEBUG */
+extern LINE act_line;           /* current line number being processed */
+extern const CHAR *act_linetxt; /* text of the current line */
+extern const CHAR *act_file;    /* current source file being processed */
+extern const CHAR *in_file;     /* initial source file being processed */
+extern LABEL nextlabel;         /* next internally generated label */
+extern const char *newline;     /* character(s) to use for a newline */
 
 /*
  * scanner values
  */
-extern TOKEN lastst;		/* last symbol token read by the scanner */
-extern const CHAR *lastsym;	/* pointer to the last symbol */
-extern size_t lastsymlen;	/* length of the value in laststr */
-extern UVAL ival;		/* integral value */
+extern TOKEN lastst;        /* last symbol token read by the scanner */
+extern const CHAR *lastsym; /* pointer to the last symbol */
+extern size_t lastsymlen;   /* length of the value in laststr */
+extern UVAL ival;           /* integral value */
 
 #ifdef FLOAT_SUPPORT
-extern RVAL rval;		/* floating point value */
+extern RVAL rval; /* floating point value */
 
 #endif /* FLOAT_SUPPORT */
 
-extern const char *msgtable[];	/* table of messages output */
+extern const char *msgtable[]; /* table of messages output */
 
 /*
  * stack frame values
  */
-extern SIZE lc_auto;		/* the current size of the stack frame */
-extern SIZE lc_auto_max;	/* the maximum size that the stack frame has grown */
+extern SIZE lc_auto;     /* the current size of the stack frame */
+extern SIZE lc_auto_max; /* the maximum size that the stack frame has grown */
 
-extern SIZE bits_in_sizeunit;	/* number of bits which make a generic object */
+extern SIZE bits_in_sizeunit; /* number of bits which make a generic object */
 
-extern int global_flag;		/* allocate memory for "permanent use */
-extern int error_resync;	/* prevent error message cascade */
-extern int total_errors;	/* number of errors currently encountered */
+extern int global_flag;  /* allocate memory for "permanent use */
+extern int error_resync; /* prevent error message cascade */
+extern int total_errors; /* number of errors currently encountered */
 
 /*
  * compiler options
  */
-extern BOOL align_option;	/* align structure fields to smallest alignment */
+extern BOOL align_option; /* align structure fields to smallest alignment */
 
 #ifdef ASM
-extern BOOL asm_option;		/* asm keyword allowed */
+extern BOOL asm_option; /* asm keyword allowed */
 
-#endif /* ASM */
-extern BOOL bitfield_option;	/* reverse allocation order of bitfields */
-extern BOOL code_option;	/* generate code */
-extern int datamodel_option;	/* method of referencing global data */
+#endif                       /* ASM */
+extern BOOL bitfield_option; /* reverse allocation order of bitfields */
+extern BOOL code_option;     /* generate code */
+extern int datamodel_option; /* method of referencing global data */
 
 #ifdef DEBUGOPT
-extern BOOL debug_option;	/* generate debugging information */
+extern BOOL debug_option; /* generate debugging information */
 
 #endif /*DEBUGOPT */
 #ifdef EXTENSION
-extern BOOL extension_option;	/* extenions to ANSI C enabled */
+extern BOOL extension_option; /* extenions to ANSI C enabled */
 
 #endif /* EXTENSION */
 #ifdef EXTERNAL
-extern BOOL extern_option;	/* generate extern definitions for all globals */
+extern BOOL extern_option; /* generate extern definitions for all globals */
 
 #endif /* EXTERNAL */
 #ifdef FLOAT_CHECK
-extern BOOL fcheck_option;	/* warn about floating point operations */
+extern BOOL fcheck_option; /* warn about floating point operations */
 
 #endif /* FLOAT_CHECK */
 #ifdef DEBUG
-extern int internal_option;	/* controls internal debugging options */
+extern int internal_option; /* controls internal debugging options */
 
-#endif /* DEBUG */
-extern BOOL lattice_option;	/* allow Lattice stype stdarg definitions */
-extern BOOL IandD_option;	/* separate Instruction and Data segments */
+#endif                      /* DEBUG */
+extern BOOL lattice_option; /* allow Lattice stype stdarg definitions */
+extern BOOL IandD_option;   /* separate Instruction and Data segments */
 
 #ifdef LIST
-extern BOOL listing_option;	/* list the input source and symbol tables */
+extern BOOL listing_option; /* list the input source and symbol tables */
 
-#endif /* LIST */
-extern BOOL longdouble_option;	/* long doubles are to be the same size as doubles */
-extern BOOL obsolete_option;	/* future language directions defined obsolete feature */
-extern BOOL opt_option;		/* use the global optimiser */
-extern BOOL optimize_option;	/* do "expensive" optimisations */
+#endif                         /* LIST */
+extern BOOL longdouble_option; /* long doubles are to be the same size as doubles */
+extern BOOL obsolete_option;   /* future language directions defined obsolete feature */
+extern BOOL opt_option;        /* use the global optimiser */
+extern BOOL optimize_option;   /* do "expensive" optimisations */
 
 #ifdef PACKENUM
-extern BOOL packenum_option;	/* enumerations are smallest integer type to hold values */
+extern BOOL packenum_option; /* enumerations are smallest integer type to hold values */
 
-#endif /* PACKENUM */
-extern BOOL reg_option;		/* honour the "register" storage */
-extern BOOL short_option;	/* integers are to be the same size as shorts */
-extern BOOL small_option;	/* small model (8086) */
+#endif                    /* PACKENUM */
+extern BOOL reg_option;   /* honour the "register" storage */
+extern BOOL short_option; /* integers are to be the same size as shorts */
+extern BOOL small_option; /* small model (8086) */
 
 #ifdef TOPSPEED
-extern BOOL topspeed_option;	/* Enable TopSpeed extensions */
+extern BOOL topspeed_option; /* Enable TopSpeed extensions */
 
-#endif /* TOPSPEED */
-extern BOOL trad_option;	/* accept only K&R plus a few extras */
+#endif                   /* TOPSPEED */
+extern BOOL trad_option; /* accept only K&R plus a few extras */
 
 #ifdef TRANSLATE
-extern BOOL trans_option;	/* convert identifier > 8 character in output file */
+extern BOOL trans_option; /* convert identifier > 8 character in output file */
 
-#endif /* TRANSLATE */
-extern BOOL uchar_option;	/* char type to be unsigned */
-extern BOOL verbose_option;	/* output extra statistics */
-extern int error_option;	/* the current error message level */
-extern int warn_option;		/* the current warning message level */
-extern BOOL fpu_option;		/* generate code which contains floating point instructions */
-extern BOOL fpu_return_option;	/* return FP value in FP register */
+#endif                         /* TRANSLATE */
+extern BOOL uchar_option;      /* char type to be unsigned */
+extern BOOL verbose_option;    /* output extra statistics */
+extern int error_option;       /* the current error message level */
+extern int warn_option;        /* the current warning message level */
+extern BOOL fpu_option;        /* generate code which contains floating point instructions */
+extern BOOL fpu_return_option; /* return FP value in FP register */
 
 #ifdef ICODE
-extern BOOL icode_option;	/* generate an icode file */
+extern BOOL icode_option; /* generate an icode file */
 
 #endif /* ICODE */
 #ifdef PROBES
-extern BOOL probe_option;	/* generate stack probes on function entry */
+extern BOOL probe_option; /* generate stack probes on function entry */
 
 #endif /* PROBE */
 #ifdef FORMAT_CHECK
-extern BOOL format_option;	/* check fprintf and fscanf format strings */
+extern BOOL format_option; /* check fprintf and fscanf format strings */
 
 #endif /* FORMAT_CHECK */
 #ifdef STACK_CHECK
-extern BOOL stackcheck_option;	/* check stack with run-time routine */
+extern BOOL stackcheck_option; /* check stack with run-time routine */
 
 #endif /* STACK_CHECK */
 #ifdef TRACE
-extern BOOL trace_option;	/* generate trace code */
+extern BOOL trace_option; /* generate trace code */
 
-#endif /* TRACE */
-extern int max_error_count;	/* maximum number of errors before stopping */
+#endif                      /* TRACE */
+extern int max_error_count; /* maximum number of errors before stopping */
 
-extern TYP *ret_type;		/* function return type */
-extern EXPR *init_node;		/* initialisations in compound statement */
+extern TYP *ret_type;   /* function return type */
+extern EXPR *init_node; /* initialisations in compound statement */
 
 #ifdef VERBOSE
 /*
  * statistics collected during the verbose mode
  */
-extern clock_t decl_time;	/* time spent parsing the declarations */
-extern clock_t parse_time;	/* time spend parsing the statements/expressions */
-extern clock_t opt_time;	/* time spend in the optimisers */
-extern clock_t gen_time;	/* time spend in the code generator */
+extern clock_t decl_time;  /* time spent parsing the declarations */
+extern clock_t parse_time; /* time spend parsing the statements/expressions */
+extern clock_t opt_time;   /* time spend in the optimisers */
+extern clock_t gen_time;   /* time spend in the code generator */
 
 #endif /* VERBOSE */
 
-extern BLOCK init_block;	/* empty block table */
-extern BOOL errorloop;		/* prevents recursion during error recovery */
+extern BLOCK init_block; /* empty block table */
+extern BOOL errorloop;   /* prevents recursion during error recovery */
 
 /*
  * the basic types
  */
-extern TYP *tp_void;		/* void type */
-extern TYP *tp_char;		/* char type */
-extern TYP *tp_uchar;		/* unsigned char type */
-extern TYP *tp_schar;		/* signed char type */
-extern TYP *tp_int;		/* int type */
-extern TYP *tp_uint;		/* unsigned int type */
-extern TYP *tp_short;		/* short type */
-extern TYP *tp_ushort;		/* unsigned short type */
-extern TYP *tp_long;		/* long type */
-extern TYP *tp_ulong;		/* unsigned long type */
-extern TYP *tp_pointer;		/* pointer type */
-extern TYP *tp_array;		/* array type */
-extern TYP *tp_float;		/* float type */
-extern TYP *tp_double;		/* double type */
-extern TYP *tp_longdouble;	/* long double type */
-extern TYP *tp_enum;		/* enum type */
-extern TYP *tp_struct;		/* struct type */
-extern TYP *tp_union;		/* union type */
-extern TYP *tp_ellipsis;	/* ellipsis type */
-extern TYP *tp_func;		/* function type */
-extern TYP *tp_string;		/* pointer to char type */
-extern TYP *tp_wstring;		/* pointer to wchar_t type */
+extern TYP *tp_void;       /* void type */
+extern TYP *tp_char;       /* char type */
+extern TYP *tp_uchar;      /* unsigned char type */
+extern TYP *tp_schar;      /* signed char type */
+extern TYP *tp_int;        /* int type */
+extern TYP *tp_uint;       /* unsigned int type */
+extern TYP *tp_short;      /* short type */
+extern TYP *tp_ushort;     /* unsigned short type */
+extern TYP *tp_long;       /* long type */
+extern TYP *tp_ulong;      /* unsigned long type */
+extern TYP *tp_pointer;    /* pointer type */
+extern TYP *tp_array;      /* array type */
+extern TYP *tp_float;      /* float type */
+extern TYP *tp_double;     /* double type */
+extern TYP *tp_longdouble; /* long double type */
+extern TYP *tp_enum;       /* enum type */
+extern TYP *tp_struct;     /* struct type */
+extern TYP *tp_union;      /* union type */
+extern TYP *tp_ellipsis;   /* ellipsis type */
+extern TYP *tp_func;       /* function type */
+extern TYP *tp_string;     /* pointer to char type */
+extern TYP *tp_wstring;    /* pointer to wchar_t type */
 
 /*
  * defined types
  */
-extern TYP *tp_wchar;		/* wchar_t type */
-extern TYP *tp_size;		/* size_t type */
-extern TYP *tp_ptrdiff;		/* ptrdiff_t type */
+extern TYP *tp_wchar;   /* wchar_t type */
+extern TYP *tp_size;    /* size_t type */
+extern TYP *tp_ptrdiff; /* ptrdiff_t type */
 
 /*
  * names used in the parser and code generators
  */
-extern const CHAR *alloca_name;	/* pointer to the name alloca */
-extern const CHAR *printf_name;	/* pointer to the name printf */
-extern const CHAR *fprintf_name;	/* pointer to the name fprintf */
-extern const CHAR *sprintf_name;	/* pointer to the name sprintf */
-extern const CHAR *scanf_name;	/* pointer to the name scanf */
-extern const CHAR *fscanf_name;	/* pointer to the name fscanf */
-extern const CHAR *sscanf_name;	/* pointer to the name sscanf */
+extern const CHAR *alloca_name;  /* pointer to the name alloca */
+extern const CHAR *printf_name;  /* pointer to the name printf */
+extern const CHAR *fprintf_name; /* pointer to the name fprintf */
+extern const CHAR *sprintf_name; /* pointer to the name sprintf */
+extern const CHAR *scanf_name;   /* pointer to the name scanf */
+extern const CHAR *fscanf_name;  /* pointer to the name fscanf */
+extern const CHAR *sscanf_name;  /* pointer to the name sscanf */
 
-extern struct slit *strtab;	/* table of strings to be output to the assembler file */
-extern BOOL uses_structassign;	/* function uses a structure assignment */
-extern BOOL is_leaf_function;	/* function doesn't call any other function */
-extern BOOL is_parameter;	/* controls whether stack optimisation is allowed */
+extern struct slit *strtab;    /* table of strings to be output to the assembler file */
+extern BOOL uses_structassign; /* function uses a structure assignment */
+extern BOOL is_leaf_function;  /* function doesn't call any other function */
+extern BOOL is_parameter;      /* controls whether stack optimisation is allowed */
 
 #ifdef MC680X0
-extern BOOL volatile_found;	/* the volatile keyword has been found */
+extern BOOL volatile_found; /* the volatile keyword has been found */
 
 #endif /* MC680X0 */
 
@@ -238,11 +238,11 @@ extern BOOL volatile_found;	/* the volatile keyword has been found */
 /*
  * floating point constants used within the compiler
  */
-extern RVAL F_zero;		/* contains the value  0.0 */
-extern RVAL F_one;		/* contains the value  1.0 */
-extern RVAL F_two;		/* contains the value  2.0 */
-extern RVAL F_ten;		/* contains the value 10.0 */
-extern RVAL F_half;		/* contains the value  0.5 */
+extern RVAL F_zero; /* contains the value  0.0 */
+extern RVAL F_one;  /* contains the value  1.0 */
+extern RVAL F_two;  /* contains the value  2.0 */
+extern RVAL F_ten;  /* contains the value 10.0 */
+extern RVAL F_half; /* contains the value  0.5 */
 
 #endif /* FLOAT_SUPPORT */
 
@@ -300,7 +300,7 @@ extern struct genfuncs mcc30_funcs;
 
 #endif /* TMS320C30 */
 #else
-extern SIZE *g_alignments;	/* code generator alignment table */
+extern SIZE *g_alignments; /* code generator alignment table */
 
 #endif /* MULTIPLE_PROCESSORS */
 
@@ -368,11 +368,11 @@ extern struct funcs rosc30_funcs;
 
 #endif /* MULTIPLE_ASSEMBLERS */
 
-extern const CHAR *external_prefix;	/* prefix for external/global symbols */
-extern SWITCH *swtables;	/* switch jump tables to be output to the assembler file */
-extern SIZE stack_offset;	/* the number of bytes to remove from the stack */
-extern SIZE max_scratch;	/* the maxmimum number of bytes allocated to temporary variables */
-extern SIZE act_scratch;	/* the current number of bytes allocated to temporary variables */
+extern const CHAR *external_prefix; /* prefix for external/global symbols */
+extern SWITCH *swtables;            /* switch jump tables to be output to the assembler file */
+extern SIZE stack_offset;           /* the number of bytes to remove from the stack */
+extern SIZE max_scratch;            /* the maxmimum number of bytes allocated to temporary variables */
+extern SIZE act_scratch;            /* the current number of bytes allocated to temporary variables */
 
 #endif /* CPU_DEFINED */
 

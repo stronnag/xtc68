@@ -12,13 +12,13 @@
  */
 
 typedef union {
-	long val;
-	char *str;
-	LIST *list;
-	STMT *stmt;
-	SYM  *sym;
-	EXPR  expr;
-	OPERAND *op;
+  long val;
+  char *str;
+  LIST *list;
+  STMT *stmt;
+  SYM *sym;
+  EXPR expr;
+  OPERAND *op;
 } YYSTYPE;
 
 extern YYSTYPE yylval;
@@ -63,7 +63,7 @@ extern YYSTYPE yylval;
 #define SREG 294
 
 #ifdef MINIX
-#	define _ASCII 295
-#	define _SECT  296
-#	define _ALIGN 297
+#define _ASCII 295
+#define _SECT 296
+#define _ALIGN 297
 #endif

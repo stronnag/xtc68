@@ -6,7 +6,7 @@
  */
 
 #ifndef _CHECK_H
-#define	_CHECK_H
+#define _CHECK_H
 
 #ifdef CPU_DEFINED
 #undef CPU_DEFINED
@@ -19,72 +19,71 @@
 #ifdef MC68K
 #define MC680X0
 #ifdef CPU_DEFINED
-#define	MULTIPLE_PROCESSORS
+#define MULTIPLE_PROCESSORS
 #endif /* CPU_DEFINED */
 #define CPU_DEFINED
 #endif /* MC68K */
 
 #ifdef MC680X0
-#define PROGNAME   "c68"
-#define ENVNAME	   "C68"
+#define PROGNAME "c68"
+#define ENVNAME "C68"
 #endif /* MC680X0 */
 
-
-#ifdef  INTEL_486
+#ifdef INTEL_486
 #ifndef INTEL_386
 #define INTEL_386
 #endif /* INTEL_386 */
 #endif /* INTEL_486 */
 
 #ifdef INTEL_386
-#define	INTEL
+#define INTEL
 #ifdef CPU_DEFINED
-#define	MULTIPLE_PROCESSORS
+#define MULTIPLE_PROCESSORS
 #endif /* CPU_DEFINED */
 #define CPU_DEFINED
 #ifndef PROGNAME
-#define PROGNAME   "c386"
-#define	ENVNAME	   "C386"
+#define PROGNAME "c386"
+#define ENVNAME "C386"
 #endif /* PROGNAME */
 #endif /* INTEL_386 */
 
 #ifdef INTEL_86
-#define	INTEL
+#define INTEL
 #ifdef CPU_DEFINED
-#define	MULTIPLE_PROCESSORS
+#define MULTIPLE_PROCESSORS
 #endif /* CPU_DEFINED */
 #define CPU_DEFINED
 #ifndef PROGNAME
-#define PROGNAME   "c86"
-#define	ENVNAME	   "C86"
+#define PROGNAME "c86"
+#define ENVNAME "C86"
 #endif /* PROGNAME */
 #endif /* INTEL_86 */
 
 #ifdef ARM
 #ifdef CPU_DEFINED
-#define	MULTIPLE_PROCESSORS
+#define MULTIPLE_PROCESSORS
 #endif /* CPU_DEFINED */
 #define CPU_DEFINED
 #ifndef PROGNAME
 #define PROGNAME "carm"
-#define	ENVNAME	 "CARM"
+#define ENVNAME "CARM"
 #endif /* PROGNAME */
 #endif /* ARM */
 
 #ifdef TMS320C30
 #ifdef CPU_DEFINED
-#define	MULTIPLE_PROCESSORS
+#define MULTIPLE_PROCESSORS
 #endif /* CPU_DEFINED */
 #define CPU_DEFINED
 #ifndef PROGNAME
-#define	PROGNAME "cc30"
-#define	ENVNAME  "C30"
+#define PROGNAME "cc30"
+#define ENVNAME "C30"
 #endif /* PROGNAME */
 #endif /* TMS320C30 */
 
 #ifndef CPU_DEFINED
-#define	PROGNAME "cc"
-#undef	ICODE
+#define PROGNAME "cc"
+#undef ICODE
 #endif /* CPU_DEFINED */
 
 /*****************************************************************************/
@@ -121,8 +120,8 @@ error, define only one Floating Point format
 
 #ifndef CPU_DEFINED
 /* if no CPU has been defined then we are not interested in FP code */
-#undef	FLOAT_IEEE
-#undef	FLOAT_MFFP
+#undef FLOAT_IEEE
+#undef FLOAT_MFFP
 #endif /* CPU_DEFINED */
 
 /*****************************************************************************/
@@ -164,18 +163,18 @@ error, A TI TMS320C30 processor has not been configured to be build
 
 #ifndef PROCESSOR_DEFINED
 #ifdef MC680X0
-#define	MC68K_DEFAULT
+#define MC68K_DEFAULT
 #else
 #ifdef INTEL_86
-#define	INTEL_86_DEFAULT
+#define INTEL_86_DEFAULT
 #else
 #ifdef INTEL_386
-#define	INTEL_386_DEFAULT
+#define INTEL_386_DEFAULT
 #else
 #ifdef ARM
-#define	ARM_DEFAULT
+#define ARM_DEFAULT
 #ifdef TMS320C30
-#define	TMS320C30
+#define TMS320C30
 #endif /* TMS320C30_DEFAULT */
 #endif /* ARM_DEFAULT */
 #endif /* INTEL_386_DEFAULT */
@@ -185,29 +184,29 @@ error, A TI TMS320C30 processor has not been configured to be build
 
 /*****************************************************************************/
 
-#ifdef	TARGET_ACK_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_ACK_DEFAULT
+#define TARGET_DEFINED
 #ifndef MC680X0
 error, Requires a 68000 code generator to be selected
 #endif /* MC680X0 */
 #endif /* TARGET_ACK_DEFAUL T */
 
-#ifdef	TARGET_CPM_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_CPM_DEFAULT
+#define TARGET_DEFINED
 #ifndef MC680X0
 error, Requires a 68000 code generator to be selected
 #endif /* MC680X0 */
 #endif /* TARGET_CPM_DEFAULT */
 
-#ifdef	TARGET_QMAC_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_QMAC_DEFAULT
+#define TARGET_DEFINED
 #ifndef MC680X0
 error, Requires a 68000 code generator to be selected
 #endif /* MC680X0 */
 #endif /* TARGET_QMAC_DEFAULT */
 
-#ifdef	TARGET_GAS_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_GAS_DEFAULT
+#define TARGET_DEFINED
 #ifndef MC680X0
 #ifndef INTEL
 error, Requires a 68000 or Intel 80 X86 code generator to be selected
@@ -215,50 +214,50 @@ error, Requires a 68000 or Intel 80 X86 code generator to be selected
 #endif /* MC680X0 */
 #endif /* TARGET_GAS_DEFAULT */
 
-#ifdef	TARGET_SUN_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_SUN_DEFAULT
+#define TARGET_DEFINED
 #ifndef INTEL
 error, Requires an Intel 80 X86 code generator to be selected
 #endif /* INTEL */
 #endif /* TARGET_SUN_DEFAULT */
 
-#ifdef	TARGET_BAS_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_BAS_DEFAULT
+#define TARGET_DEFINED
 #ifndef INTEL
 error, Requires an Intel 80 X86 code generator to be selected
 #endif /* INTEL */
 #endif /* TARGET_BAS_DEFAULT */
 
-#ifdef	TARGET_SYSV_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_SYSV_DEFAULT
+#define TARGET_DEFINED
 #ifndef INTEL
 error, Requires an Intel 80 X86 code generator to be selected
 #endif /* INTEL */
 #endif /* TARGET_SYSV_DEFAULT */
 
-#ifdef	TARGET_MASM_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_MASM_DEFAULT
+#define TARGET_DEFINED
 #ifndef INTEL
 error, Requires an Intel 80 X86 code generator to be selected
 #endif /* INTEL */
 #endif /* TARGET_MASM_DEFAULT */
 
-#ifdef	TARGET_NASM_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_NASM_DEFAULT
+#define TARGET_DEFINED
 #ifndef INTEL
 error, Requires an Intel 80 X86 code generator to be selected
 #endif /* INTEL */
 #endif /* TARGET_NASM_DEFAULT */
 
-#ifdef	TARGET_OBJ_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_OBJ_DEFAULT
+#define TARGET_DEFINED
 #ifndef ARM
 error, Requires an ARM code generator to be selected
 #endif /* ARM */
 #endif /* TARGET_OBJ_DEFAULT */
 
-#ifdef	TARGET_ROSSIN_DEFAULT
-#define	TARGET_DEFINED
+#ifdef TARGET_ROSSIN_DEFAULT
+#define TARGET_DEFINED
 #ifndef TMS320C30
 error, Requires a TI TMS320C30 code generator to be selected
 #endif /* TMS320C30 */
@@ -266,34 +265,34 @@ error, Requires a TI TMS320C30 code generator to be selected
 
 #ifndef TARGET_DEFINED
 #ifdef TARGET_ACK
-#define	TARGET_ACK_DEFAULT
+#define TARGET_ACK_DEFAULT
 #else
 #ifdef TARGET_CPM
-#define	TARGET_CPM_DEFAULT
+#define TARGET_CPM_DEFAULT
 #else
 #ifdef TARGET_QMAC
-#define	TARGET_QMAC_DEFAULT
+#define TARGET_QMAC_DEFAULT
 #else
 #ifdef TARGET_GAS
-#define	TARGET_GAS_DEFAULT
+#define TARGET_GAS_DEFAULT
 #else
 #ifdef TARGET_BAS
-#define	TARGET_BAS_DEFAULT
+#define TARGET_BAS_DEFAULT
 #else
 #ifdef TARGET_SYSV
-#define	TARGET_SYSV_DEFAULT
+#define TARGET_SYSV_DEFAULT
 #else
 #ifdef TARGET_MASM
-#define	TARGET_MASM_DEFAULT
+#define TARGET_MASM_DEFAULT
 #else
 #ifdef TARGET_MASM
-#define	TARGET_NASM_DEFAULT
+#define TARGET_NASM_DEFAULT
 #else
 #ifdef TARGET_OBJ
-#define	TARGET_OBJ_DEFAULT
+#define TARGET_OBJ_DEFAULT
 #else
 #ifdef TARGET_ROSSIN
-#define	TARGET_ROSSIN_DEFAULT
+#define TARGET_ROSSIN_DEFAULT
 #endif /* TARGET_ROSSIN */
 #endif /* TARGET_OBJ */
 #endif /* TARGET_NASM */
@@ -310,7 +309,7 @@ error, Requires a TI TMS320C30 code generator to be selected
 
 /* check to see whether we have multiple assemblers */
 #ifdef MULTIPLE_PROCESSORS
-#define	MULTIPLE_ASSEMBLERS
+#define MULTIPLE_ASSEMBLERS
 #endif /* MULTIPLE_PROCESSORS */
 
 #ifdef MC680X0
@@ -320,7 +319,8 @@ error, Requires a TI TMS320C30 code generator to be selected
 #endif /* MC680X0 */
 
 #ifdef INTEL
-#if ((defined(TARGET_BAS) + defined(TARGET_GAS) + defined(TARGET_SUN) + defined(TARGET_SYSV) + defined(TARGET_MASM) + defined(TARGET_NASM)) >1)
+#if ((defined(TARGET_BAS) + defined(TARGET_GAS) + defined(TARGET_SUN) + defined(TARGET_SYSV) + defined(TARGET_MASM) +          \
+      defined(TARGET_NASM)) > 1)
 #define MULTIPLE_ASSEMBLERS
 #endif
 #endif /* INTEL_386 */
@@ -352,7 +352,8 @@ error, You must select an assembler for the
 #endif /* MC680X0 */
 
 #ifdef INTEL
-#if ((defined(TARGET_BAS) + defined(TARGET_GAS) + defined(TARGET_SUN) + defined(TARGET_SYSV) + defined(TARGET_MASM) + defined(TARGET_NASM)) == 0)
+#if ((defined(TARGET_BAS) + defined(TARGET_GAS) + defined(TARGET_SUN) + defined(TARGET_SYSV) + defined(TARGET_MASM) +          \
+      defined(TARGET_NASM)) == 0)
 	error, You must select an assembler for the
 	Intel 8086 / 80386 processor
 #endif
@@ -378,21 +379,44 @@ error, You must select an assembler for the
  * Macros to allow function definitions to be either ANSI or K&R style
  */
 #ifdef __STDC__
-#define P0(t1)			(t1)
-#define P1(t1, a1)			(t1 a1)
-#define P2(t1, a1, t2, a2)		(t1 a1, t2 a2)
-#define P3(t1, a1, t2, a2, t3, a3)	(t1 a1, t2 a2, t3 a3)
-#define P4(t1, a1, t2, a2, t3, a3, t4, a4)	(t1 a1, t2 a2, t3 a3, t4 a4)
-#define P5(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5)	(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5)
-#define P8(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5, t6, a6, t7, a7, t8, a8)	(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6, t7 a7, t8 a8)
+#define P0(t1) (t1)
+#define P1(t1, a1) (t1 a1)
+#define P2(t1, a1, t2, a2) (t1 a1, t2 a2)
+#define P3(t1, a1, t2, a2, t3, a3) (t1 a1, t2 a2, t3 a3)
+#define P4(t1, a1, t2, a2, t3, a3, t4, a4) (t1 a1, t2 a2, t3 a3, t4 a4)
+#define P5(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5) (t1 a1, t2 a2, t3 a3, t4 a4, t5 a5)
+#define P8(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5, t6, a6, t7, a7, t8, a8)                                                     \
+  (t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6, t7 a7, t8 a8)
 #else
-#define P0(t1)			()
-#define P1(t1, a1)			(a1) t1 a1;
-#define P2(t1, a1, t2, a2)		(a1, a2) t1 a1; t2 a2;
-#define P3(t1, a1, t2, a2, t3, a3)	(a1, a2, a3) t1 a1; t2 a2; t3 a3;
-#define P4(t1, a1, t2, a2, t3, a3, t4, a4)	(a1, a2, a3, a4) t1 a1; t2 a2; t3 a3; t4 a4;
-#define P5(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5)	(a1, a2, a3, a4, a5) t1 a1; t2 a2; t3 a3; t4 a4; t5 a5;
-#define P8(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5, t6, a6, t7, a7, t8, a8)	(a1, a2, a3, a4, a5, a6, a7, a8) t1 a1; t2 a2; t3 a3; t4 a4; t5 a5; t6 a6; t7 a7; t8 a8;
+#define P0(t1) ()
+#define P1(t1, a1) (a1) t1 a1;
+#define P2(t1, a1, t2, a2)                                                                                                     \
+  (a1, a2) t1 a1;                                                                                                              \
+  t2 a2;
+#define P3(t1, a1, t2, a2, t3, a3)                                                                                             \
+  (a1, a2, a3) t1 a1;                                                                                                          \
+  t2 a2;                                                                                                                       \
+  t3 a3;
+#define P4(t1, a1, t2, a2, t3, a3, t4, a4)                                                                                     \
+  (a1, a2, a3, a4) t1 a1;                                                                                                      \
+  t2 a2;                                                                                                                       \
+  t3 a3;                                                                                                                       \
+  t4 a4;
+#define P5(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5)                                                                             \
+  (a1, a2, a3, a4, a5) t1 a1;                                                                                                  \
+  t2 a2;                                                                                                                       \
+  t3 a3;                                                                                                                       \
+  t4 a4;                                                                                                                       \
+  t5 a5;
+#define P8(t1, a1, t2, a2, t3, a3, t4, a4, t5, a5, t6, a6, t7, a7, t8, a8)                                                     \
+  (a1, a2, a3, a4, a5, a6, a7, a8) t1 a1;                                                                                      \
+  t2 a2;                                                                                                                       \
+  t3 a3;                                                                                                                       \
+  t4 a4;                                                                                                                       \
+  t5 a5;                                                                                                                       \
+  t6 a6;                                                                                                                       \
+  t7 a7;                                                                                                                       \
+  t8 a8;
 #endif /* __STDC__ */
 
 /*****************************************************************************/
@@ -402,17 +426,17 @@ error, You must select an assembler for the
  *   Determine the worst case alignment requirements.
  */
 		    union alignment_union {
-		    char    c;
-		    short   s;
-		    int     i;
-		    long    l;
-		    void   *vp;
-		    float   f;
-		    double  d;
-		    void    (*fn) (int);
-		};
+  char c;
+  short s;
+  int i;
+  long l;
+  void *vp;
+  float f;
+  double d;
+  void (*fn)(int);
+};
 
-#define	AL_HOST		((SIZE)sizeof(union alignment_union))
+#define AL_HOST ((SIZE)sizeof(union alignment_union))
 #endif /* AL_HOST */
 
 /*****************************************************************************/
@@ -435,9 +459,9 @@ static int dummy;
  */
 
 #ifdef EPOC
-#define	FATAL(x)
+#define FATAL(x)
 #else
-#define	FATAL(x)	fatal x
+#define FATAL(x) fatal x
 #endif /* EPOC */
 
 #endif /* _CHECK_H */

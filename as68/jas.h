@@ -10,188 +10,188 @@
  *    of using this software, even if they result from defects in it.
  */
 
-#include <stdio.h>
 #include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
+#include <inttypes.h>
 #include <setjmp.h>
 #include <stdint.h>
-#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct _sym {
-	struct _sym *next;
-	union {
-		char here[8];
-		long stix[2];
-	} name;
-	intptr_t value;
-	unsigned short index;
-	unsigned short flags;
-	unsigned short access;
+  struct _sym *next;
+  union {
+    char here[8];
+    long stix[2];
+  } name;
+  intptr_t value;
+  unsigned short index;
+  unsigned short flags;
+  unsigned short access;
 } SYM;
 
 typedef struct {
-	struct _sym *psym;
+  struct _sym *psym;
   intptr_t value;
 } EXPR;
 
 /*
  * Flags for symbols
  */
-#define UNK	0x0000
-#define BSS	0x0100
-#define TXT	0x0200
-#define DAT	0x0400
-#define SEGMT	0x0700
-#define EXTERN	0x0800
-#define GLOBAL	0x2000
-#define EQUATED	0x4000
-#define DEFINED	0x8000
+#define UNK 0x0000
+#define BSS 0x0100
+#define TXT 0x0200
+#define DAT 0x0400
+#define SEGMT 0x0700
+#define EXTERN 0x0800
+#define GLOBAL 0x2000
+#define EQUATED 0x4000
+#define DEFINED 0x8000
 
-#define NAMEX	(EQUATED|TXT)	/* special mark for name extension */
-#define NAMEV	0x87654321	/* special value for name extension */
+#define NAMEX (EQUATED | TXT) /* special mark for name extension */
+#define NAMEV 0x87654321      /* special value for name extension */
 
 typedef struct {
-	unsigned short mode;
-	unsigned char reg, inx;
-	EXPR expr;
+  unsigned short mode;
+  unsigned char reg, inx;
+  EXPR expr;
 } OPERAND;
 
 typedef struct {
-	char mnemon[8];
-	unsigned short op0, op1;
-	char size;
-	char format[14];
-	unsigned char flags;
+  char mnemon[8];
+  unsigned short op0, op1;
+  char size;
+  char format[14];
+  unsigned char flags;
 } INST;
 
 typedef struct {
-	INST *inst;
-	OPERAND *op0, *op1;
-	short misc;
+  INST *inst;
+  OPERAND *op0, *op1;
+  short misc;
 } STMT;
 
 /*
  * Flags for operand types
  */
-#define O_NONE	0x0000
-#define O_AN	0x0001
-#define O_DN	0x0002
-#define	O_INDR	0x0004
-#define O_DISP	0x0008
-#define O_POST	0x0010
-#define O_PRE	0x0020
-#define O_INDX	0x0040
-#define O_ABS	0x0080
-#define O_SABS	0x8000
-#define	O_PCRL	0x0100
-#define O_PCIX	0x0200
-#define O_IMM	0x0400
-#define O_USP	0x0800
-#define O_CCR	0x1000
-#define O_SR	0x2000
-#define O_REGS	0x4003
-#define O_ALL	0x87ff
-#define O_DMEM	0x80fc
-#define O_DST	0x80fe
-#define O_MEM	0x83fc
-#define O_LAB	0x8380
-#define O_STAT	0x83cc
-#define O_WRT	0x80ec
-#define O_RD	0x83dc
-#define O_NAN	0x87fe
+#define O_NONE 0x0000
+#define O_AN 0x0001
+#define O_DN 0x0002
+#define O_INDR 0x0004
+#define O_DISP 0x0008
+#define O_POST 0x0010
+#define O_PRE 0x0020
+#define O_INDX 0x0040
+#define O_ABS 0x0080
+#define O_SABS 0x8000
+#define O_PCRL 0x0100
+#define O_PCIX 0x0200
+#define O_IMM 0x0400
+#define O_USP 0x0800
+#define O_CCR 0x1000
+#define O_SR 0x2000
+#define O_REGS 0x4003
+#define O_ALL 0x87ff
+#define O_DMEM 0x80fc
+#define O_DST 0x80fe
+#define O_MEM 0x83fc
+#define O_LAB 0x8380
+#define O_STAT 0x83cc
+#define O_WRT 0x80ec
+#define O_RD 0x83dc
+#define O_NAN 0x87fe
 
 /*
  * Flags for the size field
  */
-#define S_B	0x01
-#define S_W	0x02
-#define S_L	0x04
-#define S_BW	S_B|S_W
-#define S_BL	S_B|S_L
-#define S_WL	S_W|S_L
-#define S_BWL	S_B|S_W|S_L
+#define S_B 0x01
+#define S_W 0x02
+#define S_L 0x04
+#define S_BW S_B | S_W
+#define S_BL S_B | S_L
+#define S_WL S_W | S_L
+#define S_BWL S_B | S_W | S_L
 
 /*
  * Flags for special actions and defaults
  */
-#define F_B	0x01
-#define F_W	0x02
-#define F_L	0x04
-#define F_TXT	0x08
-#define F_Q	0x10
-#define F_TV	0x20
-#define F_MQ	0x40
-#define F_PC	0x80
+#define F_B 0x01
+#define F_W 0x02
+#define F_L 0x04
+#define F_TXT 0x08
+#define F_Q 0x10
+#define F_TV 0x20
+#define F_MQ 0x40
+#define F_PC 0x80
 
 typedef struct _list {
-	struct _list *next;
+  struct _list *next;
 #ifndef LABELDIFF
-	union {
-#else /* LABELDIFF */
-	struct {
+  union {
+#else  /* LABELDIFF */
+  struct {
 #endif /* LABELDIFF */
-		SYM *sym;
-		EXPR val;
-	} u;
+    SYM *sym;
+    EXPR val;
+  } u;
 #ifdef LABELDIFF
-	SYM *sym2;
+  SYM *sym2;
 #endif /* LABELDIFF */
 } LIST;
 
 /*
  * Types of things that get generated
  */
-#define GENSTMT  1
+#define GENSTMT 1
 #define GENVALUE 2
 #define GENRELOC 3
 #define GENPCREL 4
 #define GENBRNCH 5
 #ifdef LABELDIFF
 #define GENLDIFF 6 /* EAJ. Label difference */
-#endif /* LABELDIFF */
+#endif             /* LABELDIFF */
 
 #define CBLEN 512
 
 typedef struct {
-	unsigned char nbits;
-	unsigned char action;
+  unsigned char nbits;
+  unsigned char action;
 #ifdef USE_LINE
-	int line;
+  int line;
 #endif
-	EXPR value;
+  EXPR value;
 } CBUF;
 
 #ifdef LABELDIFF
 typedef struct {
-	SYM *plus;
-	SYM *minus;
-	long constant;
+  SYM *plus;
+  SYM *minus;
+  long constant;
 } LDIFF;
 
 #endif /* LABELDIFF */
 typedef struct _clist {
-	struct _clist *next;
-	short cnt, inx;
-	CBUF cblock[CBLEN];
+  struct _clist *next;
+  short cnt, inx;
+  CBUF cblock[CBLEN];
 } CLIST;
 
 typedef struct _branch BRANCH;
 struct _branch {
-	long where;
-	CBUF *cptr;
-	BRANCH *link;
+  long where;
+  CBUF *cptr;
+  BRANCH *link;
 };
 
-#define ALLOC(n,t) ((t *) allocate( (unsigned) ( (n) * sizeof (t) ) ))
-#define ALLO(t)	ALLOC(1,t)
-#define REALLO(p,n,t) ((t *) myreallocate( p, (unsigned) ( (n) * sizeof (t) ) ))
-#define STRCPY(s) strcpy( ALLOC(1+strlen(s),char), s )
+#define ALLOC(n, t) ((t *)allocate((unsigned)((n) * sizeof(t))))
+#define ALLO(t) ALLOC(1, t)
+#define REALLO(p, n, t) ((t *)myreallocate(p, (unsigned)((n) * sizeof(t))))
+#define STRCPY(s) strcpy(ALLOC(1 + strlen(s), char), s)
 
 #ifdef MEM_DEBUG
 #define free my_free
 #endif
 
 #ifndef GENERIC
-extern  long  dottxt;
+extern long dottxt;
 #endif /* GENERIC */

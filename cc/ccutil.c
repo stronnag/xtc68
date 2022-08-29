@@ -30,25 +30,23 @@
  *	Simple alternative to handle DBG macros when the
  *	'libdebug' library is not available.
  */
-void	jdbg (char *proc, int x, char *ctl,...)
-{
-	va_list va;
-	va_start (va, ctl);
+void jdbg(char *proc, int x, char *ctl, ...) {
+  va_list va;
+  va_start(va, ctl);
 
-	fputs(proc, stdout);
-	fputs(": ", stdout);
+  fputs(proc, stdout);
+  fputs(": ", stdout);
 
-	vprintf (ctl, va);
-	va_end (va);
-	fputc ('\n', stdout);
-	return;
+  vprintf(ctl, va);
+  va_end(va);
+  fputc('\n', stdout);
+  return;
 }
 #endif /* JDBG */
 
-
 #ifndef HAVE_BASENAME
 /*=============================================================== BASENAME */
-char   *basename ( fname )
+char *basename(fname)
 /*		~~~~~~~~
  *
  * Routine to return the base name of any filename.
@@ -58,22 +56,21 @@ char   *basename ( fname )
 char *fname;
 {
 #ifndef QDOS
-	return FilePart(fname);
+  return FilePart(fname);
 #else
-	int got_under;
+  int got_under;
 
-	char *p = &fname[strlen(fname)-1];
+  char *p = &fname[strlen(fname) - 1];
 
-	for( got_under = 0; p > fname && got_under < 2; p--) {
-		if( strchr("_.",*p)) {
-			got_under++;
-		}
-	}
-	return (p == fname ? p : p+2);
+  for (got_under = 0; p > fname && got_under < 2; p--) {
+    if (strchr("_.", *p)) {
+      got_under++;
+    }
+  }
+  return (p == fname ? p : p + 2);
 #endif /* QDOS */
 }
 #endif /* ! HAVE_BASENAME */
-
 
 /****************************************************************** STRPOS */
 /*
@@ -87,18 +84,16 @@ char *fname;
  *  26 Jan 95   DJW   - Added 'const' keyword to parameter definitions
  */
 
-int strpos (s, c)
-  const char * s;
-  int    c;
+int strpos(s, c) const char *s;
+int c;
 {
-    char *reply;
+  char *reply;
 
-    if ((reply = strchr (s, c))==NULL) {
-        return -1;
-    }
-    return (int)(reply - s);
+  if ((reply = strchr(s, c)) == NULL) {
+    return -1;
+  }
+  return (int)(reply - s);
 }
-
 
 #ifndef HAVE_LIBGEN
 
@@ -140,10 +135,10 @@ unsigned char _C_esc_a[] = "ntfvrab\\";
  */
 
 unsigned char _C_oct_a[] = "01234567";
-unsigned char _C_oct[] = {0,1,2,3,4,5,6,7,'\0'};
+unsigned char _C_oct[] = {0, 1, 2, 3, 4, 5, 6, 7, '\0'};
 
 unsigned char _C_hex_a[] = "0123456789ABCDEFabcdef";
-unsigned char _C_hex[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,10,11,12,13,14,15,'\0'};
+unsigned char _C_hex[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15, '\0'};
 
 /****************************************************************** _STREADD */
 /*
@@ -159,42 +154,36 @@ unsigned char _C_hex[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,10,11,12,13,14,1
  *  24 Jan 95   DJW   - Missing 'const' keyword added to function definition.
  */
 
+char *__streadd(char *output, const char *input, const char *exceptions, const char *escape) {
+  int c, i;
 
-char *  __streadd ( char *       output,
-                    const char * input,
-                    const char * exceptions,
-                    const char * escape)
-{
-    int c, i;
-
-    do {
-        c = (int)(unsigned char)*input++;
-        if (isprint(c))  {
-            if (escape && (strchr(escape,c) != NULL)) {
-                *output++ = '\\';
-            }
-            *output++ = (char)c;
-            continue;
-        }
-        if (exceptions && strchr(exceptions, c)) {
-            *output++ = (char)c;
-            continue;
-        }
+  do {
+    c = (int)(unsigned char)*input++;
+    if (isprint(c)) {
+      if (escape && (strchr(escape, c) != NULL)) {
         *output++ = '\\';
-        if ((i=strpos((char *)_C_esc,c)) >= 0) {
-            *output++ = _C_esc_a[i];
-            continue;
-        }
-        *output++ = (char)('0' + (c >> 6));
-        c &= 0x3f;
-        *output++ = (char)('0' + (c >> 3));
-        *output++ = (char)('0' + (c & 0x7));
-    } while (*input);
+      }
+      *output++ = (char)c;
+      continue;
+    }
+    if (exceptions && strchr(exceptions, c)) {
+      *output++ = (char)c;
+      continue;
+    }
+    *output++ = '\\';
+    if ((i = strpos((char *)_C_esc, c)) >= 0) {
+      *output++ = _C_esc_a[i];
+      continue;
+    }
+    *output++ = (char)('0' + (c >> 6));
+    c &= 0x3f;
+    *output++ = (char)('0' + (c >> 3));
+    *output++ = (char)('0' + (c & 0x7));
+  } while (*input);
 
-    *output = '\0';
-    return (output);
+  *output = '\0';
+  return (output);
 }
-
 
 /****************************************************************** STRECPY */
 /*
@@ -218,14 +207,10 @@ char *  __streadd ( char *       output,
  *  29 Aug 94   DJW   - First version
  */
 
-char *  strecpy (char *        output,
-                 const char *  input,
-				 const char *  exceptions)
-{
-    (void) __streadd(output, input, exceptions,"\\");
-    return (output);
+char *strecpy(char *output, const char *input, const char *exceptions) {
+  (void)__streadd(output, input, exceptions, "\\");
+  return (output);
 }
-
 
 /****************************************************************** STREADD */
 /*
@@ -249,13 +234,7 @@ char *  strecpy (char *        output,
  *  29 Aug 94   DJW   - First version
  */
 
-char *  streadd (char *        output,
-                 const char *  input,
-                 const char *  exceptions)
-{
-    return __streadd(output, input, exceptions,"\\");
-}
-
+char *streadd(char *output, const char *input, const char *exceptions) { return __streadd(output, input, exceptions, "\\"); }
 
 #if 0
 /****************************************************************** STRCADD */
@@ -350,94 +329,75 @@ char *  strccpy (char * output, const char * input)
 }
 #endif
 
-
 #endif /* HAVE_LIBGEN */
-
 
 /****************************************************************** MY_ERROR */
 #ifndef QDOS
-void my_error(int p1,char * p2)
-{
-	errno = p1;
+void my_error(int p1, char *p2) {
+  errno = p1;
 #ifndef EPOC
-	perror(p2);
+  perror(p2);
 #endif /* EPOC */
-	exit(p1);
+  exit(p1);
 }
 
 /********************************************************************** FILEPART */
-char *FilePart(char *fnam)
-{
-	char *p = fnam;
-	char *q = fnam + strlen(fnam);
+char *FilePart(char *fnam) {
+  char *p = fnam;
+  char *q = fnam + strlen(fnam);
 
-	for(;q != p; --q)
-	{
-		if(*q == ':' || *q == DSEP)
-		{
-			q++;
-			break;
-		}
-	}
-	return q;
+  for (; q != p; --q) {
+    if (*q == ':' || *q == DSEP) {
+      q++;
+      break;
+    }
+  }
+  return q;
 }
 
 /********************************************************************** ADDPART */
-void AddPart(char *d, char *s, int mlen)
-{
-	int m,n;
-	m = strlen(d);
-	n = strlen(s);
-	if(mlen < m+n+2)
-	{
-		my_error(5, "Addpart len");
-	}
-	else
-	{
-		if(*(d+m-1) != DSEP && *s != DSEP)
-		{
-			if(*d)
-				(void)strcat(d, DSEPS);
-		}
-		(void) strcat(d, s);
-	}
+void AddPart(char *d, char *s, int mlen) {
+  int m, n;
+  m = strlen(d);
+  n = strlen(s);
+  if (mlen < m + n + 2) {
+    my_error(5, "Addpart len");
+  } else {
+    if (*(d + m - 1) != DSEP && *s != DSEP) {
+      if (*d)
+        (void)strcat(d, DSEPS);
+    }
+    (void)strcat(d, s);
+  }
 }
-
-
 
 /****************************************************************** STRPBRK */
 #ifdef EPOC
-char *strpbrk(const char *str, const char *pat)
-{
-	char * p;
-	for (p = (char *)str ; *p ; p++)
-	{
-		if(strchr(pat, *p))
-		{
-			return p;
-		}
-	}
-	return NULL;
+char *strpbrk(const char *str, const char *pat) {
+  char *p;
+  for (p = (char *)str; *p; p++) {
+    if (strchr(pat, *p)) {
+      return p;
+    }
+  }
+  return NULL;
 }
 #endif /* EPOC */
 
 /******************************************************************* STRRPBRK */
-char *strrpbrk(char *str, char *pat)
-{
-	char *q,*p;
-	q = p = str+strlen(str);
-	while (--p != str)
-	{
-		if(strchr(pat, *p))
-		{
-			q = p;
-			break;
-		}
-	}
-	return q;
+char *strrpbrk(char *str, char *pat) {
+  char *q, *p;
+  q = p = str + strlen(str);
+  while (--p != str) {
+    if (strchr(pat, *p)) {
+      q = p;
+      break;
+    }
+  }
+  return q;
 }
 
-#define _mkname(p1,p2) strcpy(p1,p2)
+#define _mkname(p1, p2) strcpy(p1, p2)
 
 #endif /* ! QDOS */
 
@@ -668,141 +628,137 @@ int   argunpack (const char *   cmdline,
  *                      escaping when packing arguments.
  */
 
-char * argpack (char * const * argv,
-			    int 		   flag)
-{
-	char *	cmdline, *cmdlinenew;
-	size_t	cmdlen;
-	char *	workbuf = NULL;
+char *argpack(char *const *argv, int flag) {
+  char *cmdline, *cmdlinenew;
+  size_t cmdlen;
+  char *workbuf = NULL;
 
-	/*
-	 *	Assume initially that we could
-	 *	have a zero length command line.
-	 */
-	if ((cmdline = malloc((size_t)2)) == NULL) {
-		DBG(("ARGPACK",0x101,"Exit: failed to allocate initial cmdline buffer"));
-		return (NULL);
-	}
-	cmdline[0] = '\0';
-	cmdlen = 0;
+  /*
+   *	Assume initially that we could
+   *	have a zero length command line.
+   */
+  if ((cmdline = malloc((size_t)2)) == NULL) {
+    DBG(("ARGPACK", 0x101, "Exit: failed to allocate initial cmdline buffer"));
+    return (NULL);
+  }
+  cmdline[0] = '\0';
+  cmdlen = 0;
 
-	/*
-	 *	Now try and add any arguments
-	 */
-	while (*argv != NULL) {
-		DBG(("ARGPACK",0x204,"argv=$%x, *argv=$%x(%s)",argv, *argv, *argv));
-		/*
-		 *	Add a space seperator if not first parameter
-		 */
-		if (cmdlen != 0) {
-			(void)strcat (cmdline," ");
-		}
-		/*
-		 *	Allocate temporary buffer to do
-		 *	(potential) parameter expansion.
-		 *	Play safe with size allocated!
-		 */
-		free (workbuf);
-		if ((workbuf = malloc ((strlen(*argv) * 4) + 3)) == NULL) {
-			DBG(("ARGPACK",0x101,"Exit: failed to allocate workbuf"));
-			free (cmdline);
-			return NULL;
-		}
-		/*
-		 *	Get (expanded) parameter into workbuf
-		 */
-		if (flag == 0) {
-			(void) strcpy(workbuf,*argv);
-		} else {
-			int 	whitespace;
-			unsigned char * ptr;
-			char *dest = workbuf;
+  /*
+   *	Now try and add any arguments
+   */
+  while (*argv != NULL) {
+    DBG(("ARGPACK", 0x204, "argv=$%x, *argv=$%x(%s)", argv, *argv, *argv));
+    /*
+     *	Add a space seperator if not first parameter
+     */
+    if (cmdlen != 0) {
+      (void)strcat(cmdline, " ");
+    }
+    /*
+     *	Allocate temporary buffer to do
+     *	(potential) parameter expansion.
+     *	Play safe with size allocated!
+     */
+    free(workbuf);
+    if ((workbuf = malloc((strlen(*argv) * 4) + 3)) == NULL) {
+      DBG(("ARGPACK", 0x101, "Exit: failed to allocate workbuf"));
+      free(cmdline);
+      return NULL;
+    }
+    /*
+     *	Get (expanded) parameter into workbuf
+     */
+    if (flag == 0) {
+      (void)strcpy(workbuf, *argv);
+    } else {
+      int whitespace;
+      unsigned char *ptr;
+      char *dest = workbuf;
 
-			for (ptr = (unsigned char *)*argv, whitespace = 0 ; *ptr ; ptr++) {
-				if (isspace(*ptr)) {
-					whitespace = 1;
-					break;
-				}
-			}
-			if (whitespace) {
-				*dest++ = '"';				/* add leading quote if needed */
-			}
-			dest = __streadd(dest,*argv,NULL,"\"\'\\");
-			if (whitespace) {
-				*dest++ = '"';				/* add trailing quote if needed */
-			}
-			*dest = '\0';					/* add terminator byte */
-		}
-		/*
-		 *	Increase size of buffer used to build
-		 *	command line by amount needed to hold
-		 *	the next (expanded) parameter to be
-		 *	added and then add it to end.
-		 */
-		cmdlen = strlen(cmdline) + strlen(workbuf) + 2;	/* Allow for NUL + space */
-		if ((cmdlinenew = realloc (cmdline,cmdlen)) == NULL) {
-			DBG(("ARGPACK",0x101,"Exit: failed to extend cmdline"));
-			free (workbuf);
-			free (cmdline);
-			return NULL;
-		}
-		DBG(("ARGPACK",0x204,"Adding new argument of '%s' to cmdline", workbuf));
-		cmdline = strcat (cmdlinenew,workbuf);
-		DBG(("ARGPACK",0x204," ... giving line as follows:\n%s", cmdline));
-		/*
-		 *	Try for another one
-		 */
-		argv++;
-	}
-	/*
-	 *	Free work buffer before returning
-	 */
-	free(workbuf);
-	DBG(("ARGPACK",0x201,"Exit with cmdline as follows:\n%s", cmdline));
-	return (cmdline);
+      for (ptr = (unsigned char *)*argv, whitespace = 0; *ptr; ptr++) {
+        if (isspace(*ptr)) {
+          whitespace = 1;
+          break;
+        }
+      }
+      if (whitespace) {
+        *dest++ = '"'; /* add leading quote if needed */
+      }
+      dest = __streadd(dest, *argv, NULL, "\"\'\\");
+      if (whitespace) {
+        *dest++ = '"'; /* add trailing quote if needed */
+      }
+      *dest = '\0'; /* add terminator byte */
+    }
+    /*
+     *	Increase size of buffer used to build
+     *	command line by amount needed to hold
+     *	the next (expanded) parameter to be
+     *	added and then add it to end.
+     */
+    cmdlen = strlen(cmdline) + strlen(workbuf) + 2; /* Allow for NUL + space */
+    if ((cmdlinenew = realloc(cmdline, cmdlen)) == NULL) {
+      DBG(("ARGPACK", 0x101, "Exit: failed to extend cmdline"));
+      free(workbuf);
+      free(cmdline);
+      return NULL;
+    }
+    DBG(("ARGPACK", 0x204, "Adding new argument of '%s' to cmdline", workbuf));
+    cmdline = strcat(cmdlinenew, workbuf);
+    DBG(("ARGPACK", 0x204, " ... giving line as follows:\n%s", cmdline));
+    /*
+     *	Try for another one
+     */
+    argv++;
+  }
+  /*
+   *	Free work buffer before returning
+   */
+  free(workbuf);
+  DBG(("ARGPACK", 0x201, "Exit with cmdline as follows:\n%s", cmdline));
+  return (cmdline);
 }
 
 #ifdef QDOS
 /*=========================================================== CHECK_CPU */
-int 	CheckCPU(void)
+int CheckCPU(void)
 /*		~~~~~~~~
  *	This function gets the CPU type.  We need to do this
  *	check because the GWASS assembler requires at least
  *	a 68020 to be able to run.
  *----------------------------------------------------------------------*/
 {
-	return (*((char *)(_sys_var + 0xa1)));
+  return (*((char *)(_sys_var + 0xa1)));
 }
 #endif /* QDOS */
 
 /*================================================================= PRINTSTR */
-void	printstr ( char * str, ...)
+void printstr(char *str, ...)
 /*		~~~~~~~~
  *	Print a variable number of strings to the error channel.
  *	The array of strings will be NULL terminated.
  *---------------------------------------------------------------------------*/
 {
-	va_list  ap;
+  va_list ap;
 
-	DBG(("PRINTSTR",0x11,"Enter"));
-	va_start(ap, str);
-	while(str != NULL) {
-		DBG(("PRINTSTR",0x18,"   %s",str));
+  DBG(("PRINTSTR", 0x11, "Enter"));
+  va_start(ap, str);
+  while (str != NULL) {
+    DBG(("PRINTSTR", 0x18, "   %s", str));
 #ifdef EPOC
-		if (WriteToParentSetup() != NULL)
-		{
-			WriteToParent(str,strlen(str)+1);
-		}
-		else
+    if (WriteToParentSetup() != NULL) {
+      WriteToParent(str, strlen(str) + 1);
+    } else
 #else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
-                     write( STDERR_FILENO, str, strlen(str));
+    write(STDERR_FILENO, str, strlen(str));
 #pragma GCC diagnostic pop
 #endif
-		str = (char *)va_arg(ap, char *);
-	}
-	va_end(ap);
-	DBG(("PRINTSTR",0x11,"Exit"));
-	return;
+      str = (char *)va_arg(ap, char *);
+  }
+  va_end(ap);
+  DBG(("PRINTSTR", 0x11, "Exit"));
+  return;
 }

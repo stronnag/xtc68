@@ -50,103 +50,101 @@
 
 /********************************************************** Type Definitions */
 
-typedef int WEIGHT;		/* weighting of expression complexity */
+typedef int WEIGHT; /* weighting of expression complexity */
 
 /********************************************************** Static Variables */
 
-static int regptr = 0;		/* index into reglst */
+static int regptr = 0; /* index into reglst */
 static SYM *reglst[REG_LIST];
-static int autoptr = 0;		/* index into autolst */
+static int autoptr = 0; /* index into autolst */
 static SYM *autolst[AUTO_LIST];
-static CSE *olist;		/* list of optimisable expressions */
+static CSE *olist; /* list of optimisable expressions */
 
 /*********************************************** Static Function Definitions */
 
-static BOOL is_equalsym P_ ((const SYM *, const SYM *));
-static void walkstmt P_ ((STMT *, void (*)(STMT *), EXPR *(*)(EXPR *)));
-static CSE *searchnode P_ ((const EXPR *));
-static CSE *enternode P_ ((EXPR *, BOOL));
-static CSE *voidauto P_ ((EXPR *));
-static void scannode P_ ((EXPR *, BOOL));
-static void scan P_ ((STMT *));
-static void bsort P_ ((CSE **));
-static EXPR *repcsenode P_ ((EXPR *));
-static void repcse P_ ((STMT *));
-static WEIGHT swapnode P_ ((EXPR *));
-static void swap P_ ((STMT *));
+static BOOL is_equalsym P_((const SYM *, const SYM *));
+static void walkstmt P_((STMT *, void (*)(STMT *), EXPR *(*)(EXPR *)));
+static CSE *searchnode P_((const EXPR *));
+static CSE *enternode P_((EXPR *, BOOL));
+static CSE *voidauto P_((EXPR *));
+static void scannode P_((EXPR *, BOOL));
+static void scan P_((STMT *));
+static void bsort P_((CSE **));
+static EXPR *repcsenode P_((EXPR *));
+static void repcse P_((STMT *));
+static WEIGHT swapnode P_((EXPR *));
+static void swap P_((STMT *));
 
 /*****************************************************************************/
 
-void addoptinfo P2 (SYM *, sp, STORAGE, sc)
-{
-     TYP    *tp = TYPEOF (sp);
+void addoptinfo P2(SYM *, sp, STORAGE, sc) {
+  TYP *tp = TYPEOF(sp);
 
-    switch (tp->type) {
-    case bt_pointer32:
-	if (is_array_type (tp) && sc != sc_parms) {
-	    break;
-	}
-	/*FALLTHRU*/
-    case bt_char:
-    case bt_charu:
-    case bt_uchar:
-    case bt_schar:
-    case bt_short:
-    case bt_ushort:
-    case bt_int16:
-    case bt_uint16:
-    case bt_int32:
-    case bt_uint32:
-    case bt_long:
-    case bt_ulong:
-    case bt_float:
-    case bt_double:
-	if (!is_volatile_qualified (tp)) {
-	    switch (storageof (sp)) {
-	    case sc_register:
-		if (regptr < REG_LIST) {
-		    reglst[regptr++] = sp;
-		    DPRINTF ((DEBUG_GLOBAL, "adding '%s' to reglst\n", nameof (sp)));
-		}
-		break;
-	    case sc_parms:
-	    case sc_auto:
-		if (autoptr < AUTO_LIST) {
-		    autolst[autoptr++] = sp;
-		    DPRINTF ((DEBUG_GLOBAL, "adding '%s' to autolst\n", nameof (sp)));
-		}
-		break;
-	    default:
-		break;
-	    }
-	}
-	break;
-    default:
-	break;
+  switch (tp->type) {
+  case bt_pointer32:
+    if (is_array_type(tp) && sc != sc_parms) {
+      break;
     }
+    /*FALLTHRU*/
+  case bt_char:
+  case bt_charu:
+  case bt_uchar:
+  case bt_schar:
+  case bt_short:
+  case bt_ushort:
+  case bt_int16:
+  case bt_uint16:
+  case bt_int32:
+  case bt_uint32:
+  case bt_long:
+  case bt_ulong:
+  case bt_float:
+  case bt_double:
+    if (!is_volatile_qualified(tp)) {
+      switch (storageof(sp)) {
+      case sc_register:
+        if (regptr < REG_LIST) {
+          reglst[regptr++] = sp;
+          DPRINTF((DEBUG_GLOBAL, "adding '%s' to reglst\n", nameof(sp)));
+        }
+        break;
+      case sc_parms:
+      case sc_auto:
+        if (autoptr < AUTO_LIST) {
+          autolst[autoptr++] = sp;
+          DPRINTF((DEBUG_GLOBAL, "adding '%s' to autolst\n", nameof(sp)));
+        }
+        break;
+      default:
+        break;
+      }
+    }
+    break;
+  default:
+    break;
+  }
 }
 
 /*
  * Remove the expression from the register lists
  */
-void deloptinfo P1 (EXPR *, ep)
-{
-    int     i;
+void deloptinfo P1(EXPR *, ep) {
+  int i;
 
-    assert (is_sym (ep));
-    for (i = 0; i < autoptr; i++) {
-	if (is_equalsym (autolst[i], ep->v.sp)) {
-	    autolst[i] = NIL_SYM;
-	    DPRINTF ((DEBUG_GLOBAL, "removing '%s' from autolst\n", nameof (ep->v.sp)));
-	}
+  assert(is_sym(ep));
+  for (i = 0; i < autoptr; i++) {
+    if (is_equalsym(autolst[i], ep->v.sp)) {
+      autolst[i] = NIL_SYM;
+      DPRINTF((DEBUG_GLOBAL, "removing '%s' from autolst\n", nameof(ep->v.sp)));
     }
-    for (i = 0; i < regptr; i++) {
-	if (is_equalsym (reglst[i], ep->v.sp)) {
-	    message (ERR_ADDREGVAR, reglst[i]->name);
-	    reglst[i] = NIL_SYM;
-	    DPRINTF ((DEBUG_GLOBAL, "removing '%s' from reglst\n", nameof (ep->v.sp)));
-	}
+  }
+  for (i = 0; i < regptr; i++) {
+    if (is_equalsym(reglst[i], ep->v.sp)) {
+      message(ERR_ADDREGVAR, reglst[i]->name);
+      reglst[i] = NIL_SYM;
+      DPRINTF((DEBUG_GLOBAL, "removing '%s' from reglst\n", nameof(ep->v.sp)));
     }
+  }
 }
 
 /*****************************************************************************/
@@ -155,71 +153,66 @@ void deloptinfo P1 (EXPR *, ep)
  *   used as a parameter to walkstmt() when no action is to be
  *   performed on the expressions.
  */
-static EXPR *null_expr P1 (EXPR *, ep)
-{
-    return ep;
-}
-
+static EXPR *null_expr P1(EXPR *, ep) { return ep; }
 
 /*
  *   walkstmt() descends the statement tree recursively.
  */
 #if defined(__STDC__) || defined(__cplusplus)
-static void walkstmt (STMT *stmt, void (*stmtfunc) (STMT *), EXPR *(*exprfunc) (EXPR *))
+static void walkstmt(STMT *stmt, void (*stmtfunc)(STMT *), EXPR *(*exprfunc)(EXPR *))
 #else
-static void walkstmt (stmt, stmtfunc, exprfunc)
-     STMT   *stmt;
-     void    (*stmtfunc) ();
-     EXPR   *(*exprfunc) ();
+static void walkstmt(stmt, stmtfunc, exprfunc) STMT *stmt;
+void (*stmtfunc)();
+EXPR *(*exprfunc)();
 
 #endif
 {
-    for (; stmt != NIL_STMT; stmt = stmt->next) {
-	switch (stmt->stype) {
-	case st_return:
-	case st_expr:
-	    stmt->exp = (*exprfunc) (stmt->exp);
-	    break;
-	case st_while:
-	case st_do:
-	    stmt->exp = (*exprfunc) (stmt->exp);
-	    (*stmtfunc) (stmt->s1);
-	    break;
-	case st_for:
-	    stmt->exp = (*exprfunc) (stmt->exp);
-	    stmt->v1.e = (*exprfunc) (stmt->v1.e);
-	    (*stmtfunc) (stmt->s1);
-	    stmt->v2.e = (*exprfunc) (stmt->v2.e);
-	    break;
-	case st_if:
-	    stmt->exp = (*exprfunc) (stmt->exp);
-	    (*stmtfunc) (stmt->s1);
-	    (*stmtfunc) (stmt->v1.s);
-	    break;
-	case st_switch:
-	    stmt->exp = (*exprfunc) (stmt->exp);
-	    (*stmtfunc) (stmt->v1.s);
-	    break;
-	case st_case:
-	case st_default:
-	case st_label:
-	    (*stmtfunc) (stmt->v1.s);
-	    break;
-	case st_compound:
-	    (*stmtfunc) (stmt->s1);
-	    break;
-	case st_goto:
-	case st_break:
-	case st_continue:
+  for (; stmt != NIL_STMT; stmt = stmt->next) {
+    switch (stmt->stype) {
+    case st_return:
+    case st_expr:
+      stmt->exp = (*exprfunc)(stmt->exp);
+      break;
+    case st_while:
+    case st_do:
+      stmt->exp = (*exprfunc)(stmt->exp);
+      (*stmtfunc)(stmt->s1);
+      break;
+    case st_for:
+      stmt->exp = (*exprfunc)(stmt->exp);
+      stmt->v1.e = (*exprfunc)(stmt->v1.e);
+      (*stmtfunc)(stmt->s1);
+      stmt->v2.e = (*exprfunc)(stmt->v2.e);
+      break;
+    case st_if:
+      stmt->exp = (*exprfunc)(stmt->exp);
+      (*stmtfunc)(stmt->s1);
+      (*stmtfunc)(stmt->v1.s);
+      break;
+    case st_switch:
+      stmt->exp = (*exprfunc)(stmt->exp);
+      (*stmtfunc)(stmt->v1.s);
+      break;
+    case st_case:
+    case st_default:
+    case st_label:
+      (*stmtfunc)(stmt->v1.s);
+      break;
+    case st_compound:
+      (*stmtfunc)(stmt->s1);
+      break;
+    case st_goto:
+    case st_break:
+    case st_continue:
 #ifdef ASM
-	case st_asm:
+    case st_asm:
 #endif /* ASM */
-	    break;
-	default:
-	    CANNOT_REACH_HERE ();
-	    break;
-	}
+      break;
+    default:
+      CANNOT_REACH_HERE();
+      break;
     }
+  }
 }
 
 /*****************************************************************************/
@@ -229,85 +222,80 @@ static void walkstmt (stmt, stmtfunc, exprfunc)
  *   and sp2 are equivalent.
  */
 
-static BOOL is_equalsym P2 (const SYM *, sp1, const SYM *, sp2)
-{
-    if (sp1 == NIL_SYM || sp2 == NIL_SYM) {
-	return FALSE;
-    }
-    if (sp1 == sp2) {
-	return TRUE;
-    }
-    if (storageof (sp1) != storageof (sp2)) {
-	return FALSE;
-    }
-    switch (storageof (sp1)) {
-    case sc_auto:
-    case sc_parms:
-    case sc_register:
-	return (sp1->value.i == sp2->value.i);
-    case sc_external:
-    case sc_global:
-	return (nameof (sp1) == nameof (sp2));
-    default:
-	return FALSE;
-    }
+static BOOL is_equalsym P2(const SYM *, sp1, const SYM *, sp2) {
+  if (sp1 == NIL_SYM || sp2 == NIL_SYM) {
+    return FALSE;
+  }
+  if (sp1 == sp2) {
+    return TRUE;
+  }
+  if (storageof(sp1) != storageof(sp2)) {
+    return FALSE;
+  }
+  switch (storageof(sp1)) {
+  case sc_auto:
+  case sc_parms:
+  case sc_register:
+    return (sp1->value.i == sp2->value.i);
+  case sc_external:
+  case sc_global:
+    return (nameof(sp1) == nameof(sp2));
+  default:
+    return FALSE;
+  }
 }
 
 /*
  *   is_equalnode() will return TRUE if the expressions pointed to by ep1
  *   and ep2 are equivalent.
  */
-BOOL is_equalnode P2 (const EXPR *, ep1, const EXPR *, ep2)
-{
-    if (ep1 == NIL_EXPR || ep2 == NIL_EXPR) {
-	return FALSE;
-    }
-    if (ep1->nodetype != ep2->nodetype) {
-	return FALSE;
-    }
-    switch (ep1->nodetype) {
-    case en_icon:
-    case en_autocon:
-	return (ep1->v.i == ep2->v.i);
-    case en_labcon:
-	return (ep1->v.l == ep2->v.l);
-    case en_nacon:
-    case en_global:
-	return (ep1->v.str == ep2->v.str);
-    case en_sym:
-	return is_equalsym (ep1->v.sp, ep2->v.sp);
-    case en_ref:
-    case en_fieldref:
-    case en_uminus:
-    case en_cast:
-	return is_equalnode (ep1->v.p[0], ep2->v.p[0]);
-    case en_add:
-    case en_sub:
-	return is_equalnode (ep1->v.p[1], ep2->v.p[1]) &&
-	    is_equalnode (ep1->v.p[0], ep2->v.p[0]);
-    default:
-	return FALSE;
-    }
+BOOL is_equalnode P2(const EXPR *, ep1, const EXPR *, ep2) {
+  if (ep1 == NIL_EXPR || ep2 == NIL_EXPR) {
+    return FALSE;
+  }
+  if (ep1->nodetype != ep2->nodetype) {
+    return FALSE;
+  }
+  switch (ep1->nodetype) {
+  case en_icon:
+  case en_autocon:
+    return (ep1->v.i == ep2->v.i);
+  case en_labcon:
+    return (ep1->v.l == ep2->v.l);
+  case en_nacon:
+  case en_global:
+    return (ep1->v.str == ep2->v.str);
+  case en_sym:
+    return is_equalsym(ep1->v.sp, ep2->v.sp);
+  case en_ref:
+  case en_fieldref:
+  case en_uminus:
+  case en_cast:
+    return is_equalnode(ep1->v.p[0], ep2->v.p[0]);
+  case en_add:
+  case en_sub:
+    return is_equalnode(ep1->v.p[1], ep2->v.p[1]) && is_equalnode(ep1->v.p[0], ep2->v.p[0]);
+  default:
+    return FALSE;
+  }
 }
-
 
 /*
  *   searchnode will search the common expression table for an entry that
  *   matches the node passed and return a pointer to it.
  */
-static CSE *searchnode P1 (const EXPR *, ep)
-{
-    register CSE *csp;
+static CSE *searchnode P1(const EXPR *, ep) {
+  register CSE *csp;
 
-    if (ep == NIL_EXPR) {
-	return NIL_CSE;
-    }
-    for (csp = olist; csp != NIL_CSE; csp = csp->next) {
-	if (is_equalnode (ep, csp->exp)) {
-	    return csp;
-	}
-    }
+  if (ep == NIL_EXPR) {
     return NIL_CSE;
+  }
+  for (csp = olist; csp != NIL_CSE; csp = csp->next) {
+    if (is_equalnode(ep, csp->exp)) {
+      return csp;
+    }
+  }
+  return NIL_CSE;
 }
 
 /*****************************************************************************/
@@ -315,41 +303,36 @@ static CSE *searchnode P1 (const EXPR *, ep)
 /*
  *   returns the desirability of optimization for a subexpression.
  */
-USES desire P1 (const CSE *, csp)
-{
-    const EXPR *ep = csp->exp;
+USES desire P1(const CSE *, csp) {
+  const EXPR *ep = csp->exp;
 
-    if (csp->voidf || (is_icon (ep) && ep->v.i < 32L && ep->v.i >= 0L))
-	return (USES) 0;
-    if (is_lvalue (ep)) {
-	return (USES) ((int) csp->uses * 2);
-    }
-    return csp->uses;
+  if (csp->voidf || (is_icon(ep) && ep->v.i < 32L && ep->v.i >= 0L))
+    return (USES)0;
+  if (is_lvalue(ep)) {
+    return (USES)((int)csp->uses * 2);
+  }
+  return csp->uses;
 }
 
 /*
  *   bsort() implements a bubble sort on the expression list.
  */
-static void
-        bsort
-        P1 (CSE **, lst)
-{
-    CSE    *csp1, *csp2;
-    register USES uses;
+static void bsort P1(CSE **, lst) {
+  CSE *csp1, *csp2;
+  register USES uses;
 
-    csp1 = *lst;
-    if (csp1 == NIL_CSE || csp1->next == NIL_CSE) {
-	return;
-    }
-    bsort (&(csp1->next));
-    uses = desire (csp1);
-    while ((csp1 != NIL_CSE) &&
-	   (csp2 = csp1->next) != NIL_CSE && uses < desire (csp2)) {
-	*lst = csp2;
-	csp1->next = csp2->next;
-	csp2->next = csp1;
-	lst = &(csp2->next);
-    }
+  csp1 = *lst;
+  if (csp1 == NIL_CSE || csp1->next == NIL_CSE) {
+    return;
+  }
+  bsort(&(csp1->next));
+  uses = desire(csp1);
+  while ((csp1 != NIL_CSE) && (csp2 = csp1->next) != NIL_CSE && uses < desire(csp2)) {
+    *lst = csp2;
+    csp1->next = csp2->next;
+    csp2->next = csp1;
+    lst = &(csp2->next);
+  }
 }
 
 /*****************************************************************************/
@@ -361,58 +344,54 @@ static void
  *   duse is a flag indicating whether or not this reference will be
  *   dereferenced.
  */
-static CSE *enternode P2 (EXPR *, ep, BOOL, duse)
-{
-    CSE    *csp;
+static CSE *enternode P2(EXPR *, ep, BOOL, duse) {
+  CSE *csp;
 
-    if ((csp = searchnode (ep)) == NIL_CSE) {	/* add to tree */
-	csp = (CSE *) xalloc (sizeof (CSE));
+  if ((csp = searchnode(ep)) == NIL_CSE) { /* add to tree */
+    csp = (CSE *)xalloc(sizeof(CSE));
 
-	csp->next = olist;
-	csp->uses = (USES) 0;
-	csp->duses = (USES) 0;
-	csp->exp = copynode (ep);
-	csp->voidf = FALSE;
-	csp->reg = NO_REG;
-	olist = csp;
-	return csp;
-    }
-    /*
-     *       Integer constants may be in the table with different sizes --
-     *       keep the maximum size
-     */
-    if (is_icon (ep) && ep->etp->size > csp->exp->etp->size) {
-	csp->exp->etp = ep->etp;
-    }
-    ++(csp->uses);
-    if (duse) {
-	++(csp->duses);
-    }
+    csp->next = olist;
+    csp->uses = (USES)0;
+    csp->duses = (USES)0;
+    csp->exp = copynode(ep);
+    csp->voidf = FALSE;
+    csp->reg = NO_REG;
+    olist = csp;
     return csp;
+  }
+  /*
+   *       Integer constants may be in the table with different sizes --
+   *       keep the maximum size
+   */
+  if (is_icon(ep) && ep->etp->size > csp->exp->etp->size) {
+    csp->exp->etp = ep->etp;
+  }
+  ++(csp->uses);
+  if (duse) {
+    ++(csp->duses);
+  }
+  return csp;
 }
-
 
 /*
  *   voidauto() will void an auto dereference node which points to the
  *   same auto constant as ep.
  */
 
-static CSE *voidauto P1 (EXPR *, ep)
-{
-    CSE    *csp;
+static CSE *voidauto P1(EXPR *, ep) {
+  CSE *csp;
 
-    for (csp = olist; csp != NIL_CSE; csp = csp->next) {
-	if (is_lvalue (csp->exp) && is_equalnode (ep, csp->exp->v.p[0])) {
-	    if (csp->voidf) {
-		return NIL_CSE;
-	    }
-	    csp->voidf = TRUE;
-	    return csp;
-	}
+  for (csp = olist; csp != NIL_CSE; csp = csp->next) {
+    if (is_lvalue(csp->exp) && is_equalnode(ep, csp->exp->v.p[0])) {
+      if (csp->voidf) {
+        return NIL_CSE;
+      }
+      csp->voidf = TRUE;
+      return csp;
     }
-    return NIL_CSE;
+  }
+  return NIL_CSE;
 }
-
 
 /*
  *   scannode() will scan the expression pointed to by node for
@@ -425,170 +404,161 @@ static CSE *voidauto P1 (EXPR *, ep)
  *   duse should be set if the expression will be dereferenced.
  */
 
-static void scannode P2 (EXPR *, ep, BOOL, duse)
-{
-    EXPR   *ep0;
-    CSE    *csp, *csp1;
+static void scannode P2(EXPR *, ep, BOOL, duse) {
+  EXPR *ep0;
+  CSE *csp, *csp1;
 
-    if (ep == NIL_EXPR) {
-	return;
+  if (ep == NIL_EXPR) {
+    return;
+  }
+  switch (ep->nodetype) {
+  case en_fcon:
+  case en_str:
+    break;
+  case en_icon:
+  case en_autocon:
+  case en_sym:
+    /*
+     *   look if the dereferenced use of the node is in the
+     *   list, remove it in this case.
+     */
+    if ((csp = voidauto(ep)) != NIL_CSE) {
+      csp1 = enternode(ep, duse);
+      csp1->duses += csp->uses;
+      break;
     }
-    switch (ep->nodetype) {
-    case en_fcon:
-    case en_str:
-	break;
-    case en_icon:
-    case en_autocon:
-    case en_sym:
-	/*
-	 *   look if the dereferenced use of the node is in the
-	 *   list, remove it in this case.
-	 */
-	if ((csp = voidauto (ep)) != NIL_CSE) {
-	    csp1 = enternode (ep, duse);
-	    csp1->duses += csp->uses;
-	    break;
-	}
-	/*FALLTHRU*/
-    case en_labcon:
-    case en_global:
-    case en_nacon:
-	VOIDCAST enternode (ep, duse);
-	break;
-    case en_ref:
-    case en_fieldref:
-	ep0 = ep->v.p[0];
-	if (is_sym (ep0) &&
-	    (is_auto (ep0->v.sp) ||
-	     is_parms (ep0->v.sp) ||
-	     is_register (ep0->v.sp))) {
-	    BOOL    first = (searchnode (ep) == NIL_CSE);
+    /*FALLTHRU*/
+  case en_labcon:
+  case en_global:
+  case en_nacon:
+    VOIDCAST enternode(ep, duse);
+    break;
+  case en_ref:
+  case en_fieldref:
+    ep0 = ep->v.p[0];
+    if (is_sym(ep0) && (is_auto(ep0->v.sp) || is_parms(ep0->v.sp) || is_register(ep0->v.sp))) {
+      BOOL first = (searchnode(ep) == NIL_CSE);
 
-	    csp = enternode (ep, duse);
-	    if (searchnode (ep0) != NIL_CSE) {
-		/*
-		 *   the non-dereferenced use of the auto node
-		 *   is already in the list.
-		 */
-		csp->voidf = TRUE;
-		scannode (ep0, TRUE);
-	    } else if (first) {
-		/*
-		 *   look for register nodes
-		 */
-		int     i;
-		SYM    *sp = ep0->v.sp;
+      csp = enternode(ep, duse);
+      if (searchnode(ep0) != NIL_CSE) {
+        /*
+         *   the non-dereferenced use of the auto node
+         *   is already in the list.
+         */
+        csp->voidf = TRUE;
+        scannode(ep0, TRUE);
+      } else if (first) {
+        /*
+         *   look for register nodes
+         */
+        int i;
+        SYM *sp = ep0->v.sp;
 
-		for (i = 0; i < regptr; ++i) {
-		    if (is_equalsym (reglst[i], sp)) {
-			csp->voidf--;	/* this is not in auto_lst */
-			csp->uses += (USES) (90 * (100 - i));
-			csp->duses += (USES) (30 * (100 - i));
-			break;
-		    }
-		}
+        for (i = 0; i < regptr; ++i) {
+          if (is_equalsym(reglst[i], sp)) {
+            csp->voidf--; /* this is not in auto_lst */
+            csp->uses += (USES)(90 * (100 - i));
+            csp->duses += (USES)(30 * (100 - i));
+            break;
+          }
+        }
 
-		/*
-		 *   set voidf if the node is not in autolst
-		 */
-		csp->voidf++;
-		for (i = 0; i < autoptr; ++i) {
-		    if (is_equalsym (autolst[i], sp)) {
-			csp->voidf--;
-			break;
-		    }
-		}
+        /*
+         *   set voidf if the node is not in autolst
+         */
+        csp->voidf++;
+        for (i = 0; i < autoptr; ++i) {
+          if (is_equalsym(autolst[i], sp)) {
+            csp->voidf--;
+            break;
+          }
+        }
 
-		/*
-		 *   Even if that item must not be put in a register,
-		 *   it is legal to put its address therein
-		 */
-		if (csp->voidf) {
-		    scannode (ep0, TRUE);
-		}
-	    }
-	} else {
-	    scannode (ep0, TRUE);
-	}
-	break;
-    case en_add:
-    case en_sub:
-	scannode (ep->v.p[1], duse);
-	scannode (ep->v.p[0], duse);
-	break;
-    case en_ainc:
-    case en_adec:
-    case en_deref:
-	scannode (ep->v.p[0], duse);
-	break;
-    case en_asadd:
-    case en_assub:
-    case en_mul:
-    case en_div:
-    case en_lsh:
-    case en_rsh:
-    case en_mod:
-    case en_and:
-    case en_or:
-    case en_xor:
-    case en_lor:
-    case en_land:
-    case en_eq:
-    case en_ne:
-    case en_gt:
-    case en_ge:
-    case en_lt:
-    case en_le:
-    case en_asmul:
-    case en_asmul2:
-    case en_asdiv:
-    case en_asdiv2:
-    case en_asmod:
-    case en_aslsh:
-    case en_asrsh:
-    case en_asand:
-    case en_asor:
-    case en_asxor:
-    case en_cond:
-    case en_comma:
-    case en_list:
-    case en_assign:
-	scannode (ep->v.p[1], FALSE);
-	/*FALLTHRU*/
-    case en_uminus:
-    case en_compl:
-    case en_not:
-    case en_test:
-    case en_cast:
-	scannode (ep->v.p[0], FALSE);
-	break;
-    case en_fcall:
-    case en_call:
-	scannode (ep->v.p[0], TRUE);
-	scannode (ep->v.p[1], FALSE);
-	break;
-    default:
-	CANNOT_REACH_HERE ();
-	break;
+        /*
+         *   Even if that item must not be put in a register,
+         *   it is legal to put its address therein
+         */
+        if (csp->voidf) {
+          scannode(ep0, TRUE);
+        }
+      }
+    } else {
+      scannode(ep0, TRUE);
     }
+    break;
+  case en_add:
+  case en_sub:
+    scannode(ep->v.p[1], duse);
+    scannode(ep->v.p[0], duse);
+    break;
+  case en_ainc:
+  case en_adec:
+  case en_deref:
+    scannode(ep->v.p[0], duse);
+    break;
+  case en_asadd:
+  case en_assub:
+  case en_mul:
+  case en_div:
+  case en_lsh:
+  case en_rsh:
+  case en_mod:
+  case en_and:
+  case en_or:
+  case en_xor:
+  case en_lor:
+  case en_land:
+  case en_eq:
+  case en_ne:
+  case en_gt:
+  case en_ge:
+  case en_lt:
+  case en_le:
+  case en_asmul:
+  case en_asmul2:
+  case en_asdiv:
+  case en_asdiv2:
+  case en_asmod:
+  case en_aslsh:
+  case en_asrsh:
+  case en_asand:
+  case en_asor:
+  case en_asxor:
+  case en_cond:
+  case en_comma:
+  case en_list:
+  case en_assign:
+    scannode(ep->v.p[1], FALSE);
+    /*FALLTHRU*/
+  case en_uminus:
+  case en_compl:
+  case en_not:
+  case en_test:
+  case en_cast:
+    scannode(ep->v.p[0], FALSE);
+    break;
+  case en_fcall:
+  case en_call:
+    scannode(ep->v.p[0], TRUE);
+    scannode(ep->v.p[1], FALSE);
+    break;
+  default:
+    CANNOT_REACH_HERE();
+    break;
+  }
 }
 
-static EXPR *scanexpr P1 (EXPR *, ep)
-{
-    scannode (ep, FALSE);
-    return ep;
+static EXPR *scanexpr P1(EXPR *, ep) {
+  scannode(ep, FALSE);
+  return ep;
 }
-
 
 /*
  *   scan() will gather all optimisable expressions into the
  *   expression list for a block of statements.
  */
 
-static void scan P1 (STMT *, stmt)
-{
-    walkstmt (stmt, scan, scanexpr);
-}
+static void scan P1(STMT *, stmt) { walkstmt(stmt, scan, scanexpr); }
 
 /*****************************************************************************/
 
@@ -596,103 +566,86 @@ static void scan P1 (STMT *, stmt)
  *   constant() will fold all constant expression in the statement
  *   tree.
  */
-static void constant P1 (STMT *, stmt)
-{
-    walkstmt (stmt, constant, constantopt);
-}
+static void constant P1(STMT *, stmt) { walkstmt(stmt, constant, constantopt); }
 
 /*****************************************************************************/
 
-static EXPR *unsymbolnode P1 (EXPR *, ep)
-{
-    SYM    *sp;
-    TYP    *tp;
+static EXPR *unsymbolnode P1(EXPR *, ep) {
+  SYM *sp;
+  TYP *tp;
 
-    switch (ep->nodetype) {
-    case en_sym:
-	sp = ep->v.sp;
-	tp = TYPEOF (sp);
-	switch (storageof (sp)) {
-	case sc_static:
-	    if (!is_func (tp)) {
-		ep->nodetype = en_labcon;
-		ep->v.l = sp->value.l;
-		ep->etp = mk_type (tp_pointer, tp);
-		break;
-	    }
-	    /*FALLTHRU*/
-	case sc_global:
-	case sc_external:
-	    if (datamodel_option && !is_func (tp)) {
-		ep->nodetype = en_global;
-	    } else {
-		ep->nodetype = en_nacon;
-	    }
-	    ep->v.str = nameof (sp);
-	    ep->etp = mk_type (tp_pointer, tp);
-	    break;
-	case sc_const:
-	    ep->nodetype = en_icon;
-	    ep->v.i = sp->value.i;
-	    break;
-	case sc_register:
-	case sc_auto:
-	case sc_parms:
-	    ep->etp = mk_type (tp_pointer, tp);
-	    ep->nodetype = en_autocon;
-	    ep->v.i = sp->value.i;
-	    break;
-	default:
-	    CANNOT_REACH_HERE ();
-	    break;
-	}
-	break;
+  switch (ep->nodetype) {
+  case en_sym:
+    sp = ep->v.sp;
+    tp = TYPEOF(sp);
+    switch (storageof(sp)) {
+    case sc_static:
+      if (!is_func(tp)) {
+        ep->nodetype = en_labcon;
+        ep->v.l = sp->value.l;
+        ep->etp = mk_type(tp_pointer, tp);
+        break;
+      }
+      /*FALLTHRU*/
+    case sc_global:
+    case sc_external:
+      if (datamodel_option && !is_func(tp)) {
+        ep->nodetype = en_global;
+      } else {
+        ep->nodetype = en_nacon;
+      }
+      ep->v.str = nameof(sp);
+      ep->etp = mk_type(tp_pointer, tp);
+      break;
+    case sc_const:
+      ep->nodetype = en_icon;
+      ep->v.i = sp->value.i;
+      break;
+    case sc_register:
+    case sc_auto:
+    case sc_parms:
+      ep->etp = mk_type(tp_pointer, tp);
+      ep->nodetype = en_autocon;
+      ep->v.i = sp->value.i;
+      break;
     default:
-	break;
+      CANNOT_REACH_HERE();
+      break;
     }
-    return ep;
+    break;
+  default:
+    break;
+  }
+  return ep;
 }
 
-EXPR   *unsymbolexpr P1 (EXPR *, ep)
-{
-    return walkexpr (ep, unsymbolnode);
-}
+EXPR *unsymbolexpr P1(EXPR *, ep) { return walkexpr(ep, unsymbolnode); }
 
 /*
  *    unsymbol() will remove all references to en_sym nodes.
  */
-static void unsymbol P1 (STMT *, stmt)
-{
-    CSE    *csp;
+static void unsymbol P1(STMT *, stmt) {
+  CSE *csp;
 
-    walkstmt (stmt, unsymbol, unsymbolexpr);
-    /* must also change the Common Sub-expression tree */
-    for (csp = olist; csp; csp = csp->next) {
-	csp->exp = walkexpr (csp->exp, unsymbolnode);
-    }
+  walkstmt(stmt, unsymbol, unsymbolexpr);
+  /* must also change the Common Sub-expression tree */
+  for (csp = olist; csp; csp = csp->next) {
+    csp->exp = walkexpr(csp->exp, unsymbolnode);
+  }
 }
 
 /*****************************************************************************/
 
-static EXPR *transformnode P1 (EXPR *, ep)
-{
-    return g_transform (ep);
-}
+static EXPR *transformnode P1(EXPR *, ep) { return g_transform(ep); }
 
-static EXPR *transformexpr P1 (EXPR *, ep)
-{
-    return walkexpr (ep, transformnode);
-}
+static EXPR *transformexpr P1(EXPR *, ep) { return walkexpr(ep, transformnode); }
 
 /*
  *   transform() will descend the statement tree calling a code
  *   generator specific routine to transform all expressions which
  *   are performed by run-time support routines.
  */
-static void transform P1 (STMT *, stmt)
-{
-    walkstmt (stmt, transform, transformexpr);
-}
+static void transform P1(STMT *, stmt) { walkstmt(stmt, transform, transformexpr); }
 
 /*****************************************************************************/
 
@@ -700,136 +653,127 @@ static void transform P1 (STMT *, stmt)
  *   repcsenode() will replace all allocated references within an
  *   expression with register nodes.
  */
-static EXPR *repcsenode P1 (EXPR *, ep)
-{
-    CSE    *csp;
+static EXPR *repcsenode P1(EXPR *, ep) {
+  CSE *csp;
 
-    switch (ep->nodetype) {
-    case en_fcon:
-    case en_icon:
-    case en_nacon:
-    case en_labcon:
-    case en_autocon:
-    case en_sym:
-    case en_ref:
-    case en_fieldref:
-	if (((csp = searchnode (ep)) != NIL_CSE) && (csp->reg != NO_REG)) {
-	    ep->nodetype = en_register;
-	    ep->v.r = csp->reg;
-	}
-	break;
-    default:
-	break;
+  switch (ep->nodetype) {
+  case en_fcon:
+  case en_icon:
+  case en_nacon:
+  case en_labcon:
+  case en_autocon:
+  case en_sym:
+  case en_ref:
+  case en_fieldref:
+    if (((csp = searchnode(ep)) != NIL_CSE) && (csp->reg != NO_REG)) {
+      ep->nodetype = en_register;
+      ep->v.r = csp->reg;
     }
-    return ep;
+    break;
+  default:
+    break;
+  }
+  return ep;
 }
 
-static EXPR *repcseexpr P1 (EXPR *, ep)
-{
-    return walkexpr (ep, repcsenode);
-}
+static EXPR *repcseexpr P1(EXPR *, ep) { return walkexpr(ep, repcsenode); }
 
 /*
  *    repcse() will scan through a block of statements replacing
  *    the optimized expressions with their temporary references.
  */
-static void repcse P1 (STMT *, stmt)
-{
-    walkstmt (stmt, repcse, repcseexpr);
-}
+static void repcse P1(STMT *, stmt) { walkstmt(stmt, repcse, repcseexpr); }
 
 /*****************************************************************************/
 
-static WEIGHT swapnode P1 (EXPR *, ep)
-{
-    WEIGHT  lweight, rweight;
+static WEIGHT swapnode P1(EXPR *, ep) {
+  WEIGHT lweight, rweight;
 
-    if (ep == NIL_EXPR) {
-	return (WEIGHT) 0;
+  if (ep == NIL_EXPR) {
+    return (WEIGHT)0;
+  }
+  ep = opt0(ep);
+  switch (ep->nodetype) {
+  case en_register:
+    return (WEIGHT)1;
+  case en_icon:
+  case en_fcon:
+  case en_nacon:
+  case en_labcon:
+  case en_autocon:
+  case en_global:
+  case en_sym:
+  case en_str:
+    return (WEIGHT)2;
+  case en_ref:
+  case en_fieldref:
+    return swapnode(ep->v.p[0]);
+  case en_uminus:
+  case en_not:
+  case en_test:
+  case en_compl:
+  case en_ainc:
+  case en_adec:
+  case en_cast:
+  case en_deref:
+    return swapnode(ep->v.p[0]) + 1;
+  case en_lt:
+  case en_le:
+  case en_gt:
+  case en_ge:
+    /* almost commutative operators */
+  case en_eq:
+  case en_ne:
+  case en_add:
+  case en_mul:
+  case en_and:
+  case en_or:
+  case en_xor:
+    /* commutative operators */
+    lweight = swapnode(ep->v.p[0]);
+    rweight = swapnode(ep->v.p[1]);
+    if (rweight > lweight) {
+      swap_nodes(ep);
     }
-    ep = opt0 (ep);
-    switch (ep->nodetype) {
-    case en_register:
-	return (WEIGHT) 1;
-    case en_icon:
-    case en_fcon:
-    case en_nacon:
-    case en_labcon:
-    case en_autocon:
-    case en_global:
-    case en_sym:
-    case en_str:
-	return (WEIGHT) 2;
-    case en_ref:
-    case en_fieldref:
-	return swapnode (ep->v.p[0]);
-    case en_uminus:
-    case en_not:
-    case en_test:
-    case en_compl:
-    case en_ainc:
-    case en_adec:
-    case en_cast:
-    case en_deref:
-	return swapnode (ep->v.p[0]) + 1;
-    case en_lt:
-    case en_le:
-    case en_gt:
-    case en_ge:
-	/* almost commutative operators */
-    case en_eq:
-    case en_ne:
-    case en_add:
-    case en_mul:
-    case en_and:
-    case en_or:
-    case en_xor:
-	/* commutative operators */
-	lweight = swapnode (ep->v.p[0]);
-	rweight = swapnode (ep->v.p[1]);
-	if (rweight > lweight) {
-	    swap_nodes (ep);
-	}
-	return lweight + rweight;
-    case en_sub:
-    case en_div:
-    case en_mod:
-    case en_lsh:
-    case en_rsh:
-    case en_land:
-    case en_lor:
-    case en_cond:
-    case en_comma:
-    case en_list:
-    case en_asadd:
-    case en_assub:
-    case en_asmul:
-    case en_asmul2:
-    case en_asdiv:
-    case en_asdiv2:
-    case en_asor:
-    case en_asxor:
-    case en_asand:
-    case en_asmod:
-    case en_aslsh:
-    case en_asrsh:
-    case en_assign:
-	return swapnode (ep->v.p[0]) + swapnode (ep->v.p[1]);
-    case en_fcall:
-    case en_call:
-	return (WEIGHT) 10 + swapnode (ep->v.p[0]) + swapnode (ep->v.p[1]);
-    default:
-	CANNOT_REACH_HERE ();
-	break;
-    }
-    return (WEIGHT) 0;
+    return lweight + rweight;
+  case en_sub:
+  case en_div:
+  case en_mod:
+  case en_lsh:
+  case en_rsh:
+  case en_land:
+  case en_lor:
+  case en_cond:
+  case en_comma:
+  case en_list:
+  case en_asadd:
+  case en_assub:
+  case en_asmul:
+  case en_asmul2:
+  case en_asdiv:
+  case en_asdiv2:
+  case en_asor:
+  case en_asxor:
+  case en_asand:
+  case en_asmod:
+  case en_aslsh:
+  case en_asrsh:
+  case en_assign:
+    return swapnode(ep->v.p[0]) + swapnode(ep->v.p[1]);
+  case en_fcall:
+  case en_call:
+    return (WEIGHT)10 + swapnode(ep->v.p[0]) + swapnode(ep->v.p[1]);
+  default:
+    CANNOT_REACH_HERE();
+    break;
+  }
+  return (WEIGHT)0;
 }
 
-static EXPR *swapexpr P1 (EXPR *, ep)
-{
-    VOIDCAST swapnode (ep);
+static EXPR *swapexpr P1(EXPR *, ep) {
+  VOIDCAST swapnode(ep);
 
-    return ep;
+  return ep;
 }
 
 /*
@@ -838,27 +782,15 @@ static EXPR *swapexpr P1 (EXPR *, ep)
  *   an intermediate value from being temporarily pushed on the stack
  *   during expression evaluation.
  */
-static void swap P1 (STMT *, stmt)
-{
-    walkstmt (stmt, swap, swapexpr);
-}
+static void swap P1(STMT *, stmt) { walkstmt(stmt, swap, swapexpr); }
 
 /*****************************************************************************/
 
-static EXPR *ordernode P1 (EXPR *, ep)
-{
-    return g_order (ep);
-}
+static EXPR *ordernode P1(EXPR *, ep) { return g_order(ep); }
 
-static EXPR *orderexpr P1 (EXPR *, ep)
-{
-    return walkexpr (ep, ordernode);
-}
+static EXPR *orderexpr P1(EXPR *, ep) { return walkexpr(ep, ordernode); }
 
-static void order P1 (STMT *, stmt)
-{
-    walkstmt (stmt, order, orderexpr);
-}
+static void order P1(STMT *, stmt) { walkstmt(stmt, order, orderexpr); }
 
 /*****************************************************************************/
 
@@ -866,25 +798,22 @@ static void order P1 (STMT *, stmt)
  *   descend the statement tree recursively and sort consecutive case
  *   statements into ascending order.
  */
-static void ordercase P1 (STMT *, stmt)
-{
-    walkstmt (stmt, ordercase, null_expr);
-    if (stmt) {
-	switch (stmt->stype) {
-	case st_case:
-	    if (stmt->s1 && stmt->s1->stype == st_case &&
-		(stmt->s1 == stmt->v1.s) &&
-		(stmt->s1->v2.i < stmt->v2.i)) {
-		IVAL    i = stmt->v2.i;
+static void ordercase P1(STMT *, stmt) {
+  walkstmt(stmt, ordercase, null_expr);
+  if (stmt) {
+    switch (stmt->stype) {
+    case st_case:
+      if (stmt->s1 && stmt->s1->stype == st_case && (stmt->s1 == stmt->v1.s) && (stmt->s1->v2.i < stmt->v2.i)) {
+        IVAL i = stmt->v2.i;
 
-		stmt->v2.i = stmt->s1->v2.i;
-		stmt->s1->v2.i = i;
-	    }
-	    break;
-	default:
-	    break;
-	}
+        stmt->v2.i = stmt->s1->v2.i;
+        stmt->s1->v2.i = i;
+      }
+      break;
+    default:
+      break;
     }
+  }
 }
 
 /*****************************************************************************/
@@ -895,47 +824,46 @@ static void ordercase P1 (STMT *, stmt)
  *   the tempref for all occurrences of the expression within
  *   the block.
  */
-CSE    *globalopt P1 (STMT *, stmt)
-{
-    olist = NIL_CSE;
+CSE *globalopt P1(STMT *, stmt) {
+  olist = NIL_CSE;
 #ifdef ICODE
 #ifdef DEBUG
-    if (icode_option) {
-	if (is_debugging (DEBUG_GLOBAL)) {
-	    genicode (stmt, 0);
-	}
+  if (icode_option) {
+    if (is_debugging(DEBUG_GLOBAL)) {
+      genicode(stmt, 0);
     }
-#endif /* DEBUG */
-#endif /* ICODE */
-    constant (stmt);		/* constant folding */
-    transform (stmt);
-    if (opt_option) {
-	scan (stmt);		/* collect expressions */
-	bsort (&olist);		/* sort expressions list into usage order */
-    }
-    unsymbol (stmt);		/* replace all references to symbols */
+  }
+#endif            /* DEBUG */
+#endif            /* ICODE */
+  constant(stmt); /* constant folding */
+  transform(stmt);
+  if (opt_option) {
+    scan(stmt);    /* collect expressions */
+    bsort(&olist); /* sort expressions list into usage order */
+  }
+  unsymbol(stmt); /* replace all references to symbols */
 #ifdef ICODE
 #ifdef DEBUG
-    if (icode_option) {
-	if (is_debugging (DEBUG_GLOBAL)) {
-	    genicode (stmt, 0);
-	}
+  if (icode_option) {
+    if (is_debugging(DEBUG_GLOBAL)) {
+      genicode(stmt, 0);
     }
+  }
 #endif /* DEBUG */
 #endif /* ICODE */
-    if (opt_option) {
-	g_allocate (olist);	/* allocate registers */
-	repcse (stmt);		/* replace allocated expressions */
-	swap (stmt);		/* swap commutative expression */
-	order (stmt);		/* code generation order */
-	ordercase (stmt);
-    }
+  if (opt_option) {
+    g_allocate(olist); /* allocate registers */
+    repcse(stmt);      /* replace allocated expressions */
+    swap(stmt);        /* swap commutative expression */
+    order(stmt);       /* code generation order */
+    ordercase(stmt);
+  }
 #ifdef ICODE
-    if (icode_option) {
-	genicse (olist);
-    }
+  if (icode_option) {
+    genicse(olist);
+  }
 #endif /* ICODE */
-    regptr = autoptr = 0;
-    return olist;
+  regptr = autoptr = 0;
+  return olist;
 }
 #endif /* CPU_DEFINED */

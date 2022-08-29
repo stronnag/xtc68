@@ -27,34 +27,30 @@
 
 #include "genx86.h"
 
-typedef enum {
-    target_8086,
-    target_80186,
-    target_80286
-} TARGET;
+typedef enum { target_8086, target_80186, target_80286 } TARGET;
 
 /* support routines */
-#define	SUP_LDIV	(const CHAR *)".ldiv"
-#define	SUP_LMOD	(const CHAR *)".lmod"
-#define	SUP_LMUL	(const CHAR *)".lmul"
-#define	SUP_LSHL	(const CHAR *)".lshl"
-#define	SUP_LSHR	(const CHAR *)".lshr"
-#define	SUP_ULDIV	(const CHAR *)".uldiv"
-#define	SUP_ULMOD	(const CHAR *)".ilmod"
-#define	SUP_ULMUL	(const CHAR *)".ulmul"
-#define	SUP_ULSHL	(const CHAR *)".ulshl"
-#define	SUP_ULSHR	(const CHAR *)".ulshr"
-#define	SUP_ASLDIV	(const CHAR *)".asldiv"
-#define	SUP_ASLMOD	(const CHAR *)".aslmod"
-#define	SUP_ASLMUL	(const CHAR *)".aslmul"
-#define	SUP_ASLSHL	(const CHAR *)".aslshl"
-#define	SUP_ASLSHR	(const CHAR *)".aslshr"
-#define	SUP_ASOPL	(const CHAR *)".asopl"
-#define	SUP_ASULDIV	(const CHAR *)".asuldiv"
-#define	SUP_ASULMOD	(const CHAR *)".asilmod"
-#define	SUP_ASULMUL	(const CHAR *)".asulmul"
-#define	SUP_ASULSHL	(const CHAR *)".asulshl"
-#define	SUP_ASULSHR	(const CHAR *)".asulshr"
-#define	SUP_STACKCHECK	(const CHAR *)".stackcheck"
+#define SUP_LDIV (const CHAR *)".ldiv"
+#define SUP_LMOD (const CHAR *)".lmod"
+#define SUP_LMUL (const CHAR *)".lmul"
+#define SUP_LSHL (const CHAR *)".lshl"
+#define SUP_LSHR (const CHAR *)".lshr"
+#define SUP_ULDIV (const CHAR *)".uldiv"
+#define SUP_ULMOD (const CHAR *)".ilmod"
+#define SUP_ULMUL (const CHAR *)".ulmul"
+#define SUP_ULSHL (const CHAR *)".ulshl"
+#define SUP_ULSHR (const CHAR *)".ulshr"
+#define SUP_ASLDIV (const CHAR *)".asldiv"
+#define SUP_ASLMOD (const CHAR *)".aslmod"
+#define SUP_ASLMUL (const CHAR *)".aslmul"
+#define SUP_ASLSHL (const CHAR *)".aslshl"
+#define SUP_ASLSHR (const CHAR *)".aslshr"
+#define SUP_ASOPL (const CHAR *)".asopl"
+#define SUP_ASULDIV (const CHAR *)".asuldiv"
+#define SUP_ASULMOD (const CHAR *)".asilmod"
+#define SUP_ASULMUL (const CHAR *)".asulmul"
+#define SUP_ASULSHL (const CHAR *)".asulshl"
+#define SUP_ASULSHR (const CHAR *)".asulshr"
+#define SUP_STACKCHECK (const CHAR *)".stackcheck"
 
 #endif /* _GEN86_H */

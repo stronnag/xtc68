@@ -98,8 +98,7 @@ int main(int ac, char **av) {
           tm = localtime(&s.st_mtime);
           char tbuff[64];
           strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%m:%S", tm);
-          printf("%-36.*s%9zu%8u%4d %s\n", len, qd.d_name, (size_t)s.st_size,
-                 (uint32_t)htonl(qd.d_datalen), qd.d_type, tbuff);
+          printf("%-36.*s%9zu%8u%4d %s\n", len, qd.d_name, (size_t)s.st_size, (uint32_t)htonl(qd.d_datalen), qd.d_type, tbuff);
         }
       }
     }

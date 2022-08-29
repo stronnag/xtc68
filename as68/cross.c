@@ -17,126 +17,119 @@
  * handle possible alignment and byte-order problems in cross environment
  */
 
-
-void pcrossw(short w, char *cp)
-{
+void pcrossw(short w, char *cp) {
 #ifdef HOST_LITTLE_ENDIAN
-       *(short *)cp = (unsigned short) (w << 8) + (w >> 8);
+  *(short *)cp = (unsigned short)(w << 8) + (w >> 8);
 #else
-       *(short *)cp = w;
+  *(short *)cp = w;
 #endif
-
 }
 
-void pcrossl(l, cp)
-long l;
+void pcrossl(l, cp) long l;
 char *cp;
 {
-       union {
-               long l;
-               char c[4];
-       } u;
+  union {
+    long l;
+    char c[4];
+  } u;
 
-       u.l = l;
+  u.l = l;
 #ifdef HOST_LITTLE_ENDIAN
-       cp[0] = u.c[3];
-       cp[1] = u.c[2];
-       cp[2] = u.c[1];
-       cp[3] = u.c[0];
+  cp[0] = u.c[3];
+  cp[1] = u.c[2];
+  cp[2] = u.c[1];
+  cp[3] = u.c[0];
 #else
-       *(long *)cp = l;
+  *(long *)cp = l;
 #endif
-
 }
 
 static char mklowbuf[4];
 
-char * mklowbyte(l)
+char *mklowbyte(l)
 long l;
 {
-       mklowbuf[0] = l;
-       return mklowbuf;
+  mklowbuf[0] = l;
+  return mklowbuf;
 }
 
 char *mklowshort(l)
 long l;
 {
-       mklowbuf[0] = l>>8;
-       mklowbuf[1] = l;
-       return mklowbuf;
+  mklowbuf[0] = l >> 8;
+  mklowbuf[1] = l;
+  return mklowbuf;
 }
 
-char *
-mklowlong(l)
+char *mklowlong(l)
 long l;
 {
-       pcrossl(l, mklowbuf);
-       return mklowbuf;
+  pcrossl(l, mklowbuf);
+  return mklowbuf;
 }
 
-char * swapw(cp, n)
+char *swapw(cp, n)
 char *cp;
 long n;
 {
-    char *p = cp;
+  char *p = cp;
 #ifdef HOST_LITTLE_ENDIAN
-       char t;
+  char t;
 
-       while (n--) {
-               t = cp[1];
-               cp[1] = cp[0];
-               cp[0] = t;
-               cp += 2;
-       }
+  while (n--) {
+    t = cp[1];
+    cp[1] = cp[0];
+    cp[0] = t;
+    cp += 2;
+  }
 #endif
-    return p;
+  return p;
 }
 
 char *swapl(cp, n)
 char *cp;
 long n;
 {
-    char *p = cp;
+  char *p = cp;
 #ifdef HOST_LITTLE_ENDIAN
-       char t;
+  char t;
 
-       while (n--) {
-               t = cp[3];
-               cp[3] = cp[0];
-               cp[0] = t;
+  while (n--) {
+    t = cp[3];
+    cp[3] = cp[0];
+    cp[0] = t;
 
-               t = cp[2];
-               cp[2] = cp[1];
-               cp[1] = t;
-               cp += 4;
-       }
+    t = cp[2];
+    cp[2] = cp[1];
+    cp[1] = t;
+    cp += 4;
+  }
 #endif
-    return p;
+  return p;
 }
 
 struct fsym {
-       char name[8];
-       short flags;
-       short value[2];
+  char name[8];
+  short flags;
+  short value[2];
 } tmpsym;
 
 struct sym {
-       char name[8];
-       short flags;
-       long value;
+  char name[8];
+  short flags;
+  long value;
 };
 
-char * fixsym(void *xsp)
-{
-       struct sym *sp = (struct sym *) xsp;
-       struct fsym *fp;
-       int i;
+char *fixsym(void *xsp) {
+  struct sym *sp = (struct sym *)xsp;
+  struct fsym *fp;
+  int i;
 
-       fp = &tmpsym;
-       for (i=0; i<8; i++)
-               fp->name[i] = sp->name[i];
-       pcrossw(sp->flags, (char *) &fp->flags);
-       pcrossl(sp->value, (char *) fp->value);
+  fp = &tmpsym;
+  for (i = 0; i < 8; i++)
+    fp->name[i] = sp->name[i];
+  pcrossw(sp->flags, (char *)&fp->flags);
+  pcrossl(sp->value, (char *)fp->value);
 
-       return (char *)&tmpsym;
+  return (char *)&tmpsym;
 }

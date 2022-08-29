@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with GNU CC; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 /* #defines that need visibility everywhere.  */
 #define FALSE 0
 #define TRUE 1
@@ -39,13 +38,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* If compiled with GNU C, use the built-in alloca */
 #ifdef __GNUC__
 #define alloca __builtin_alloca
-# ifdef XTC68
-#  define GCC_INCLUDE_DIR "/usr/local/share/qdos/include"
-#  define GPLUSPLUS_INCLUDE_DIR "/usr/local/share/qdos/include"
-# endif
-#elif defined (XTC68)   /* Must be DOS/NT/OS2 */
-# define GCC_INCLUDE_DIR "c:/qlinc"
-# define GPLUSPLUS_INCLUDE_DIR "c:/qlinc"
-# define alloca xalloca
-extern char * xalloca(unsigned long);
+#ifdef XTC68
+#define GCC_INCLUDE_DIR "/usr/local/share/qdos/include"
+#define GPLUSPLUS_INCLUDE_DIR "/usr/local/share/qdos/include"
+#endif
+#elif defined(XTC68) /* Must be DOS/NT/OS2 */
+#define GCC_INCLUDE_DIR "c:/qlinc"
+#define GPLUSPLUS_INCLUDE_DIR "c:/qlinc"
+#define alloca xalloca
+extern char *xalloca(unsigned long);
 #endif

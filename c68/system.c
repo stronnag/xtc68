@@ -61,67 +61,62 @@
  *  an initial error channel.   On systems which support the default
  *  'stderr' channel this can be a dummy.
  */
-void openerror P0 (void)
-{
-    return;
-}
+void openerror P0(void) { return; }
 
 /*
  *  Open up any files specified on the command line.
  */
-void openfiles P2 (int, argc, char **, argv)
-{
+void openfiles P2(int, argc, char **, argv) {
 #ifdef HAS_NLS
-    catid = catopen (PROGNAME, 0);
+  catid = catopen(PROGNAME, 0);
 #endif /* HAS_NLS */
 
 #ifdef LIST
-    if (argc > 2)
+  if (argc > 2)
 #else
-    if (argc > 3)
+  if (argc > 3)
 #endif
-    {
-	message (MSG_EXTRAPARAM);
-	exit (EXIT_FAILURE);
-    }
-    if (argc > 0) {
-	/* used named file instead of stdin */
+  {
+    message(MSG_EXTRAPARAM);
+    exit(EXIT_FAILURE);
+  }
+  if (argc > 0) {
+    /* used named file instead of stdin */
 
-	if ((input = fopen (*argv, "r")) == NULL) {
-	    message (MSG_OPENINPUT, *argv);
-	    exit (EXIT_FAILURE);
-	}
+    if ((input = fopen(*argv, "r")) == NULL) {
+      message(MSG_OPENINPUT, *argv);
+      exit(EXIT_FAILURE);
+    }
 #ifdef BUFFER_SIZE
-	VOIDCAST setvbuf (input, NULL, _IOFBF, BUFFER_SIZE);
+    VOIDCAST setvbuf(input, NULL, _IOFBF, BUFFER_SIZE);
 
 #endif /* BUFFSER_SIZE */
-	in_file = act_file = (const CHAR *) *argv;
+    in_file = act_file = (const CHAR *)*argv;
+  }
+  argv++;
+  if (argc > 1) {
+    /* used named file instead of stdout */
+    if ((output = fopen(*argv, "w")) == NULL) {
+      message(MSG_OPENOUTPUT, *argv);
+      exit(EXIT_FAILURE);
     }
-    argv++;
-    if (argc > 1) {
-	/* used named file instead of stdout */
-	if ((output = fopen (*argv, "w")) == NULL) {
-	    message (MSG_OPENOUTPUT, *argv);
-	    exit (EXIT_FAILURE);
-	}
 #ifdef BUFFER_SIZE
-	VOIDCAST setvbuf (output, NULL, _IOFBF, BUFFER_SIZE);
+    VOIDCAST setvbuf(output, NULL, _IOFBF, BUFFER_SIZE);
 
 #endif /* BUFFER_SIZE */
-    }
+  }
 #ifdef LIST
-    argv++;
-    if (argc > 2) {
-	/* used named listing file instead of stderr */
-	if ((listfile = fopen (*argv, "w")) == NULL) {
-	    message (MSG_OPENLISTING, *argv);
-	    exit (EXIT_FAILURE);
-	}
+  argv++;
+  if (argc > 2) {
+    /* used named listing file instead of stderr */
+    if ((listfile = fopen(*argv, "w")) == NULL) {
+      message(MSG_OPENLISTING, *argv);
+      exit(EXIT_FAILURE);
     }
+  }
 #endif /* LIST */
-    return;
+  return;
 }
-
 
 #ifdef HAS_NLS
 #include <nl_types.h>
@@ -133,12 +128,11 @@ nl_catd catid;
  *  message_text Take a message number, and return a pointer
  *            to the corresponding text string
  */
-const char *message_text P1 (MSGNUM, num)
-{
+const char *message_text P1(MSGNUM, num) {
 #ifdef HAS_NLS
-    return (catgets (catid, NL_SETD, num + 1, msgtable[num]));
+  return (catgets(catid, NL_SETD, num + 1, msgtable[num]));
 #else
-    return (msgtable[num]);
+  return (msgtable[num]);
 #endif /* HAS_NLS */
 }
 #endif /* ! EPOC */
@@ -178,7 +172,7 @@ const char *message_text P1 (MSGNUM, num)
 
 GLREF_D VOID *DatCommandPtr;
 LOCAL_C VOID *rcb;
-LOCAL_D char buf[256];		/* scratch buffer used for resources loaded */
+LOCAL_D char buf[256]; /* scratch buffer used for resources loaded */
 
 /*
  *   Open resource file at add-file slot 2 inside own .img file.
@@ -190,19 +184,18 @@ LOCAL_D char buf[256];		/* scratch buffer used for resources loaded */
  *      resource files, we can simply do it by changing this code
  *      to pick up the correct resource file.
  */
-LOCAL_C VOID InitRsc P0 (VOID)
-{
-    HANDLE  OlibCat;
+LOCAL_C VOID InitRsc P0(VOID) {
+  HANDLE OlibCat;
 
-    p_findlib ("OLIB.DYL", &OlibCat);
-    if ((rcb = p_newlibh (OlibCat, C_RSCFILE)) != NULL) {
-	INT     ret;
+  p_findlib("OLIB.DYL", &OlibCat);
+  if ((rcb = p_newlibh(OlibCat, C_RSCFILE)) != NULL) {
+    INT ret;
 
-	if ((ret = p_entersend3 (rcb, O_RS_INIT, DatCommandPtr)) == 0) {
-	    return;
-	}
+    if ((ret = p_entersend3(rcb, O_RS_INIT, DatCommandPtr)) == 0) {
+      return;
     }
-    p_exit (150);
+  }
+  p_exit(150);
 }
 
 /*
@@ -210,12 +203,11 @@ LOCAL_C VOID InitRsc P0 (VOID)
  *   Returns pointer to buffer containing the message text.
  *   Note that the static buffer buf[] is used in every case.
  */
-const char *message_text P1 (MSGNUM, num)
-{
-    if (p_entersend4 (rcb, O_RS_READ_BUF, num, buf) < 0) {
-	p_exit (151);
-    }
-    return (char *) buf;
+const char *message_text P1(MSGNUM, num) {
+  if (p_entersend4(rcb, O_RS_READ_BUF, num, buf) < 0) {
+    p_exit(151);
+  }
+  return (char *)buf;
 }
 
 #ifdef HAS_STDARG
@@ -237,20 +229,19 @@ const char *message_text P1 (MSGNUM, num)
  *  b)  The output must not exceed the size of the buffer allocated below
  *      N.B.  Should this be a constant set in chdr.h?
  */
-int vfprintf P3 (FHANDLE, fd, char *, fmt, va_list, args)
-{
-    INT     len;
-    TEXT    obuf[512];		/* scratch buffer used for messages */
+int vfprintf P3(FHANDLE, fd, char *, fmt, va_list, args) {
+  INT len;
+  TEXT obuf[512]; /* scratch buffer used for messages */
 
-    len = p_atob (&obuf[0], fmt, args);
+  len = p_atob(&obuf[0], fmt, args);
 #if 1
-    if (fd == errfile && WriteToParentSetup () != NULL) {
-	obuf[len] = '\0';
-	WriteToParent (obuf, len + 1);
-	return (len);
-    }
+  if (fd == errfile && WriteToParentSetup() != NULL) {
+    obuf[len] = '\0';
+    WriteToParent(obuf, len + 1);
+    return (len);
+  }
 #endif
-    return p_write (fd, &obuf[0], len);
+  return p_write(fd, &obuf[0], len);
 }
 
 /*
@@ -258,15 +249,14 @@ int vfprintf P3 (FHANDLE, fd, char *, fmt, va_list, args)
  *  ANSI C fread() routine except that it returns a -ve value on
  *  error rather than 0, and we need to correct for this
  */
-size_t fread P4 (char *, buffer, size_t, size, size_t, num, FHANDLE, fd)
-{
-    INT     reply;
+size_t fread P4(char *, buffer, size_t, size, size_t, num, FHANDLE, fd) {
+  INT reply;
 
-    if ((reply = p_read (fd, buffer, (unsigned) size * num)) < 0) {
-	return (0);
-    } else {
-	return (reply);
-    }
+  if ((reply = p_read(fd, buffer, (unsigned)size * num)) < 0) {
+    return (0);
+  } else {
+    return (reply);
+  }
 }
 
 /*
@@ -278,14 +268,13 @@ size_t fread P4 (char *, buffer, size_t, size, size_t, num, FHANDLE, fd)
  *  allows for batch compiles.  It is up to the CPOC front-end to
  *  delete the error file as required.
  */
-void openerror P0 (void)
-{
+void openerror P0(void) {
 #if 0
     TEXT    errname[P_FNAMESIZE];
 
 #endif
 
-    InitRsc ();
+  InitRsc();
 #if 0
     if (p_getenv ("CPOC", errname) < 0) {
 	p_scpy (errname, "CPOC.LOG");
@@ -306,8 +295,7 @@ void openerror P0 (void)
  *  be passed a target assembler file will depend on whether
  *  we are generating code or not.
  */
-void openfiles P2 (int, argc, char **, argv)
-{
+void openfiles P2(int, argc, char **, argv) {
 #if 0
     /*
      * Do we need to check the number of parameters ?
@@ -318,16 +306,16 @@ void openfiles P2 (int, argc, char **, argv)
 	exit (EXIT_FAILURE);
     }
 #endif
-    if (p_open (&input, argv[0], P_FSTREAM_TEXT) < 0) {
-	message (MSG_OPENINPUT, argv[0]);
-	exit (EXIT_FAILURE);
-    }
-    in_file = act_file = argv[0];
+  if (p_open(&input, argv[0], P_FSTREAM_TEXT) < 0) {
+    message(MSG_OPENINPUT, argv[0]);
+    exit(EXIT_FAILURE);
+  }
+  in_file = act_file = argv[0];
 
-    if (p_open (&output, argv[1], P_FSTREAM_TEXT | P_FUPDATE | P_FREPLACE) < 0) {
-	message (MSG_OPENOUTPUT, argv[1]);
-	exit (EXIT_FAILURE);
-    }
+  if (p_open(&output, argv[1], P_FSTREAM_TEXT | P_FUPDATE | P_FREPLACE) < 0) {
+    message(MSG_OPENOUTPUT, argv[1]);
+    exit(EXIT_FAILURE);
+  }
 }
 
 #endif /* EPOC */
@@ -357,15 +345,15 @@ void openfiles P2 (int, argc, char **, argv)
 /*
  *      Tailor the start-up environment
  */
-void    (*_consetup) (chanid_t, struct WINDOWDEF *) = consetup_title;
-int     (*_conwrite) (struct UFB *, void *, unsigned) = NULL;
-int     (*_Open) (const char *, int,...) = qopen;
+void (*_consetup)(chanid_t, struct WINDOWDEF *) = consetup_title;
+int (*_conwrite)(struct UFB *, void *, unsigned) = NULL;
+int (*_Open)(const char *, int, ...) = qopen;
 
-char    _prog_name[] = PROGNAME;
-char    _version[] = VERSION;
-char    _copyright[] = LAST_CHANGE_DATE;
-char   *_SigNoMsg = NULL;
-long    _stack = 20L * 1024L;
-long    _stackmargin = 1024L;
+char _prog_name[] = PROGNAME;
+char _version[] = VERSION;
+char _copyright[] = LAST_CHANGE_DATE;
+char *_SigNoMsg = NULL;
+long _stack = 20L * 1024L;
+long _stackmargin = 1024L;
 
 #endif /* QDOS */

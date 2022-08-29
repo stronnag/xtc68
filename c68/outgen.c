@@ -58,67 +58,67 @@
 
 /*****************************************************************************/
 
-const CHAR *outlate P1 (const CHAR *, string)
-{
-    static CHAR symname[MAX_ID_LEN + 1];
-    const CHAR *sp;
-    CHAR   *dp;
+const CHAR *outlate P1(const CHAR *, string) {
+  static CHAR symname[MAX_ID_LEN + 1];
+  const CHAR *sp;
+  CHAR *dp;
 
 #ifdef TRANSLATE
-    int     k;
+  int k;
 
 #endif /* TRANSLATE */
 
-    dp = (CHAR *) &symname[0];
-    if (*string == (CHAR) '.') {
+  dp = (CHAR *)&symname[0];
+  if (*string == (CHAR)'.') {
 #ifdef TRANSLATE
-	if (!trans_option) {
-	    return string;
-	}
-	/* delete the leading '.' which mucks things up here!! */
-	sp = &string[1];
+    if (!trans_option) {
+      return string;
+    }
+    /* delete the leading '.' which mucks things up here!! */
+    sp = &string[1];
 #else
-	return string;
+    return string;
 #endif /* TRANSLATE */
-    } else {
-	sp = external_prefix;
-	while (*sp) {
-	    *dp++ = (CHAR) *sp++;
-	};
-	sp = string;
-    }
-    while ((*dp++ = (CHAR) *sp++) != (CHAR) 0);
+  } else {
+    sp = external_prefix;
+    while (*sp) {
+      *dp++ = (CHAR)*sp++;
+    };
+    sp = string;
+  }
+  while ((*dp++ = (CHAR)*sp++) != (CHAR)0)
+    ;
 
 #ifdef TRANSLATE
-    if (trans_option && ((k = (int) strlen ((char *) symname)) > 8)) {
-	/*
-	 * translate long symbol name to 8 chars 140603: big prime number
-	 * smaller than 52**3 This is for defective assemblers/linkers that
-	 * can only handle external names which are 8 chars wide, this may
-	 * help if you have problems with different identifiers not
-	 * being different in the first 7 (seven, due to the leading
-	 * underscore) characters
-	 *
-	 * THIS IS UGLY, BUT IT IT THE LAST RESORT, AND IT HELPED ME IN SOME
-	 * CASES. TRANS_OPTION IS *NOT* THE DEFAULT
-	 */
-	unsigned long check;
-	int     j;
+  if (trans_option && ((k = (int)strlen((char *)symname)) > 8)) {
+    /*
+     * translate long symbol name to 8 chars 140603: big prime number
+     * smaller than 52**3 This is for defective assemblers/linkers that
+     * can only handle external names which are 8 chars wide, this may
+     * help if you have problems with different identifiers not
+     * being different in the first 7 (seven, due to the leading
+     * underscore) characters
+     *
+     * THIS IS UGLY, BUT IT IT THE LAST RESORT, AND IT HELPED ME IN SOME
+     * CASES. TRANS_OPTION IS *NOT* THE DEFAULT
+     */
+    unsigned long check;
+    int j;
 
-	check = (unsigned long) 0;
-	for (j = 0; j < k; j++)
-	    check = (check + check + (unsigned long) symname[j]) % (unsigned long) 140603L;
-	j = (int) (check % (unsigned long) 52);
-	check = check / (unsigned long) 52;
-	symname[0] = (CHAR) ((j < 26) ? 'a' + j : 'A' + j - 26);
-	j = (int) (check % (unsigned long) 52);
-	check = check / (unsigned long) 52;
-	symname[1] = (CHAR) ((j < 26) ? 'a' + j : 'A' + j - 26);
-	j = (int) (check % (unsigned long) 52);
-	symname[2] = (CHAR) ((j < 26) ? 'a' + j : 'A' + j - 26);
-	symname[8] = (CHAR) '\0';
-    }
+    check = (unsigned long)0;
+    for (j = 0; j < k; j++)
+      check = (check + check + (unsigned long)symname[j]) % (unsigned long)140603L;
+    j = (int)(check % (unsigned long)52);
+    check = check / (unsigned long)52;
+    symname[0] = (CHAR)((j < 26) ? 'a' + j : 'A' + j - 26);
+    j = (int)(check % (unsigned long)52);
+    check = check / (unsigned long)52;
+    symname[1] = (CHAR)((j < 26) ? 'a' + j : 'A' + j - 26);
+    j = (int)(check % (unsigned long)52);
+    symname[2] = (CHAR)((j < 26) ? 'a' + j : 'A' + j - 26);
+    symname[8] = (CHAR)'\0';
+  }
 #endif /* TRANSLATE */
-    return symname;
+  return symname;
 }
 #endif /* CPU_DEFINED */

@@ -56,7 +56,6 @@ typedef struct PACKED {
   uint32_t d_backup;
 } QLDIR_t;
 
-
 #ifdef WIN32
 char *stpcpy(char *d, const char *s) {
   while ((*d++ = *s++)) /* NULL loop */
@@ -126,7 +125,7 @@ int main(int ac, char **av) {
   if (inf) {
     char *p, *q;
     int fd;
-    QLDIR_t qd ={0};
+    QLDIR_t qd = {0};
     short nlen;
     struct stat s;
 
@@ -174,8 +173,7 @@ int main(int ac, char **av) {
 
       if ((fd = open(secret, O_RDWR, 0666)) > -1) {
         while (read(fd, &qd, sizeof(qd)) == sizeof(qd)) {
-          if (nlen == htons(qd.d_szname) &&
-              strncasecmp(qd.d_name, q, nlen) == 0) {
+          if (nlen == htons(qd.d_szname) && strncasecmp(qd.d_name, q, nlen) == 0) {
             lseek(fd, -1 * sizeof(qd), SEEK_CUR);
             break;
           }

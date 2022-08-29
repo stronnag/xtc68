@@ -1,4 +1,4 @@
- #define _GNU_SOURCE
+#define _GNU_SOURCE
 
 /*
  *						cc.h
@@ -258,7 +258,7 @@
 #endif /* CPOC */
 #else
 #ifdef CPOC
-# error "Both CPOC and XTC68 targets specified"
+#error "Both CPOC and XTC68 targets specified"
 #endif /* CPOC */
 #endif /* QL */
 
@@ -310,37 +310,37 @@
  *	Set seperator characters according to environment
  */
 #ifdef QDOS
-# define DOT '_'
-# define DOTS "_"
-# define DSEP '_'
-# define DSEPS "_"
+#define DOT '_'
+#define DOTS "_"
+#define DSEP '_'
+#define DSEPS "_"
 #endif /* QDOS */
 
 #if defined(__unix__) || defined(__APPLE__)
-# define DOT '.'
-# define DOTS "."
-# define DSEP '/'
-# define DSEPS "/"
-# define ERR_OM 1
-# define ERR_BP 1
+#define DOT '.'
+#define DOTS "."
+#define DSEP '/'
+#define DSEPS "/"
+#define ERR_OM 1
+#define ERR_BP 1
 #endif /* defined(__unix__) || defined(__APPLE__) */
 
 #ifdef DOS_LIKE
-# define DOT '.'
-# define DOTS "."
-# define DSEP '\\'
-# define DSEPS "\\"
-# define ERR_OM 1
-# define ERR_BP 1
+#define DOT '.'
+#define DOTS "."
+#define DSEP '\\'
+#define DSEPS "\\"
+#define ERR_OM 1
+#define ERR_BP 1
 #endif /* DOS_LIKE */
 
 #ifdef EPOC
-# define DOT '.'
-# define DOTS "."
-# define DSEP '\\'
-# define DSEPS "\\"
-# define ERR_OM 1
-# define ERR_BP 1
+#define DOT '.'
+#define DOTS "."
+#define DSEP '\\'
+#define DSEPS "\\"
+#define ERR_OM 1
+#define ERR_BP 1
 #endif /* EPOC */
 
 /*
@@ -348,34 +348,34 @@
  */
 #ifdef QL
 #ifdef QDOS
-# define CC "cc"
-# define CPP "cpp"
-# define UNPROTO "unproto"
-# define COMPILER "c68"
-# define ASM "as68"
-# define LD  "ld"
+#define CC "cc"
+#define CPP "cpp"
+#define UNPROTO "unproto"
+#define COMPILER "c68"
+#define ASM "as68"
+#define LD "ld"
 #else
-# define CC "qcc"
-# define CPP "qcpp"
-# define UNPROTO "unproto"
-# define COMPILER "c68"
-# define ASM "as68"
-# define LD  "qld"
+#define CC "qcc"
+#define CPP "qcpp"
+#define UNPROTO "unproto"
+#define COMPILER "c68"
+#define ASM "as68"
+#define LD "qld"
 #endif /* QDOS */
 #endif /* QL */
 
 #ifdef CPOC
-# define CC "cpoc_cc"
-# define CPP "cpoc_cpp"
-# define UNPROTO "unproto"
-# define COMPILER "c86"
-# define ASM "as86"
-# define LD  "ld86"
+#define CC "cpoc_cc"
+#define CPP "cpoc_cpp"
+#define UNPROTO "unproto"
+#define COMPILER "c86"
+#define ASM "as86"
+#define LD "ld86"
 #endif /* CPOC */
 
-#define STDIN_FILENO	0
-#define STDOUT_FILENO	1
-#define STDERR_FILENO	2
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
 
 #define MAX_FNAME 60
 
@@ -383,34 +383,28 @@
  *	The following structure is used when it
  *	is necessary to maintain a list of files.
  */
-typedef struct FILE_LIST
-	{
-		struct FILE_LIST *	next;
-		char *	name;
-	}
-	FILE_LIST_t;
+typedef struct FILE_LIST {
+  struct FILE_LIST *next;
+  char *name;
+} FILE_LIST_t;
 
 /*
  *	These structures are used to build up a list
  *	of arguments for a particular phase.
  */
-typedef struct PASS_OPTS
-	{
-		int 	argcmax;			/* Entries currently allocated */
-		int 	argc;				/* Entries currently used */
-		char ** argv;				/* Pointer to array of arg pointers */
-	}
-	PASS_OPTS_t;
+typedef struct PASS_OPTS {
+  int argcmax; /* Entries currently allocated */
+  int argc;    /* Entries currently used */
+  char **argv; /* Pointer to array of arg pointers */
+} PASS_OPTS_t;
 
-typedef struct CC_PASSES
-	{
-	char *p_name;				/* Program name to call for this pass */
-	char *p_suffix; 			/* Character(s) output file name must end with */
-	struct PASS_OPTS p_optbuf;	/* Pointer to args control for this pass */
-	}
-	CC_PASSES_t;
+typedef struct CC_PASSES {
+  char *p_name;              /* Program name to call for this pass */
+  char *p_suffix;            /* Character(s) output file name must end with */
+  struct PASS_OPTS p_optbuf; /* Pointer to args control for this pass */
+} CC_PASSES_t;
 
-#define PASS_OPTS_INCR	4		/* Amount by which pass options incremented */
+#define PASS_OPTS_INCR 4 /* Amount by which pass options incremented */
 
 /*
  *	The order in which pass information is
@@ -419,28 +413,28 @@ typedef struct CC_PASSES
  *	that the orders are kept in step.
  */
 enum pass_order {
-	CC_PASS,
-	CPP_PASS,
-	UNPROTO_PASS,
-	C68_PASS,
-	ASM_PASS,
+  CC_PASS,
+  CPP_PASS,
+  UNPROTO_PASS,
+  C68_PASS,
+  ASM_PASS,
 #ifdef QL
 #ifdef QDOS
-	QMAC_PASS,
-	GWASS_PASS,
+  QMAC_PASS,
+  GWASS_PASS,
 #endif /* QDOS */
 #endif /* QL */
-	LDPRE_PASS,
-	LD_PASS,
-	LDPOST_PASS,
-	DEL_PASS,
+  LDPRE_PASS,
+  LD_PASS,
+  LDPOST_PASS,
+  DEL_PASS,
 #ifdef QL
 #ifdef QDOS
-	COPY_PASS,
+  COPY_PASS,
 #endif /* QDOS */
 #endif /* QL */
-	MAX_PASS
-	};
+  MAX_PASS
+};
 
 /*
  *	This is a list of the possible actions that
@@ -450,42 +444,51 @@ enum pass_order {
  *	that is used to process parameter entries.
  */
 enum actions {
-		ACTION_IGNORE,					/* Option is not used */
-		ACTION_ADD, 					/* Pass option to specified pass */
-		ACTION_ADD_FILES,				/* Add option to filelist */
-		ACTION_ADD_REST,				/* Pass option remainder to pass */
-		ACTION_ADD_ALL, 				/* Pass option to all passes */
-		ACTION_ADD_STKMEM,				/* Stack/Memory option add to all passes */
-		ACTION_ADD_MORE,				/* More data follows, allow for space */
-		ACTION_ADD_OPTIONAL,			/* More data may follow */
-		ACTION_CPP_LAST,				/* Stop after the pre-processor phase */
-		ACTION_C68_LAST,				/* Stop after the compiler phase */
-		ACTION_ASM_LAST,				/* Stop after the assembler phase */
-		ACTION_GWASS,					/* Use GWASS assembler */
-		ACTION_QMAC,					/* Use QMAC as assembler phase */
-		ACTION_FPU, 					/* Target requires hardware FPU */
-		ACTION_VERBOSE, 				/* Run in verbose mode */
-		ACTION_VERBOSE_ALL, 			/* Run all components in verbose mode */
-		ACTION_TMP, 					/* Set directory for temporary files */
-		ACTION_TMP_ALL, 				/* ... temporary and target files */
-		ACTION_TRAD,					/* Set -trad option for C68 */
-		ACTION_PATH 					/* Set program search path */
+  ACTION_IGNORE,       /* Option is not used */
+  ACTION_ADD,          /* Pass option to specified pass */
+  ACTION_ADD_FILES,    /* Add option to filelist */
+  ACTION_ADD_REST,     /* Pass option remainder to pass */
+  ACTION_ADD_ALL,      /* Pass option to all passes */
+  ACTION_ADD_STKMEM,   /* Stack/Memory option add to all passes */
+  ACTION_ADD_MORE,     /* More data follows, allow for space */
+  ACTION_ADD_OPTIONAL, /* More data may follow */
+  ACTION_CPP_LAST,     /* Stop after the pre-processor phase */
+  ACTION_C68_LAST,     /* Stop after the compiler phase */
+  ACTION_ASM_LAST,     /* Stop after the assembler phase */
+  ACTION_GWASS,        /* Use GWASS assembler */
+  ACTION_QMAC,         /* Use QMAC as assembler phase */
+  ACTION_FPU,          /* Target requires hardware FPU */
+  ACTION_VERBOSE,      /* Run in verbose mode */
+  ACTION_VERBOSE_ALL,  /* Run all components in verbose mode */
+  ACTION_TMP,          /* Set directory for temporary files */
+  ACTION_TMP_ALL,      /* ... temporary and target files */
+  ACTION_TRAD,         /* Set -trad option for C68 */
+  ACTION_PATH          /* Set program search path */
 #ifdef QL
-		,ACTION_RLL 					/* Set for RLL library to be used */
-		,ACTION_RLL_LIB 				/* Set for RLL library being built */
-		,ACTION_RLL_DEF 				/* Set for RLL defines used */
-		,ACTION_TARGET					/* Handle cases where specific targets set for C68 */
-		,ACTION_UCHAR					/* Set -uchar options for C68 */
-#endif /* QL */
-		,ACTION_UNPROTO 				/* Run UNPROTO before compiler */
+  ,
+  ACTION_RLL /* Set for RLL library to be used */
+  ,
+  ACTION_RLL_LIB /* Set for RLL library being built */
+  ,
+  ACTION_RLL_DEF /* Set for RLL defines used */
+  ,
+  ACTION_TARGET /* Handle cases where specific targets set for C68 */
+  ,
+  ACTION_UCHAR /* Set -uchar options for C68 */
+#endif         /* QL */
+  ,
+  ACTION_UNPROTO /* Run UNPROTO before compiler */
 #ifdef QL
-		,ACTION_XA						/* Set -Xa options */
-		,ACTION_XC						/* Set -Xc options */
-		,ACTION_XT						/* Set -Xt options */
-#endif /* QL */
-                ,ACTION_OUT
+  ,
+  ACTION_XA /* Set -Xa options */
+  ,
+  ACTION_XC /* Set -Xc options */
+  ,
+  ACTION_XT /* Set -Xt options */
+#endif      /* QL */
+  ,
+  ACTION_OUT
 };
-
 
 /******************************************************************
  *
@@ -498,43 +501,43 @@ enum actions {
 #define _P_(params) ()
 #endif
 
-void	add_option				_P_((int, char *));
-void	add_tmp 				_P_((char *));
+void add_option _P_((int, char *));
+void add_tmp _P_((char *));
 #ifndef HAVE_BASENAME
-char   *basename				_P_((char *));
+char *basename _P_((char *));
 #endif /* ! HAVE_BASENAME */
-int 	command_line			_P_((CC_PASSES_t *, int, CC_PASSES_t *, char *, char *));
-void	Environment_Variables	_P_((void));
-int 	no_continue 			_P_((void));
-void	printstr				_P_((char *,...));
-void	useage					_P_((void));
-struct OPTIONS *what_opt		_P_((char *));
+int command_line _P_((CC_PASSES_t *, int, CC_PASSES_t *, char *, char *));
+void Environment_Variables _P_((void));
+int no_continue _P_((void));
+void printstr _P_((char *, ...));
+void useage _P_((void));
+struct OPTIONS *what_opt _P_((char *));
 
-void	argfree 				_P_((char ***));
-int 	argunpack				_P_((const char *, char ***, int *, int (*)(char *, char ***, int *)));
-char *	argpack 				_P_((char * const * argv, int flag));
+void argfree _P_((char ***));
+int argunpack _P_((const char *, char ***, int *, int (*)(char *, char ***, int *)));
+char *argpack _P_((char *const *argv, int flag));
 #ifndef HAVE_LIBGEN
-char *	strccpy 				_P_((char * output, const char * input));
-char *	strcadd 				_P_((char * output, const char * input));
-char *	strecpy 				_P_((char *, const char *,const char *));
-char *	streadd 				_P_((char *, const char *, const char *));
+char *strccpy _P_((char *output, const char *input));
+char *strcadd _P_((char *output, const char *input));
+char *strecpy _P_((char *, const char *, const char *));
+char *streadd _P_((char *, const char *, const char *));
 #endif /* HAVE_LIBGEN */
-void	my_error				_P_((int, char *));
-char *	FilePart				_P_((char *));
-void	AddPart 				_P_((char *, char *, int));
-int 	CheckCPU				_P_((void));
+void my_error _P_((int, char *));
+char *FilePart _P_((char *));
+void AddPart _P_((char *, char *, int));
+int CheckCPU _P_((void));
 #ifndef QDOS
-# ifndef WIN32
-#  ifdef EPOC
-#	define stricmp	p_scmpi
-#  else
-#	define stricmp strcasecmp
-#  endif /* EPOC */
-# endif /* WIN32 */
+#ifndef WIN32
+#ifdef EPOC
+#define stricmp p_scmpi
+#else
+#define stricmp strcasecmp
+#endif /* EPOC */
+#endif /* WIN32 */
 #endif /* QDOS */
 
 #ifdef JDBG
-void	jdbg					_P_((char *, x,*ctl,...));
+void jdbg _P_((char *, x, *ctl, ...));
 #endif /* JDBG */
 
 #undef _P_

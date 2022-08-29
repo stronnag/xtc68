@@ -5,10 +5,8 @@
 
 #include "config.h"
 
-STRUCT STRING
-    {
-	TEXT	str;
-    }
+STRUCT STRING { TEXT str; }
 
-#define	MSG(x,y,z)	RESOURCE STRING y { str = z; }
+#define MSG(x, y, z)                                                                                                           \
+  RESOURCE STRING y { str = z; }
 #include "message.h"

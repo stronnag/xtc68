@@ -32,40 +32,36 @@
 
 /********************************************************** Type Definitions */
 
-enum e_gt {
-    bytegen, wordgen, longgen, floatgen, nogen
-};
-enum e_sg {
-    noseg, codeseg, dataseg, bssseg, romseg
-};
+enum e_gt { bytegen, wordgen, longgen, floatgen, nogen };
+enum e_sg { noseg, codeseg, dataseg, bssseg, romseg };
 
 /*********************************************** Static Function Definitions */
 
-static void putop P_ ((OPCODE));
-static void putconst P_ ((const EXPR *, ILEN));
-static void putlen P_ ((ILEN));
-static void putamode P_ ((const ADDRESS *, ILEN));
-static void put_mask P_ ((REGMASK));
-static void put_rmask P_ ((REGMASK));
-static void put_smask P_ ((REGMASK));
-static void putreg P_ ((REG));
-static void put_header P_ ((enum e_gt, SIZE));
-static void seg P_ ((enum e_sg, const char *, SIZE));
-static void put_bseg P_ ((SIZE));
-static void nl P_ ((void));
-static void put_align P_ ((SIZE));
+static void putop P_((OPCODE));
+static void putconst P_((const EXPR *, ILEN));
+static void putlen P_((ILEN));
+static void putamode P_((const ADDRESS *, ILEN));
+static void put_mask P_((REGMASK));
+static void put_rmask P_((REGMASK));
+static void put_smask P_((REGMASK));
+static void putreg P_((REG));
+static void put_header P_((enum e_gt, SIZE));
+static void seg P_((enum e_sg, const char *, SIZE));
+static void put_bseg P_((SIZE));
+static void nl P_((void));
+static void put_align P_((SIZE));
 
 /*********************************************** Global Function Definitions */
 
-PRIVATE void put_name P_ ((SYM *));
-PRIVATE void put_dword P_ ((UVAL));
-PRIVATE void put_cseg P_ ((SIZE));
-PRIVATE void put_dseg P_ ((SIZE));
-PRIVATE void put_kseg P_ ((SIZE));
-PRIVATE void put_rseg P_ ((SIZE));
-PRIVATE void put_label P_ ((LABEL));
-PRIVATE void put_reference P_ ((SYM *));
-PRIVATE void put_byte P_ ((UVAL));
+PRIVATE void put_name P_((SYM *));
+PRIVATE void put_dword P_((UVAL));
+PRIVATE void put_cseg P_((SIZE));
+PRIVATE void put_dseg P_((SIZE));
+PRIVATE void put_kseg P_((SIZE));
+PRIVATE void put_rseg P_((SIZE));
+PRIVATE void put_label P_((LABEL));
+PRIVATE void put_reference P_((SYM *));
+PRIVATE void put_byte P_((UVAL));
 
 /********************************************************** Static Variables */
 
@@ -78,447 +74,423 @@ static SIZE align_type = 0L;
 static const char *prefix = "I_";
 static const char *comment = ";";
 
-static const char *opl[] =
-{
-    "MOVE",			/* op_move */
-    "MOVEQ",			/* op_moveq */
-    "MOVEA",			/* op_movea */
-    "ADD",			/* op_add */
-    "ADDI",			/* op_addi */
-    "ADDQ",			/* op_addq */
-    "ADDA",			/* op_adda */
-    "SUB",			/* op_sub */
-    "SUBI",			/* op_subi */
-    "SUBQ",			/* op_subq */
-    "SUBA",			/* op_suba */
-    "MULS",			/* op_muls */
-    "MULU",			/* op_mulu */
-    "DIVS",			/* op_divs */
-    "DIVU",			/* op_divu */
-    "AND",			/* op_and */
-    "ANDI",			/* op_andi */
-    "OR",			/* op_or */
-    "ORI",			/* op_ori */
-    "EOR",			/* op_eor */
-    "ASL",			/* op_asl */
-    "LSR",			/* op_lsr */
-    "JMP",			/* op_jmp */
-    "JSR",			/* op_jsr */
-    "BSR",			/* op_bsr */
-    "MOVEM",			/* op_movem */
-    "RTS",			/* op_rts */
-    "RTE",			/* op_rte */
-    "BRA",			/* op_bra */
-    "BEQ",			/* op_beq */
-    "BNE",			/* op_bne */
-    "BLT",			/* op_blt */
-    "BLE",			/* op_ble */
-    "BGT",			/* op_bgt */
-    "BGE",			/* op_bge */
-    "BHI",			/* op_bhi */
-    "BCC",			/* op_bhs */
-    "BCS",			/* op_blo */
-    "BLS",			/* op_bls */
-    "BTST",			/* op_btst */
-    "TST",			/* op_tst */
-    "EXT",			/* op_ext */
-    "EXTB",			/* op_extb */
-    "LEA",			/* op_lea */
-    "SWAP",			/* op_swap */
-    "NEG",			/* op_neg */
-    "NOT",			/* op_not */
-    "CMP",			/* op_cmp */
-    "CMPA",			/* op_cmpa */
-    "CLR",			/* op_clr */
-    "LINK",			/* op_link */
-    "UNLK",			/* op_unlk */
-    "PEA",			/* op_pea */
-    "CMPI",			/* op_cmpi */
-    "DBRA",			/* op_dbra */
-    "ASR",			/* op_asr */
-    "ROL",			/* op_rol */
-    "ROR",			/* op_ror */
-    "SEQ",			/* op_seq */
-    "SNE",			/* op_sne */
-    "SLT",			/* op_slt */
-    "SLE",			/* op_sle */
-    "SGT",			/* op_sgt */
-    "SGE",			/* op_sge */
-    "SHI",			/* op_shi */
-    "SCC",			/* op_shs */
-    "SCS",			/* op_slo */
-    "SLS",			/* op_sls */
-    "ST",			/* op_st */
-    "NOP",			/* op_nop */
+static const char *opl[] = {
+    "MOVE",  /* op_move */
+    "MOVEQ", /* op_moveq */
+    "MOVEA", /* op_movea */
+    "ADD",   /* op_add */
+    "ADDI",  /* op_addi */
+    "ADDQ",  /* op_addq */
+    "ADDA",  /* op_adda */
+    "SUB",   /* op_sub */
+    "SUBI",  /* op_subi */
+    "SUBQ",  /* op_subq */
+    "SUBA",  /* op_suba */
+    "MULS",  /* op_muls */
+    "MULU",  /* op_mulu */
+    "DIVS",  /* op_divs */
+    "DIVU",  /* op_divu */
+    "AND",   /* op_and */
+    "ANDI",  /* op_andi */
+    "OR",    /* op_or */
+    "ORI",   /* op_ori */
+    "EOR",   /* op_eor */
+    "ASL",   /* op_asl */
+    "LSR",   /* op_lsr */
+    "JMP",   /* op_jmp */
+    "JSR",   /* op_jsr */
+    "BSR",   /* op_bsr */
+    "MOVEM", /* op_movem */
+    "RTS",   /* op_rts */
+    "RTE",   /* op_rte */
+    "BRA",   /* op_bra */
+    "BEQ",   /* op_beq */
+    "BNE",   /* op_bne */
+    "BLT",   /* op_blt */
+    "BLE",   /* op_ble */
+    "BGT",   /* op_bgt */
+    "BGE",   /* op_bge */
+    "BHI",   /* op_bhi */
+    "BCC",   /* op_bhs */
+    "BCS",   /* op_blo */
+    "BLS",   /* op_bls */
+    "BTST",  /* op_btst */
+    "TST",   /* op_tst */
+    "EXT",   /* op_ext */
+    "EXTB",  /* op_extb */
+    "LEA",   /* op_lea */
+    "SWAP",  /* op_swap */
+    "NEG",   /* op_neg */
+    "NOT",   /* op_not */
+    "CMP",   /* op_cmp */
+    "CMPA",  /* op_cmpa */
+    "CLR",   /* op_clr */
+    "LINK",  /* op_link */
+    "UNLK",  /* op_unlk */
+    "PEA",   /* op_pea */
+    "CMPI",  /* op_cmpi */
+    "DBRA",  /* op_dbra */
+    "ASR",   /* op_asr */
+    "ROL",   /* op_rol */
+    "ROR",   /* op_ror */
+    "SEQ",   /* op_seq */
+    "SNE",   /* op_sne */
+    "SLT",   /* op_slt */
+    "SLE",   /* op_sle */
+    "SGT",   /* op_sgt */
+    "SGE",   /* op_sge */
+    "SHI",   /* op_shi */
+    "SCC",   /* op_shs */
+    "SCS",   /* op_slo */
+    "SLS",   /* op_sls */
+    "ST",    /* op_st */
+    "NOP",   /* op_nop */
 #ifdef FLOAT_IEEE
-    "FABS",			/* op_fabs */
-    "FNEG",			/* op_fneg */
-    "FADD",			/* op_fadd */
-    "FSUB",			/* op_fsub */
-    "FDIV",			/* op_fdiv */
-    "FMUL",			/* op_fmul */
-    "FCMP",			/* op_fcmp */
-    "FTST",			/* op_ftst */
-    "FMOVE",			/* op_fmove */
-    "FMOVEM",			/* op_fmovem */
-#endif				/* FLOAT_IEEE */
+    "FABS",   /* op_fabs */
+    "FNEG",   /* op_fneg */
+    "FADD",   /* op_fadd */
+    "FSUB",   /* op_fsub */
+    "FDIV",   /* op_fdiv */
+    "FMUL",   /* op_fmul */
+    "FCMP",   /* op_fcmp */
+    "FTST",   /* op_ftst */
+    "FMOVE",  /* op_fmove */
+    "FMOVEM", /* op_fmovem */
+#endif        /* FLOAT_IEEE */
 #ifdef ASM
-    "",				/* op_asm */
-#endif				/* ASM */
-    "COMMENT",			/* op_line */
-    (char *) NULL,		/* op_label */
+    "",           /* op_asm */
+#endif            /* ASM */
+    "COMMENT",    /* op_line */
+    (char *)NULL, /* op_label */
 };
 
 /*****************************************************************************/
 
-static void putop P1 (OPCODE, op)
-{
-    if (op >= OP_MIN && op <= OP_MAX && opl[op] != (char *) 0) {
-	oprintf ("\t%s", opl[op]);
-    } else {
-	FATAL ((__FILE__, "putop", "illegal opcode %d", op));
-    }
+static void putop P1(OPCODE, op) {
+  if (op >= OP_MIN && op <= OP_MAX && opl[op] != (char *)0) {
+    oprintf("\t%s", opl[op]);
+  } else {
+    FATAL((__FILE__, "putop", "illegal opcode %d", op));
+  }
 }
 
 /*
  * put a constant to the output file.
  */
-static void putconst P2 (const EXPR *, ep, ILEN, len)
-{
-    switch (ep->nodetype) {
-    case en_autocon:
-    case en_icon:
-	oprintf ("$%x", ep->v.i);
-	break;
+static void putconst P2(const EXPR *, ep, ILEN, len) {
+  switch (ep->nodetype) {
+  case en_autocon:
+  case en_icon:
+    oprintf("$%x", ep->v.i);
+    break;
 #ifdef FLOAT_MFFP
-    case en_fcon:
-	oprintf ("$%X", genffp (ep->v.f));
-	break;
+  case en_fcon:
+    oprintf("$%X", genffp(ep->v.f));
+    break;
 #endif /* FLOAT_MFFP */
-    case en_labcon:
-	oprintf ("%s%u", prefix, (unsigned) ep->v.l);
-	break;
-    case en_nacon:
-	oprintf ("%s", outlate (ep->v.str));
-	break;
-    case en_sym:
-	oprintf ("%s", outlate (nameof (ep->v.sp)));
-	break;
-    case en_add:
-	putconst (ep->v.p[0], len);
-	oprintf ("+");
-	putconst (ep->v.p[1], len);
-	break;
-    case en_sub:
-	putconst (ep->v.p[0], len);
-	oprintf ("-");
-	putconst (ep->v.p[1], len);
-	break;
-    case en_uminus:
-	oprintf ("-");
-	/*FALLTHRU */
-    case en_cast:
-	putconst (ep->v.p[0], len);
-	break;
-    case en_str:
-	oprintf ("%s", ep->v.str);
-	break;
-    default:
-	FATAL ((__FILE__, "putconst", "illegal constant node %d", ep->nodetype));
-	break;
-    }
+  case en_labcon:
+    oprintf("%s%u", prefix, (unsigned)ep->v.l);
+    break;
+  case en_nacon:
+    oprintf("%s", outlate(ep->v.str));
+    break;
+  case en_sym:
+    oprintf("%s", outlate(nameof(ep->v.sp)));
+    break;
+  case en_add:
+    putconst(ep->v.p[0], len);
+    oprintf("+");
+    putconst(ep->v.p[1], len);
+    break;
+  case en_sub:
+    putconst(ep->v.p[0], len);
+    oprintf("-");
+    putconst(ep->v.p[1], len);
+    break;
+  case en_uminus:
+    oprintf("-");
+    /*FALLTHRU */
+  case en_cast:
+    putconst(ep->v.p[0], len);
+    break;
+  case en_str:
+    oprintf("%s", ep->v.str);
+    break;
+  default:
+    FATAL((__FILE__, "putconst", "illegal constant node %d", ep->nodetype));
+    break;
+  }
 }
 
 /*
  * append the length field to an instruction.
  */
-static void putlen P1 (ILEN, l)
-{
-    switch (l) {
-    case IL0:
-	break;
-    case IL1:
-	oprintf (".B");
-	break;
-    case IL2:
-	oprintf (".W");
-	break;
-    case IL4:
-	oprintf (".L");
-	break;
-    case (IL4 + 1):
-	oprintf (".S");
-	break;
-    case (IL8 + 1):
-	oprintf (".D");
-	break;
-    case (IL12 + 1):
-	oprintf (".X");
-	break;
-    default:
-	FATAL ((__FILE__, "putlen", "illegal length field %d", (int32_t) l));
-	break;
-    }
+static void putlen P1(ILEN, l) {
+  switch (l) {
+  case IL0:
+    break;
+  case IL1:
+    oprintf(".B");
+    break;
+  case IL2:
+    oprintf(".W");
+    break;
+  case IL4:
+    oprintf(".L");
+    break;
+  case (IL4 + 1):
+    oprintf(".S");
+    break;
+  case (IL8 + 1):
+    oprintf(".D");
+    break;
+  case (IL12 + 1):
+    oprintf(".X");
+    break;
+  default:
+    FATAL((__FILE__, "putlen", "illegal length field %d", (int32_t)l));
+    break;
+  }
 }
 
 /*
  * output a general addressing mode.
  */
-static void putamode P2 (const ADDRESS *, ap, ILEN, len)
-{
-    IVAL    i_val;
+static void putamode P2(const ADDRESS *, ap, ILEN, len) {
+  IVAL i_val;
 
-    switch (ap->mode) {
-    case am_immed:
-	oprintf ("#");
-	/*
-	 * Suppress overflow in immediate arguments -
-	 * which may occur due to optimization of constants
-	 */
-	if (is_icon (ap->u.offset)) {
-	    i_val = ap->u.offset->v.i;
-	    switch (len) {
-	    case IL1:
-		i_val &= (IVAL) 0x000000ff;
-		break;
-	    case IL2:
-		i_val &= (IVAL) 0x0000ffff;
-		break;
-	    default:
-		break;
-	    }
-	    oprintf ("%d", i_val);
-	    break;
-	}
-	/*FALLTHRU */
-    case am_direct:
-	putconst (ap->u.offset, len);
-	break;
-    case am_areg:
-	oprintf ("A%d", (int32_t) ap->preg - (int32_t) A0);
-	break;
-    case am_dreg:
-	oprintf ("D%d", (int32_t) ap->preg);
-	break;
-    case am_ind:
-	oprintf ("(A%d)", (int32_t) ap->preg - (int32_t) A0);
-	break;
-    case am_ainc:
-	oprintf ("(A%d)+", (int32_t) ap->preg - (int32_t) A0);
-	break;
-    case am_adec:
-	oprintf ("-(A%d)", (int32_t) ap->preg - (int32_t) A0);
-	break;
-    case am_indx:
-	/* allow 32-bit offsets */
-	putconst (ap->u.offset, IL4);
-	oprintf ("(A%d)", (int32_t) ap->preg - (int32_t) A0);
-	break;
-    case am_indx2:
-	/* allow 32-bit offsets */
-	putconst (ap->u.offset, IL4);
-	oprintf ("(A%d,D%d.%c)", (int32_t) ap->preg - (int32_t) A0, (int32_t) ap->sreg, 'L');
-	break;
-    case am_indx3:
-	/* allow 32-bit offsets */
-	putconst (ap->u.offset, IL4);
-	oprintf ("(A%d,A%d.L)", (int32_t) ap->preg - (int32_t) A0, (int32_t) ap->sreg - (int32_t) A0);
-	break;
-    case am_indx4:
-	/* allow 32-bit offsets */
-	putconst (ap->u.offset, IL4);
-	oprintf ("(A%d,D%d.%c)", (int32_t) ap->preg - (int32_t) A0, (int32_t) ap->sreg, 'W');
-	break;
-    case am_indxpc:
-	putconst (ap->u.offset, IL4);
-	oprintf ("(PC)");
-	break;
-    case am_indx2pc:
-	putconst (ap->u.offset, IL4);
-	oprintf ("(a%d,PC)", (int32_t) ap->preg - (int32_t) A0);
-	break;
-    case am_rmask:
-	put_rmask (ap->u.mask);
-	break;
-    case am_smask:
-	put_smask (ap->u.mask);
-	break;
-    case am_freg:
-	oprintf ("FP%d", (int32_t) ap->preg - (int32_t) FP0);
-	break;
-    case am_line:
-    case am_str:
-	putconst (ap->u.offset, IL4);
-	break;
-    default:
-	FATAL ((__FILE__, "putamode", "illegal address mode %d", ap->mode));
-	break;
+  switch (ap->mode) {
+  case am_immed:
+    oprintf("#");
+    /*
+     * Suppress overflow in immediate arguments -
+     * which may occur due to optimization of constants
+     */
+    if (is_icon(ap->u.offset)) {
+      i_val = ap->u.offset->v.i;
+      switch (len) {
+      case IL1:
+        i_val &= (IVAL)0x000000ff;
+        break;
+      case IL2:
+        i_val &= (IVAL)0x0000ffff;
+        break;
+      default:
+        break;
+      }
+      oprintf("%d", i_val);
+      break;
     }
+    /*FALLTHRU */
+  case am_direct:
+    putconst(ap->u.offset, len);
+    break;
+  case am_areg:
+    oprintf("A%d", (int32_t)ap->preg - (int32_t)A0);
+    break;
+  case am_dreg:
+    oprintf("D%d", (int32_t)ap->preg);
+    break;
+  case am_ind:
+    oprintf("(A%d)", (int32_t)ap->preg - (int32_t)A0);
+    break;
+  case am_ainc:
+    oprintf("(A%d)+", (int32_t)ap->preg - (int32_t)A0);
+    break;
+  case am_adec:
+    oprintf("-(A%d)", (int32_t)ap->preg - (int32_t)A0);
+    break;
+  case am_indx:
+    /* allow 32-bit offsets */
+    putconst(ap->u.offset, IL4);
+    oprintf("(A%d)", (int32_t)ap->preg - (int32_t)A0);
+    break;
+  case am_indx2:
+    /* allow 32-bit offsets */
+    putconst(ap->u.offset, IL4);
+    oprintf("(A%d,D%d.%c)", (int32_t)ap->preg - (int32_t)A0, (int32_t)ap->sreg, 'L');
+    break;
+  case am_indx3:
+    /* allow 32-bit offsets */
+    putconst(ap->u.offset, IL4);
+    oprintf("(A%d,A%d.L)", (int32_t)ap->preg - (int32_t)A0, (int32_t)ap->sreg - (int32_t)A0);
+    break;
+  case am_indx4:
+    /* allow 32-bit offsets */
+    putconst(ap->u.offset, IL4);
+    oprintf("(A%d,D%d.%c)", (int32_t)ap->preg - (int32_t)A0, (int32_t)ap->sreg, 'W');
+    break;
+  case am_indxpc:
+    putconst(ap->u.offset, IL4);
+    oprintf("(PC)");
+    break;
+  case am_indx2pc:
+    putconst(ap->u.offset, IL4);
+    oprintf("(a%d,PC)", (int32_t)ap->preg - (int32_t)A0);
+    break;
+  case am_rmask:
+    put_rmask(ap->u.mask);
+    break;
+  case am_smask:
+    put_smask(ap->u.mask);
+    break;
+  case am_freg:
+    oprintf("FP%d", (int32_t)ap->preg - (int32_t)FP0);
+    break;
+  case am_line:
+  case am_str:
+    putconst(ap->u.offset, IL4);
+    break;
+  default:
+    FATAL((__FILE__, "putamode", "illegal address mode %d", ap->mode));
+    break;
+  }
 }
 
 /*
  * output a generic instruction.
  */
-PRIVATE void put_code P1 (const CODE *, ip)
-{
-    putop (ip->opcode);
-    if (ip->opcode == op_pea ) {
-	    if (ip->oper1->mode == am_direct &&
-	        ip->oper1->u.offset->v.u <= 0xffffL) {
-		    putlen (IL2);
-	    } else {
-		    putlen (IL4);
-	    }
+PRIVATE void put_code P1(const CODE *, ip) {
+  putop(ip->opcode);
+  if (ip->opcode == op_pea) {
+    if (ip->oper1->mode == am_direct && ip->oper1->u.offset->v.u <= 0xffffL) {
+      putlen(IL2);
     } else {
-	    putlen (ip->length);
+      putlen(IL4);
     }
-    if (ip->oper1 != NIL_ADDRESS) {
-	oprintf ("\t");
-	putamode (ip->oper1, ip->length);
-	if (ip->oper2 != NIL_ADDRESS) {
-	    if (ip->opcode == op_line) {
-		oprintf ("%s%s>>>>\t", newline, comment);
-	    } else {
-		oprintf (",");
-	    }
-	    putamode (ip->oper2, ip->length);
-	}
+  } else {
+    putlen(ip->length);
+  }
+  if (ip->oper1 != NIL_ADDRESS) {
+    oprintf("\t");
+    putamode(ip->oper1, ip->length);
+    if (ip->oper2 != NIL_ADDRESS) {
+      if (ip->opcode == op_line) {
+        oprintf("%s%s>>>>\t", newline, comment);
+      } else {
+        oprintf(",");
+      }
+      putamode(ip->oper2, ip->length);
     }
-    oprintf ("%s", newline);
+  }
+  oprintf("%s", newline);
 }
 
 /*
  * generate a register mask.
  */
-static void put_mask P1 (REGMASK, mask)
-{
-    REG     reg;
-    BOOL    pending = FALSE;
+static void put_mask P1(REGMASK, mask) {
+  REG reg;
+  BOOL pending = FALSE;
 
-    for (reg = D0; reg <= FP7; reg++) {
-	if (mask & (REGMASK) 1) {
-	    if (pending) {
-		oprintf ("/");
-	    }
-	    putreg (reg);
-	    pending = TRUE;
-	}
-	mask >>= 1;
+  for (reg = D0; reg <= FP7; reg++) {
+    if (mask & (REGMASK)1) {
+      if (pending) {
+        oprintf("/");
+      }
+      putreg(reg);
+      pending = TRUE;
     }
+    mask >>= 1;
+  }
 }
 
 /*
  * generate a register mask for save.
  */
-static void put_smask P1 (REGMASK, mask)
-{
-    put_mask (mask);
-}
+static void put_smask P1(REGMASK, mask) { put_mask(mask); }
 
 /*
  * generate a register mask for restore.
  */
-static void put_rmask P1 (REGMASK, mask)
-{
-    put_mask (mask);
-}
+static void put_rmask P1(REGMASK, mask) { put_mask(mask); }
 
 /*
  * generate a register name from a tempref number.
  */
-static void putreg P1 (REG, r)
-{
-    switch (r) {
-    case D0:
-    case D1:
-    case D2:
-    case D3:
-    case D4:
-    case D5:
-    case D6:
-    case D7:
-	oprintf ("D%d", (int32_t) r);
-	break;
-    case A0:
-    case A1:
-    case A2:
-    case A3:
-    case A4:
-    case A5:
-    case A6:
-    case A7:
-	oprintf ("A%d", (int32_t) r - (int32_t) A0);
-	break;
-    case FP0:
-    case FP1:
-    case FP2:
-    case FP3:
-    case FP4:
-    case FP5:
-    case FP6:
-    case FP7:
-	oprintf ("FP%d", (int32_t) r - (int32_t) FP0);
-	break;
-    default:
-	CANNOT_REACH_HERE ();
-    }
+static void putreg P1(REG, r) {
+  switch (r) {
+  case D0:
+  case D1:
+  case D2:
+  case D3:
+  case D4:
+  case D5:
+  case D6:
+  case D7:
+    oprintf("D%d", (int32_t)r);
+    break;
+  case A0:
+  case A1:
+  case A2:
+  case A3:
+  case A4:
+  case A5:
+  case A6:
+  case A7:
+    oprintf("A%d", (int32_t)r - (int32_t)A0);
+    break;
+  case FP0:
+  case FP1:
+  case FP2:
+  case FP3:
+  case FP4:
+  case FP5:
+  case FP6:
+  case FP7:
+    oprintf("FP%d", (int32_t)r - (int32_t)FP0);
+    break;
+  default:
+    CANNOT_REACH_HERE();
+  }
 }
 
 /*
  * generate a named label.
  */
-PRIVATE void put_name P1 (SYM *, sp)
-{
-    put_reference (sp);
-    oprintf ("%s:%s", outlate (nameof (sp)), newline);
+PRIVATE void put_name P1(SYM *, sp) {
+  put_reference(sp);
+  oprintf("%s:%s", outlate(nameof(sp)), newline);
 }
 
 /*
  * output a compiler generated label.
  */
-PRIVATE void put_label P1 (LABEL, lab)
-{
-    oprintf ("%s%u:%s", prefix, (unsigned) lab, newline);
+PRIVATE void put_label P1(LABEL, lab) { oprintf("%s%u:%s", prefix, (unsigned)lab, newline); }
+
+static void put_header P2(enum e_gt, gtype, SIZE, al) {
+  static const char *directive[] = {
+      "DC.B\t", /* bytegen */
+      "DC.W\t", /* wordgen */
+      "DC.L\t", /* longgen */
+  };
+
+  if (gentype != gtype || outcol >= MAX_WIDTH) {
+    put_align(al);
+    gentype = gtype;
+    outcol = 15;
+    oprintf("\t%s", directive[gtype]);
+  } else {
+    oprintf(",");
+  }
 }
 
-static void put_header P2 (enum e_gt, gtype, SIZE, al)
-{
-    static const char *directive[] =
-    {
-	"DC.B\t",		/* bytegen */
-	"DC.W\t",		/* wordgen */
-	"DC.L\t",		/* longgen */
-    };
-
-    if (gentype != gtype || outcol >= MAX_WIDTH) {
-	put_align (al);
-	gentype = gtype;
-	outcol = 15;
-	oprintf ("\t%s", directive[gtype]);
-    } else {
-	oprintf (",");
-    }
+PRIVATE void put_byte P1(UVAL, val) {
+  put_header(bytegen, alignment_of_type(tp_char));
+  oprintf("$%x", val & OxffUL);
+  outcol += 4;
 }
 
-PRIVATE void put_byte P1 (UVAL, val)
-{
-    put_header (bytegen, alignment_of_type (tp_char));
-    oprintf ("$%x", val & OxffUL);
-    outcol += 4;
+PRIVATE void put_word P1(UVAL, val) {
+  put_header(wordgen, alignment_of_type(tp_short));
+  oprintf("$%x", val & OxffffUL);
+  outcol += 6;
 }
 
-PRIVATE void put_word P1 (UVAL, val)
-{
-    put_header (wordgen, alignment_of_type (tp_short));
-    oprintf ("$%x", val & OxffffUL);
-    outcol += 6;
-}
-
-PRIVATE void put_dword P1 (UVAL, val)
-{
-    put_header (longgen, alignment_of_type (tp_long));
-    oprintf ("$%X", val);
-    outcol += 10;
+PRIVATE void put_dword P1(UVAL, val) {
+  put_header(longgen, alignment_of_type(tp_long));
+  oprintf("$%X", val);
+  outcol += 10;
 }
 
 #ifndef FLOAT_BOOTSTRAP
@@ -526,31 +498,28 @@ PRIVATE void put_dword P1 (UVAL, val)
 /*
  * Generate IEEE single and double numbers
  */
-PRIVATE void put_float P1 (const RVAL *, vp)
-{
-    unsigned long ul;
+PRIVATE void put_float P1(const RVAL *, vp) {
+  unsigned long ul;
 
-    ieee_single (vp, &ul);
-    put_dword (ul);
+  ieee_single(vp, &ul);
+  put_dword(ul);
 }
 
-PRIVATE void put_double P1 (const RVAL *, vp)
-{
-    unsigned long ul[2];
+PRIVATE void put_double P1(const RVAL *, vp) {
+  unsigned long ul[2];
 
-    ieee_double (vp, ul, TRUE);
-    put_dword (ul[0]);
-    put_dword (ul[1]);
+  ieee_double(vp, ul, TRUE);
+  put_dword(ul[0]);
+  put_dword(ul[1]);
 }
 
-PRIVATE void put_longdouble P1 (const RVAL *, vp)
-{
-    unsigned long ul[3];
+PRIVATE void put_longdouble P1(const RVAL *, vp) {
+  unsigned long ul[3];
 
-    ieee_longdouble (vp, ul, TRUE);
-    put_dword (ul[0]);
-    put_dword (ul[1]);
-    put_dword (ul[2]);
+  ieee_longdouble(vp, ul, TRUE);
+  put_dword(ul[0]);
+  put_dword(ul[1]);
+  put_dword(ul[2]);
 }
 
 #endif /* FLOAT_IEEE */
@@ -558,243 +527,184 @@ PRIVATE void put_longdouble P1 (const RVAL *, vp)
 /*
  * Generate MOTOROLA FFP numbers
  */
-PRIVATE void put_float P1 (const RVAL *, vp)
-{
-    put_dword (genffp (vp));
-}
+PRIVATE void put_float P1(const RVAL *, vp) { put_dword(genffp(vp)); }
 
-PRIVATE void put_double P1 (const RVAL *, vp)
-{
-    put_dword (genffp (vp));
-}
+PRIVATE void put_double P1(const RVAL *, vp) { put_dword(genffp(vp)); }
 
-PRIVATE void put_longdouble P1 (const RVAL *, vp)
-{
-    put_dword (genffp (vp));
-}
+PRIVATE void put_longdouble P1(const RVAL *, vp) { put_dword(genffp(vp)); }
 
 #endif /* FLOAT_MFFP */
 #endif /* FLOAT_BOOTSTRAP */
 
 #ifndef RELOC_BUG
-PRIVATE void put_char P1 (const EXPR *, ep)
-{
-    put_header (bytegen, alignment_of_type (tp_char));
-    putconst (ep, IL1);
-    outcol += 10;
+PRIVATE void put_char P1(const EXPR *, ep) {
+  put_header(bytegen, alignment_of_type(tp_char));
+  putconst(ep, IL1);
+  outcol += 10;
 }
-PRIVATE void put_short P1 (const EXPR *, ep)
-{
-    put_header (wordgen, alignment_of_type (tp_short));
-    putconst (ep, IL2);
-    outcol += 10;
+PRIVATE void put_short P1(const EXPR *, ep) {
+  put_header(wordgen, alignment_of_type(tp_short));
+  putconst(ep, IL2);
+  outcol += 10;
 }
 
 #endif /* RELOC_BUG */
 
-PRIVATE void put_long P1 (const EXPR *, ep)
-{
-    put_header (longgen, alignment_of_type (tp_long));
-    putconst (ep, IL4);
-    outcol += 10;
+PRIVATE void put_long P1(const EXPR *, ep) {
+  put_header(longgen, alignment_of_type(tp_long));
+  putconst(ep, IL4);
+  outcol += 10;
 }
 
-PRIVATE void put_pointer P1 (const EXPR *, ep)
-{
-    put_header (longgen, alignment_of_type (tp_pointer));
-    putconst (ep, IL4);
-    outcol += 10;
+PRIVATE void put_pointer P1(const EXPR *, ep) {
+  put_header(longgen, alignment_of_type(tp_pointer));
+  putconst(ep, IL4);
+  outcol += 10;
 }
 
-PRIVATE void put_storage P1 (SYM *, sp)
-{
-    SIZE    al = alignment_of_type (TYPEOF (sp));
+PRIVATE void put_storage P1(SYM *, sp) {
+  SIZE al = alignment_of_type(TYPEOF(sp));
 
-    put_bseg (al);
-    if (is_static (sp)) {
-	put_label (sp->value.l);
-    } else {
-	put_name (sp);
-    }
-    oprintf ("\tDS.B\t%d%s", TYPEOF (sp)->size, newline);
+  put_bseg(al);
+  if (is_static(sp)) {
+    put_label(sp->value.l);
+  } else {
+    put_name(sp);
+  }
+  oprintf("\tDS.B\t%d%s", TYPEOF(sp)->size, newline);
 }
-
 
 /*
  * dump the string literal pool.
  * if we are producing single copies of strings (which should therefore
  * be read only we put them in the text segment - else in the data segment.
  */
-PRIVATE void put_literals P0 (void)
-{
-    const CHAR *cp;
-    size_t  len;
+PRIVATE void put_literals P0(void) {
+  const CHAR *cp;
+  size_t len;
 
-    if (trad_option) {
-	put_dseg (alignment_of_type (tp_char));
-    } else {
-	put_kseg (alignment_of_type (tp_char));
-    }
-    for (; strtab != NIL_STRING; strtab = strtab->next) {
-	nl ();
-	put_label (strtab->label);
-	cp = strtab->str;
-	for (len = strtab->len; len--;)
-	    put_byte ((UVAL) *cp++);
-	put_byte (Ox0UL);
-    }
-    nl ();
+  if (trad_option) {
+    put_dseg(alignment_of_type(tp_char));
+  } else {
+    put_kseg(alignment_of_type(tp_char));
+  }
+  for (; strtab != NIL_STRING; strtab = strtab->next) {
+    nl();
+    put_label(strtab->label);
+    cp = strtab->str;
+    for (len = strtab->len; len--;)
+      put_byte((UVAL)*cp++);
+    put_byte(Ox0UL);
+  }
+  nl();
 }
 
-PRIVATE void put_reference P1 (SYM *, sp)
-{
-    if (!is_symbol_output (sp)) {
-	switch (storageof (sp)) {
-	case sc_global:
-	    nl ();
-	    oprintf ("\tXDEF %s%s", outlate (nameof (sp)), newline);
-	    break;
-	case sc_external:
-	    nl ();
-	    oprintf ("\tXREF %s%s", outlate (nameof (sp)), newline);
-	    break;
-	default:
-	    break;
-	}
-	symbol_output (sp);
+PRIVATE void put_reference P1(SYM *, sp) {
+  if (!is_symbol_output(sp)) {
+    switch (storageof(sp)) {
+    case sc_global:
+      nl();
+      oprintf("\tXDEF %s%s", outlate(nameof(sp)), newline);
+      break;
+    case sc_external:
+      nl();
+      oprintf("\tXREF %s%s", outlate(nameof(sp)), newline);
+      break;
+    default:
+      break;
     }
+    symbol_output(sp);
+  }
 }
 
 /* align the following data */
-static void put_align P1 (SIZE, al)
-{
-    nl ();
-    if (al > align_type) {
-	switch (al) {
-	case 2L:
-	    oprintf ("\tDS.W\t0%s", newline);
-	    break;
-	case 4L:
-	    oprintf ("\tDS.L\t0%s", newline);
-	    break;
-	default:
-	    break;
-	}
+static void put_align P1(SIZE, al) {
+  nl();
+  if (al > align_type) {
+    switch (al) {
+    case 2L:
+      oprintf("\tDS.W\t0%s", newline);
+      break;
+    case 4L:
+      oprintf("\tDS.L\t0%s", newline);
+      break;
+    default:
+      break;
     }
-    align_type = al;
+  }
+  align_type = al;
 }
 
 /*
  * output any function epilogue code
  */
-PRIVATE void put_epilogue P2 (__attribute__((unused))SYM *, sp, __attribute__((unused))LABEL, label)
-{
+PRIVATE void put_epilogue P2(__attribute__((unused)) SYM *, sp, __attribute__((unused)) LABEL, label) {}
+
+PRIVATE void nl P0(void) {
+  if (outcol > 0) {
+    oprintf("%s", newline);
+    gentype = nogen;
+    outcol = 0;
+  }
 }
 
-PRIVATE void nl P0 (void)
-{
-    if (outcol > 0) {
-	oprintf ("%s", newline);
-	gentype = nogen;
-	outcol = 0;
-    }
+static void seg P3(enum e_sg, segtype, const char *, segname, SIZE, al) {
+  nl();
+  if (curseg != segtype) {
+    oprintf("\tSECTION\t%s%s", segname, newline);
+    curseg = segtype;
+    align_type = 0L;
+  }
+  put_align(al);
 }
 
-static void seg P3 (enum e_sg, segtype, const char *, segname, SIZE, al)
-{
-    nl ();
-    if (curseg != segtype) {
-	oprintf ("\tSECTION\t%s%s", segname, newline);
-	curseg = segtype;
-	align_type = 0L;
-    }
-    put_align (al);
+PRIVATE void put_cseg P1(SIZE, al) { seg(codeseg, "TEXT", al); }
+
+PRIVATE void put_dseg P1(SIZE, al) { seg(dataseg, "DATA", al); }
+
+static void put_bseg P1(SIZE, al) { seg(bssseg, "BSS", al); }
+
+PRIVATE void put_kseg P1(SIZE, al) {
+  if (IandD_option) {
+    put_dseg(al);
+  } else {
+    put_cseg(al);
+  }
 }
 
-PRIVATE void put_cseg P1 (SIZE, al)
-{
-    seg (codeseg, "TEXT", al);
-}
+PRIVATE void put_rseg P1(SIZE, al) { put_cseg(al); }
 
-PRIVATE void put_dseg P1 (SIZE, al)
-{
-    seg (dataseg, "DATA", al);
-}
+PRIVATE void put_finish P0(void) {}
 
-static void put_bseg P1 (SIZE, al)
-{
-    seg (bssseg, "BSS", al);
-}
-
-PRIVATE void put_kseg P1 (SIZE, al)
-{
-    if (IandD_option) {
-	put_dseg (al);
-    } else {
-	put_cseg (al);
-    }
-}
-
-PRIVATE void put_rseg P1 (SIZE, al)
-{
-    put_cseg (al);
-}
-
-PRIVATE void put_finish P0 (void)
-{
-}
-
-PRIVATE void put_start P0 (void)
-{
-    oprintf ("%s Generated by %s %s %s (%s) from \"%s\"%s",
-	   comment, PROGNAME, VERSION, LAST_CHANGE_DATE, __DATE__, in_file,
-	     newline);
+PRIVATE void put_start P0(void) {
+  oprintf("%s Generated by %s %s %s (%s) from \"%s\"%s", comment, PROGNAME, VERSION, LAST_CHANGE_DATE, __DATE__, in_file,
+          newline);
 #ifdef VERBOSE
-    {
-	time_t  time_of_day;
-	VOIDCAST time (&time_of_day);
+  {
+    time_t time_of_day;
+    VOIDCAST time(&time_of_day);
 
-	oprintf ("%s Compilation date/time: %s%s",
-		 comment, ctime (&time_of_day), newline);
-    }
+    oprintf("%s Compilation date/time: %s%s", comment, ctime(&time_of_day), newline);
+  }
 #endif /* VERBOSE */
-    /* introduce the sections */
-    seg (codeseg, "TEXT", (SIZE) 0);
-    seg (romseg, "ROM", (SIZE) 0);
-    seg (dataseg, "DATA", (SIZE) 0);
-    seg (bssseg, "BSS", (SIZE) 0);
+  /* introduce the sections */
+  seg(codeseg, "TEXT", (SIZE)0);
+  seg(romseg, "ROM", (SIZE)0);
+  seg(dataseg, "DATA", (SIZE)0);
+  seg(bssseg, "BSS", (SIZE)0);
 }
 
 #ifdef MULTIPLE_ASSEMBLERS
-struct funcs qmac68k_funcs =
-{
-    put_code,
-    put_name,
-    put_label,
-    put_byte,
-    put_word,
-    put_dword,
+struct funcs qmac68k_funcs = {
+    put_code,      put_name,     put_label,     put_byte,     put_word,   put_dword,
 #ifndef RELOC_BUG
-    put_char,
-    put_short,
-#endif				/* RELOC_BUG */
-    put_long,
-    put_pointer,
-    put_storage,
-    put_literals,
-    put_finish,
-    put_start,
-    put_reference,
-    put_epilogue,
-    put_cseg,
-    put_dseg,
-    put_kseg,
-    put_rseg,
+    put_char,      put_short,
+#endif /* RELOC_BUG */
+    put_long,      put_pointer,  put_storage,   put_literals, put_finish, put_start,
+    put_reference, put_epilogue, put_cseg,      put_dseg,     put_kseg,   put_rseg,
 #ifdef FLOAT_SUPPORT
-    put_float,
-    put_double,
-    put_longdouble	/**/
-#endif				/* FLOAT_SUPPORT */
+    put_float,     put_double,   put_longdouble /**/
+#endif                                          /* FLOAT_SUPPORT */
 };
 
 #endif /* MULTIPLE_ASSEMBLERS */

@@ -49,7 +49,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Names to predefine in the preprocessor for this target machine.  */
 
-#if !defined (QDOS) && !defined (XTC68)
+#if !defined(QDOS) && !defined(XTC68)
 #define CPP_PREDEFINES "-Dunix -Dmc68000 -Dis68k"
 #else
 #define CPP_PREDEFINES "-DMC68000 -DQDOS -DC68"
@@ -68,16 +68,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* If TARGET_68881, return SF and DF values in f0 instead of d0.  */
 
-#define FUNCTION_VALUE(VALTYPE,FUNC) LIBCALL_VALUE (TYPE_MODE (VALTYPE))
+#define FUNCTION_VALUE(VALTYPE, FUNC) LIBCALL_VALUE(TYPE_MODE(VALTYPE))
 
-#define LIBCALL_VALUE(MODE) \
- gen_rtx (REG, (MODE), ((TARGET_68881 && ((MODE) == SFmode || (MODE) == DFmode)) ? 16 : 0))
+#define LIBCALL_VALUE(MODE) gen_rtx(REG, (MODE), ((TARGET_68881 && ((MODE) == SFmode || (MODE) == DFmode)) ? 16 : 0))
 
 /* 1 if N is a possible register number for a function value.
    D0 may be used, and F0 as well if -m68881 is specified.  */
 
-#define FUNCTION_VALUE_REGNO_P(N) \
- ((N) == 0 || (TARGET_68881 && (N) == 16))
+#define FUNCTION_VALUE_REGNO_P(N) ((N) == 0 || (TARGET_68881 && (N) == 16))
 
 /* Also output something to cause the correct _doprnt to be loaded.  */
-#define ASM_FILE_START(FILE) fprintf (FILE, "#NO_APP\n%s\n", TARGET_68881 ? ".globl fltused" : "")
+#define ASM_FILE_START(FILE) fprintf(FILE, "#NO_APP\n%s\n", TARGET_68881 ? ".globl fltused" : "")
