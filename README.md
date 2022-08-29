@@ -1,11 +1,29 @@
 xtc68
 =====
 
-Cross compiler for QDOS c68 on POSIX platforms
+Cross compiler for QDOS C68 on POSIX platforms (and Windows).
 
-This is a resurrection of the 1999-ish code base to compile on modern POSIX systems (well Linux at least). No effort has gone into updating the obsolete DOS and NT variants.
+This is a resurrection of the 1999-ish code base to compile on modern POSIX-like systems.
 
-As of 2021-08-24, the codebase is 64bit clean. There is no longer any requirement to build 32bit executables.
+As of 2021-08-24, the codebase is 64bit clean. There is no longer any requirement to build 32bit executables, even on Windows.
+
+## Installation
+
+You can either install a [binary distribution](https://github.com/stronnag/xtc68/releases) for Linux, MacOS, Windows or [build from source](#building). For platforms where there is no binary distribution, [build from source](#building) in required. Such platforms are:
+
+* Anything other than x86_64 (amd64) with Linux, MacOS and Windows.
+
+The binary installations are tar or Zip files, with the following structure:
+
+```
+xtc68/bin
+xtc68/share/qdos
+xtc68/share/qdos/etc
+xtc68/share/qdos/include
+xtc68/share/qdos/lib
+```
+
+You should then install a [c68 runtime](#runtime) into the `xtc68/share/qdos/include` (header files) and `xtc68/share/qdos/lib` (libraries and startup files).
 
 ## Runtime
 
@@ -16,27 +34,39 @@ qcc -o hw hw.c
 ```
 will generate a QDOS executable, where `hw.c` is a trivial, standard "Hello World" application, assuming the installation directory `$(prefix)/bin`  is on `$PATH`.
 
-It is not purpose of this repo to provide a QDOS c68 environemnt, nor does it offer any help for QDOS development; it mere maintains a cross compiler.
+Note that it is not purpose of this repository to provide a QDOS C68 development environment, nor does it offer any help for QDOS development; it mere maintains a cross compiler.
 
-## Installation
+### Runtime path resolution
 
-On most POSIX (like) systems (Linux, *BSD, MacOS, Msys, Cygwin) to build and install the excutables.
+The search path for QDOS header files and libraries is:
+
+* Under the `share/qdos` directory where `share` is at the same level as the binary `bin` directory (i.e. as distributed binaries)
+* Under the directory defined at build time `$prefix/share/qdos`; `prefix` defaults to `/usr/local` for the binary distributions.
+* In directories defined by the environment variables `QLINC` (header files) and `QLLIB` (libraries).
+* In the fallback directories under `/usr/local/share/qdos`
+
+So, if you unzip the supplied Windows Zip file to `C:\` (you now have `C:\xtc68` and sub-directories) and then added the C68 header files to `C:\xtc68\share\qdos\include` and the C68 libraries to `C:\xtc68\share\qdos\lib` (i.e. into the default directories the Zip file has conveniently provided), finally add `C:\xtc68\bin` to the `PATH` environment variable;  it all should "just work".
 
 ```
-# build and install the executables in /usr/local (default)
-make && sudo make install
-# on *BSD, you need GNU Make
-gmake && sudo gmake install
+> # Powershell
+> # Assume we have a trival "hello world" hw.c
+> $env:PATH += "C:\xtc68\bin;"
+> qcc -O -o helloworld hw.c
+helloworld: dataspace 904 (388)
+>
 ```
 
-A more modern practice on essentially "sole user" systems is to install under `~/.local`, thusly:
+## Building
+
+On most POSIX (like) systems (Linux, *BSD, MacOS, Msys) to build and install the executables.
+
+Modern practice on essentially "sole user" systems is to install under `~/.local`, with `~/.local/bin` appended to the `PATH`, so:
 
 ```
 make install prefix=~/.local
 # gmake install prefix=~/.local ## FreeBSD et al
 ```
 
-`sudo` is then not needed.
 To install the QDOS includes and libraries
 
 ```
@@ -45,22 +75,42 @@ To install the QDOS includes and libraries
 
 If the optional directory is omitted, `/usr/local` is assumed. You can also use the environment variable `PREFIX` (or `prefix`) instead.
 
+If you really want to install in `/usr/local`:
+
+```
+# build and install the executables in /usr/local (default)
+make && sudo make install
+# on *BSD, you need GNU Make
+gmake && sudo gmake install
+sudo ./sdk-install.sh
+```
+
+Note `sudo` is required for a non-root user to install to `/usr/local`.
+
 ## Integration with native make (i.e. GNU Make)
 
-* The `sdk-install.sh` script provides `ql.mak`, which it will copy to `$PREFIX/qdos/etc/ql.mak`
-* In your QDOS project `Makefile`, as the first line:
-
+* The `sdk-install.sh` script provides `ql.mak`, which it will copy to `$PREFIX/share/qdos/etc/ql.mak`
+* In your QDOS project `Makefile`, as the first line (`.local` prefix install)
 
   ```
   # local install, alas $$HOME is not expanded here ..
-  include /home/USERNAME/.local/qdos/etc/ql.mak
+  include /home/USERNAME/.local/share/qdos/etc/ql.mak
   ```
-  or
+
+  * or
 
   ```
   # System install
   include /usr/local/qdos/etc/ql.mak
   ```
 
+  * or
+
+  ```
+  mkdir ~/.config/xtc68
+  cp $PREFIX/share/qdos/etc/ql.mak ~/.config/xtc68/
+  # then in a Makefile
+  include /home/USERNAME/.config/xtc68/ql.mak
+  ```
 
 Now you can easily use GNU Make to build your QDOS project.

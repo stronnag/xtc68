@@ -45,6 +45,9 @@ typedef unsigned char U_CHAR;
 #include <fcntl.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <libgen.h>
+#include <limits.h>
+
 
 /* VMS-specific definitions */
 #ifdef VMS
@@ -65,6 +68,10 @@ typedef unsigned char U_CHAR;
 #include <qdos.h>
 #endif
 #include <errno.h>		/* This defines "errno" properly */
+
+#ifdef XTC68
+extern char* get_binary_path();
+#endif
 
 #ifndef O_RDONLY
 #define O_RDONLY 0
@@ -228,7 +235,9 @@ struct file_name_list
 struct file_name_list include_defaults[] =
   {
 #ifdef XTC68
-    { &include_defaults[1], GCC_INCLUDE_DIR },
+    { 0, "" },
+    { 0, "" },
+    { 0, "" },
     { 0, "" },
     { 0, "" }
 #else
@@ -879,11 +888,14 @@ void deps_output (char *string,      long size)
   deps_buffer[deps_size] = 0;
 }
 
-int
-main (argc, argv)
-     int argc;
-     char **argv;
-{
+void remove_trailing_slash(char *fname) {
+  int n = strlen(fname);
+  if (*(fname + n -1) == '/' || *(fname + n -1) == '\\') {
+    *(fname + n -1) = 0;
+  }
+}
+
+int main (int argc, char **argv) {
   long st_mode = 0;
   long st_size = 0;
   char *in_fname, *out_fname;
@@ -1006,56 +1018,60 @@ main (argc, argv)
         char *s;
         struct file_name_list *q;
         int n;
-        int base_inc = 0;
+
+        q = include_defaults;
+
+        char* binpath = get_binary_path();
+        if (binpath) {
+          char *dirnam = strdup(dirname(binpath));
+          strcpy(binpath, dirnam);
+          free(dirnam);
+
+          char *lsep = NULL;
+#ifndef WIN32
+          lsep = strrchr(binpath,'/');
+#else
+          lsep = strrchr(binpath,'\\');
+#endif
+          if(lsep != NULL) {
+            strcpy(lsep+1, "share/qdos/include");
+            q->fname = binpath;
+            q->next = q+1;
+            q++;
+          }
+        }
 
 #ifdef PREFIX
         char* pfx = XSTR(PREFIX);
         if (strlen(pfx) > 0) {
           char *pinc = malloc(strlen(pfx) + 32);
           strcpy(pinc, pfx);
-          strcat(pinc, "/qdos/include");
-          include_defaults[0].fname = pinc;
-          include_defaults[0].next = include_defaults + 1;
-          cplusplus_include_defaults[0].fname = pinc;
-          base_inc++;
+          strcat(pinc, "/share/qdos/include");
+          q->fname = pinc;
+          q->next = q + 1;
+          q++;
         }
 #endif
-        if((s = getenv("QLINC")))
-        {
-            char *p,*r;
-            r = include_defaults[base_inc].fname = strdup(s);
-            p = (r + strlen(r) - 1);
-            if(*p == '\\' || *p == '/')
-            {
-                *p = 0;
-            }
-            include_defaults[base_inc].next = include_defaults + 1;
-            cplusplus_include_defaults[base_inc].fname = r;
-            base_inc++;
+        if((s = getenv("QLINC"))) {
+            q->fname = s;
+            q->next = q + 1;
+            q++;
         }
 
-        // fallback
-        include_defaults[base_inc].fname = "/usr/local/qdos/include";
-        include_defaults[base_inc].next = NULL;
+        q->fname = "/usr/local/share/qdos/include";
+        q->next = q+1;
+        q++;
+        q->fname = NULL;
+        q->next = NULL;
 
         max_include_len = 0;
-        for(q = include_defaults; q->next; q++)
-        {
-            n = strlen(q->fname);
-            if(n > max_include_len)
-            {
-                max_include_len = n;
-            }
+        for(q = include_defaults; q->next; q++) {
+          remove_trailing_slash(q->fname);
+          n = strlen(q->fname);
+          if(n > max_include_len) {
+            max_include_len = n;
+          }
         }
-        for(q = cplusplus_include_defaults; q->next; q++)
-        {
-            n = strlen(q->fname);
-            if(n > max_include_len)
-            {
-                max_include_len = n;
-            }
-        }
-
     }
 #endif
 
@@ -1291,14 +1307,12 @@ main (argc, argv)
 
   if (!no_standard_includes) {
     if (include == 0)
-      include = (cplusplus ? cplusplus_include_defaults : include_defaults);
+      include = include_defaults;
     else
-      last_include->next
-	= (cplusplus ? cplusplus_include_defaults : include_defaults);
+      last_include->next = include_defaults;
     /* Make sure the list for #include <...> also has the standard dirs.  */
     if (ignore_srcdir && first_bracket_include == 0)
-      first_bracket_include
-	= (cplusplus ? cplusplus_include_defaults : include_defaults);
+      first_bracket_include =  include_defaults;
   }
 
   /* Initialize output buffer */

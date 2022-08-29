@@ -1,6 +1,7 @@
 # Makefile definitions to use xtc68 in a GNU make 'Makefile'
-# add the line (no quotes) 'include /usr/local/qdos/etc/ql.mak' as the
+# add the line (no quotes) 'include $PATH_TO/ql.mak' as the
 # first line of the makefile. Then just 'make' normally.
+# where $PATH_TO represents the path to the installed 'ql.mak'
 
 CC = qcc
 LD = qld
@@ -9,4 +10,3 @@ CPP = qcpp
 
 %.o : %.s
 	$(CC) $(ASFLAGS) -c $< -o $@
- 

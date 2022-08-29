@@ -1,11 +1,11 @@
 PROG = qcpp
 
-APFLAGS=  -DXTC68 -DCPLUSPLUS
+APFLAGS= -DXTC68 -DCPLUSPLUS
 
-CFLAGS +=  -O2 $(APFLAGS) -DPREFIX="$(prefix)"
+CFLAGS += -O2 $(APFLAGS) -DPREFIX="$(prefix)"
 LDFLAGS =
 
-OBJ = version.o cexp.o cccp.o
+OBJ = version.o cexp.o cccp.o appdir.o
 
 all: 	$(PROG)
 

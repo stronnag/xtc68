@@ -31,16 +31,7 @@
 //#define _GNU_SOURCE
 #include <string.h>
 #include <unistd.h>
-//#ifdef  __FreeBSD__
 #include <libgen.h> /*(POSIX) */
-//#endif
-
-#ifdef __APPLE__
-#include <targetconditionals.h>
-#if TARGET_OS_MAC
-#include <libgen.h>
-#endif /* TARGET_OS_MAC */
-#endif /* __APPLE__ */
 
 #include "cc.h"
 #ifdef WIN32

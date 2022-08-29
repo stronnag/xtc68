@@ -31,6 +31,12 @@
 #define PACKED
 #endif
 
+#if defined(__unix__) || defined(__APPLE__)
+#include <arpa/inet.h>
+#else
+#include <winsock.h>
+#endif
+
 typedef struct PACKED {
   uint32_t d_length;          /* file length */
   unsigned char d_access;     /* file access type */
@@ -45,17 +51,13 @@ typedef struct PACKED {
   uint32_t d_backup;
 } QLDIR_t;
 
-short is_big_endian;
-
-ushort swapword(ushort val) {
-  return (is_big_endian) ? val : (ushort)(val << 8) + (val >> 8);
+#ifdef WIN32
+char *stpcpy(char *d, const char *s) {
+  while ((*d++ = *s++)) /* NULL loop */
+    ;
+  return d - 1;
 }
-
-uint32_t swaplong(uint32_t val) {
-  return (is_big_endian) ? val
-                         : (uint32_t)(((uint32_t)swapword(val & 0xFFFF) << 16) |
-                                      (uint32_t)swapword(val >> 16));
-}
+#endif
 
 void usage(void) {
   fputs("usage: qls path\n", stderr);
@@ -63,14 +65,11 @@ void usage(void) {
 }
 
 int main(int ac, char **av) {
-  uint32_t one = 1;
   char secret[PATH_MAX];
   char *p, *q;
   int fd;
   QLDIR_t qd;
   struct stat s;
-
-  is_big_endian = 1 - *(char *)&one;
 
   if (*(av + 1) && stat(*(av + 1), &s) == 0 && (S_ISDIR(s.st_mode))) {
     p = stpcpy(secret, *(av + 1));
@@ -90,7 +89,7 @@ int main(int ac, char **av) {
       strncpy(fnam, secret, n);
 
       while (read(fd, &qd, sizeof(qd)) == sizeof(qd)) {
-        len = swapword(qd.d_szname);
+        len = htons(qd.d_szname);
         strncpy(fnam + n, qd.d_name, len);
         *(fnam + n + len) = 0;
 
@@ -98,9 +97,9 @@ int main(int ac, char **av) {
           struct tm *tm;
           tm = localtime(&s.st_mtime);
           char tbuff[64];
-          strftime(tbuff, sizeof(tbuff), "%F %T", tm);
-          printf("%-36.*s%9ld%8d%4d %s\n", len, qd.d_name, s.st_size,
-                 swaplong(qd.d_datalen), qd.d_type, tbuff);
+          strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%m:%S", tm);
+          printf("%-36.*s%9zu%8u%4d %s\n", len, qd.d_name, (size_t)s.st_size,
+                 (uint32_t)htonl(qd.d_datalen), qd.d_type, tbuff);
         }
       }
     }

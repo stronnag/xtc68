@@ -2,19 +2,19 @@
 # Note you can build 32bit binaries on x86-64 by
 # CFLAGS=-m32 make
 
-DIRS = as68  c68  cc  cpp  ld  slb
+DIRS = as68 c68  cc  cpp  ld  slb tools
 CLEANDIRS = $(DIRS:%=clean-%)
 INSTALLDIRS = $(DIRS:%=install-%)
 
 prefix ?= /usr/local
-export prefix
-
 CFLAGS += -Wall -Wextra -pedantic
+
 export CFLAGS
+export prefix
 
 all: $(DIRS)
 $(DIRS):
-	$(MAKE) -C $@
+	$(MAKE) -C  $@
 
 clean: $(CLEANDIRS)
 

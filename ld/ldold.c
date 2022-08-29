@@ -44,6 +44,8 @@ Dec 89              QDOS port done by Jeremy Allison
 #include <stdlib.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <libgen.h>
+#include <limits.h>
 
 #ifdef XTC68
 # ifdef DOS_LIKE
@@ -52,6 +54,7 @@ Dec 89              QDOS port done by Jeremy Allison
 #  define _version ldversion
 #  define movmem(a,b,c) memcpy(b,a,c);
 # endif
+extern char * get_binary_path();
 #endif
 
 #define XSTR(s) STR(s)
@@ -1360,8 +1363,7 @@ int test_module(void)
 
 void link_file (char  *name, int   lib_mode, char **lib_paths, int file_no)
 {
-    char fname[50];
-
+    char fname[PATH_MAX];
     strcpy(currentname, name);
 
     if(lib_mode || (file_no == 0))
@@ -1369,8 +1371,9 @@ void link_file (char  *name, int   lib_mode, char **lib_paths, int file_no)
 	inp_hnd = -1;
 	while( *lib_paths)
         {
-            strcpy( fname, *lib_paths );
-            strcat( fname, name);
+            strcpy(fname, *lib_paths);
+            strcat(fname, "/");
+            strcat(fname, name);
             if((inp_hnd=open(fname, O_RDONLY|O_BINARY, 0))!= -1)
                 break;
             lib_paths++;
@@ -1539,6 +1542,13 @@ void write_prog(void)
 }
 
 /* Deal with command line */
+
+void remove_trailing_slash(char *fname) {
+  int n = strlen(fname);
+  if (*(fname + n -1) == '/' || *(fname + n -1) == '\\') {
+    *(fname + n -1) = 0;
+  }
+}
 
 void command_line(int   *xac, char  ***xav, char **paths, char *lib_arr)
 {
@@ -1709,51 +1719,51 @@ void command_line(int   *xac, char  ***xav, char **paths, char *lib_arr)
        halt(0);
    strcpy( p, getenv(_prog_use));
    strcat(p, "LIB_");
-#else
+#elif defined(XTC68)
    {
-       char *ldd = getenv("QLLIB");
-       if(ldd == NULL)
-       {
-#if defined(__unix__) || defined(__APPLE__) || defined(__MINGW32__)
-#ifdef PREFIX
-         char* pfx = XSTR(PREFIX);
-         if (strlen(pfx) > 0) {
-           ldd = malloc(strlen(pfx) + 16);
-           strcpy(ldd, pfx);
-           strcat(ldd, "/qdos/lib/");
-           paths[num_paths++] = ldd;
-         }
-#endif
-         // fallback
-         ldd = strdup("/usr/local/qdos/lib/");
+     char *ldd = NULL;
+     char* binpath = get_binary_path();
+     if (binpath) {
+       char *dirnam = strdup(dirname(binpath));
+       strcpy(binpath, dirnam);
+       free(dirnam);
+
+       char *lsep = NULL;
+#ifndef WIN32
+       lsep = strrchr(binpath,'/');
 #else
-         ldd = strdup("c:/qllib/");
+       lsep = strrchr(binpath,'\\');
 #endif
+       if(lsep != NULL) {
+         strcpy(lsep+1, "share/qdos/lib");
+         paths[num_paths++] = binpath;
        }
-       {
-           if(!(p = paths[num_paths++] = malloc(strlen(ldd)+2)))
-           {
-               halt(0);
-           }
-           else
-           {
-               char *q;
-               strcpy(p, ldd);
-               q = p+strlen(p);
-               if(q[-1] != '\\' && q[-1] != '/')
-               {
-                   *q++ = '/';
-                   *q = 0;
-               }
-           }
-       }
+     }
+
+#ifdef PREFIX
+     char* pfx = XSTR(PREFIX);
+     if (strlen(pfx) > 0) {
+       ldd = malloc(strlen(pfx) + 32);
+       strcpy(ldd, pfx);
+       strcat(ldd, "/share/qdos/lib");
+       paths[num_paths++] = ldd;
+     }
+#endif
+
+     ldd = getenv("QLLIB");
+     if (ldd != NULL) {
+       paths[num_paths++] = strdup(ldd);
+     }
+     paths[num_paths++] = "/usr/local/share/qdos/lib";
+     for(int i = 0; i < num_paths; i++) {
+       remove_trailing_slash(paths[i]);
+     }
    }
 #endif
    paths[num_paths] = NULL;
 }
 
-int main(int   argc, char  **argv)
-{
+int main(int   argc, char  **argv) {
    char *paths[NUM_SPATHS+2], *lib_arr;
    int i;
 #ifdef QDOS

@@ -5,17 +5,11 @@
 # This script will find the relevant files under ./, in the format
 # from the original distribution runtime disk 1
 
-
 [ -n "$prefix" ] && PREFIX=$prefix
 PREFIX=${PREFIX:-/usr/local}
-INSBIN=
-BINDIR=
 for L
 do
   case $L in
-    -e)
-      INSBIN=1
-      ;;
     *[\\/]*)
       PREFIX=$L
       ;;
@@ -26,7 +20,6 @@ do
       ;;
   esac
 done
-BINDIR=${BINDIR:-$PREFIX/bin}
 
 if [ ! -w $PREFIX ] ; then
   if [ $(id -u) -ne  0 ] ; then
@@ -40,20 +33,13 @@ if [ ! -w $PREFIX ] ; then
 fi
 CP="cp -v"
 
-mkdir -p $PREFIX/qdos/include/sys
-mkdir -p $PREFIX/qdos/include/netinet/
-mkdir -p $PREFIX/qdos/include/arpa/
-mkdir -p $PREFIX/qdos/lib
-mkdir -p $PREFIX/qdos/etc
-[ -f support/ql.mak ] && $CP support/ql.mak $PREFIX/qdos/etc
+mkdir -p $PREFIX/share/qdos/include/sys
+mkdir -p $PREFIX/share/qdos/include/netinet/
+mkdir -p $PREFIX/share/qdos/include/arpa/
+mkdir -p $PREFIX/share/qdos/lib
+mkdir -p $PREFIX/share/qdos/etc
 
-if [ -n "$INSBIN" ] ; then
-  mkdir -p $BINDIR
-  for B in as68/as68 c68/c68 cc/qcc cpp/qcpp ld/qld slb/slb slb/qdos-ar slb/qdos-ranlib
-  do
-    $CP $B $BINDIR
-  done
-fi
+[ -f support/ql.mak ] && $CP support/ql.mak $PREFIX/share/qdos/etc
 
 while read FILE
 do
@@ -64,24 +50,24 @@ do
       case $IFILE in
 	sys_*)
 	  SIFILE=${IFILE##*sys_}
-	  $CP $FILE $PREFIX/qdos/include/sys/$SIFILE
+	  $CP $FILE $PREFIX/share/qdos/include/sys/$SIFILE
       ;;
 	netinet_*)
 	  SIFILE=${IFILE##*netinet_}
-	  $CP $FILE $PREFIX/qdos/include/netinet/$SIFILE
+	  $CP $FILE $PREFIX/share/qdos/include/netinet/$SIFILE
 	  ;;
 	arpa_*)
 	  SIFILE=${IFILE##*arpa_}
-	  $CP $FILE $PREFIX/qdos/include/arpa/$SIFILE
+	  $CP $FILE $PREFIX/share/qdos/include/arpa/$SIFILE
 	  ;;
 	*)
-	  $CP $FILE $PREFIX/qdos/include/$IFILE
+	  $CP $FILE $PREFIX/share/qdos/include/$IFILE
 	  ;;
       esac
       ;;
     */lib_*)
       LFILE=${FN##*lib_}
-      $CP $FILE $PREFIX/qdos/lib/$LFILE
+      $CP $FILE $PREFIX/share/qdos/lib/$LFILE
       ;;
   esac
 done < <(find . -iname include_\* -o -iname lib_\*)
