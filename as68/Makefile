@@ -1,7 +1,7 @@
 VPATH = ../
 
 GCFLAGS = -O2
-CFLAGS +=   $(GCFLAGS) -DXTC68 -DLABELDIFF -DUSELINE -DMINIX -DHOST_LITTLE_ENDIAN
+CFLAGS += $(GCFLAGS) -DXTC68 -DLABELDIFF -DUSELINE -DMINIX -DHOST_LITTLE_ENDIAN
 LDFLAGS =
 
 OBJS = cbuf.o cpy.o gen.o hdr.o lex.o main.o ops.o \
@@ -29,5 +29,5 @@ clean:
 	rm -f *.o as68
 
 install: as68
-	install -d $(prefix)
-	install as68 $(prefix)
+	install -d $(prefix)/bin
+	install as68 $(prefix)/bin

@@ -36,7 +36,12 @@
 
 #include "slb.h"
 #include <stdarg.h>
+#include <stdint.h>
+#if defined(__unix__) || defined(__APPLE__)
 #include <arpa/inet.h>
+#else
+#include <winsock.h>
+#endif
 
 PRIVATE short gword         _PROTOTYPE((void));
 PRIVATE long  glong         _PROTOTYPE((void));
@@ -248,7 +253,7 @@ short   gword()
 
     DBG(("GWORD",0x1001,"enter:"));
     reply = (short)get_data(2);
-    reply = ntohs(reply);
+    reply = htons(reply);
     gaddr += 2;
     DBG(("GWORD",0x1001,"Exit: reply=%04.4x",reply));
     return (reply);
@@ -266,7 +271,7 @@ long    glong()
 
     DBG(("GLONG",0x1001,"Enter:"));
     reply = get_data(4);
-    reply = ntohl(reply);
+    reply = htonl(reply);
     gaddr += 4;
     DBG(("GLONG",0x1001,"Exit: reply=%08.8c",reply));
     return (reply);

@@ -40,14 +40,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef __GNUC__
 #define alloca __builtin_alloca
 # ifdef XTC68
-#  define GCC_INCLUDE_DIR "/usr/local/qdos/include"
-#  define GPLUSPLUS_INCLUDE_DIR "/usr/local/qdos/include"
+#  define GCC_INCLUDE_DIR "/usr/local/share/qdos/include"
+#  define GPLUSPLUS_INCLUDE_DIR "/usr/local/share/qdos/include"
 # endif
-#elif defined (XTC68)   /* Must be DOS/NT/OS2 */          
+#elif defined (XTC68)   /* Must be DOS/NT/OS2 */
 # define GCC_INCLUDE_DIR "c:/qlinc"
 # define GPLUSPLUS_INCLUDE_DIR "c:/qlinc"
 # define alloca xalloca
 extern char * xalloca(unsigned long);
 #endif
-
-

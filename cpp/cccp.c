@@ -23,28 +23,11 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef unsigned char U_CHAR;
 
-#ifdef EMACS
-#define NO_SHORTNAMES
-#include "../src/config.h"
-#ifdef open
-#undef open
-#undef read
-#undef write
-#endif /* open */
-#endif /* EMACS */
-
-#ifndef EMACS
 #include "config.h"
-#endif /* not EMACS */
 
 #ifndef STDC_VALUE
 #define STDC_VALUE 1
 #endif
-
-/* In case config.h defines these.  */
-#undef bcopy
-#undef bzero
-#undef bcmp
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -56,22 +39,15 @@ typedef unsigned char U_CHAR;
 #include <strings.h>
 #include <stdarg.h>
 #include <unistd.h>
-
-
-#if !defined (VMS) && !defined (QDOS) && !defined (DOS_LIKE)
 #include <time.h>
 #include <sys/file.h>
 #include <sys/time.h>		/* for __DATE__ and __TIME__ */
-#include <sys/resource.h>
-#else
-#define index strchr
-#define rindex strrchr
-#include <time.h>
-#ifndef QDOS
-#include <io.h>
-#endif
 #include <fcntl.h>
-#endif /* not VMS */
+#include <stdint.h>
+#include <inttypes.h>
+#include <libgen.h>
+#include <limits.h>
+
 
 /* VMS-specific definitions */
 #ifdef VMS
@@ -93,6 +69,10 @@ typedef unsigned char U_CHAR;
 #endif
 #include <errno.h>		/* This defines "errno" properly */
 
+#ifdef XTC68
+extern char* get_binary_path();
+#endif
+
 #ifndef O_RDONLY
 #define O_RDONLY 0
 #endif
@@ -106,17 +86,7 @@ typedef unsigned char U_CHAR;
 
 /* External declarations.  */
 
-#ifndef __APPLE__
-#ifndef DOS_LIKE
-void bcopy (), bzero ();
-int bcmp ();
-extern char *getenv ();
-#else
 #include <fcntl.h>
-#define bzero(b,len) memset(b, '\0', len)
-#define bcopy(b1,b2,len) memcpy(b2,b1,len)
-#endif
-#endif
 
 extern char *version_string;
 extern int error(char *msg,...);
@@ -129,6 +99,9 @@ extern int error(char *msg,...);
 #ifndef SUCCESS_EXIT_CODE
 #define SUCCESS_EXIT_CODE 0	/* 0 means success on Unix.  */
 #endif
+
+#define XSTR(s) STR(s)
+#define STR(s) #s
 
 /* Name under which this program was invoked.  */
 
@@ -262,7 +235,9 @@ struct file_name_list
 struct file_name_list include_defaults[] =
   {
 #ifdef XTC68
-    { &include_defaults[1], GCC_INCLUDE_DIR },
+    { 0, "" },
+    { 0, "" },
+    { 0, "" },
     { 0, "" },
     { 0, "" }
 #else
@@ -358,7 +333,7 @@ struct definition {
 /* different kinds of things that can appear in the value field
    of a hash node.  Actually, this may be useless now. */
 union hashval {
-  long ival;
+  intptr_t ival;
   char *cpval;
   DEFINITION *defn;
 };
@@ -447,7 +422,7 @@ struct arglist {
   long argno;
 };
 
-HASHNODE * install (U_CHAR *, long,  enum node_type, long, long);
+HASHNODE * install (U_CHAR *, long,  enum node_type, intptr_t, long);
 void fatal (char *,...);
 void fancy_abort (void), pfatal_with_name (char *), perror_with_name (char *);
 HASHNODE * lookup (U_CHAR *, long, long);
@@ -907,17 +882,20 @@ void deps_output (char *string,      long size)
     deps_allocated_size *= 2;
     deps_buffer = (char *) xrealloc (deps_buffer, deps_allocated_size);
   }
-  bcopy (string, &deps_buffer[deps_size], size);
+  memmove (&deps_buffer[deps_size], string, size);
   deps_size += size;
   deps_column += size;
   deps_buffer[deps_size] = 0;
 }
 
-int
-main (argc, argv)
-     int argc;
-     char **argv;
-{
+void remove_trailing_slash(char *fname) {
+  int n = strlen(fname);
+  if (*(fname + n -1) == '/' || *(fname + n -1) == '\\') {
+    *(fname + n -1) = 0;
+  }
+}
+
+int main (int argc, char **argv) {
   long st_mode = 0;
   long st_size = 0;
   char *in_fname, *out_fname;
@@ -991,23 +969,6 @@ main (argc, argv)
               new_argv[new_argc++] = argv[arg_cpy];
   }
 
-#ifdef VMS
-  {
-    /* Remove directories from PROGNAME.  */
-    char *s;
-    extern char *rindex ();
-
-    progname = savestring (argv[0]);
-
-    if (!(s = rindex (progname, ']')))
-      s = rindex (progname, ':');
-    if (s)
-      strcpy (progname, s+1);
-    if (s = rindex (progname, '.'))
-      *s = '\0';
-  }
-#endif
-
   in_fname = NULL;
   out_fname = NULL;
 
@@ -1058,44 +1019,65 @@ main (argc, argv)
         struct file_name_list *q;
         int n;
 
-	if((s = getenv("QLINC")))
-        {
+        q = include_defaults;
 
-            char *p,*r;
-            r = include_defaults[0].fname = strdup(s);
-            p = (r + strlen(r) - 1);
-            if(*p == '\\' || *p == '/')
-            {
-                *p = 0;
-            }
-            include_defaults[0].next = include_defaults + 1;
-			cplusplus_include_defaults[0].fname = r;
+        char* binpath = get_binary_path();
+        if (binpath) {
+          char *dirnam = strdup(dirname(binpath));
+          strcpy(binpath, dirnam);
+          free(dirnam);
+
+          char *lsep = NULL;
+#ifndef WIN32
+          lsep = strrchr(binpath,'/');
+#else
+          lsep = strrchr(binpath,'\\');
+#endif
+          if(lsep != NULL) {
+            strcpy(lsep+1, "share/qdos/include");
+            q->fname = binpath;
+            q->next = q+1;
+            q++;
+          }
         }
+
+#ifdef PREFIX
+        char* pfx = XSTR(PREFIX);
+        if (strlen(pfx) > 0) {
+          char *pinc = malloc(strlen(pfx) + 32);
+          strcpy(pinc, pfx);
+          strcat(pinc, "/share/qdos/include");
+          q->fname = pinc;
+          q->next = q + 1;
+          q++;
+        }
+#endif
+        if((s = getenv("QLINC"))) {
+            q->fname = s;
+            q->next = q + 1;
+            q++;
+        }
+
+        q->fname = "/usr/local/share/qdos/include";
+        q->next = q+1;
+        q++;
+        q->fname = NULL;
+        q->next = NULL;
 
         max_include_len = 0;
-        for(q = include_defaults; q->next; q++)
-        {
-            n = strlen(q->fname);
-            if(n > max_include_len)
-            {
-                max_include_len = n;
-            }
+        for(q = include_defaults; q->next; q++) {
+          remove_trailing_slash(q->fname);
+          n = strlen(q->fname);
+          if(n > max_include_len) {
+            max_include_len = n;
+          }
         }
-        for(q = cplusplus_include_defaults; q->next; q++)
-        {
-            n = strlen(q->fname);
-            if(n > max_include_len)
-            {
-                max_include_len = n;
-            }
-        }
-
     }
 #endif
 
-  bzero ((char *) pend_files, new_argc * sizeof (char *));
-  bzero ((char *) pend_defs, new_argc * sizeof (char *));
-  bzero ((char *) pend_undefs, new_argc * sizeof (char *));
+    memset ((char *) pend_files, 0, new_argc * sizeof (char *));
+    memset ((char *) pend_defs, 0, new_argc * sizeof (char *));
+    memset ((char *) pend_undefs, 0, new_argc * sizeof (char *));
 
   /* Process switches and find input file name.  */
 
@@ -1192,7 +1174,7 @@ main (argc, argv)
           else
             p = new_argv[++i];
 
-          if ((p1 = (char *) index (p, '=')) != NULL)
+          if ((p1 = (char *) strchr (p, '=')) != NULL)
             *p1 = ' ';
           pend_defs[i] = p;
         }
@@ -1325,14 +1307,12 @@ main (argc, argv)
 
   if (!no_standard_includes) {
     if (include == 0)
-      include = (cplusplus ? cplusplus_include_defaults : include_defaults);
+      include = include_defaults;
     else
-      last_include->next
-	= (cplusplus ? cplusplus_include_defaults : include_defaults);
+      last_include->next = include_defaults;
     /* Make sure the list for #include <...> also has the standard dirs.  */
     if (ignore_srcdir && first_bracket_include == 0)
-      first_bracket_include
-	= (cplusplus ? cplusplus_include_defaults : include_defaults);
+      first_bracket_include =  include_defaults;
   }
 
   /* Initialize output buffer */
@@ -1404,13 +1384,13 @@ main (argc, argv)
 
       s = spec;
       /* Find the space before the DEPS_TARGET, if there is one.  */
-      /* Don't use `index'; that causes trouble on USG.  */
+      /* Don't use `strchr'; that causes trouble on USG.  */
       while (*s != 0 && *s != ' ') s++;
       if (*s != 0)
 	{
 	  deps_target = s + 1;
 	  output_file = (char *) xmalloc (s - spec + 1);
-	  bcopy (spec, output_file, s - spec);
+	  memmove (output_file, spec, s - spec);
 	  output_file[s - spec] = 0;
 	}
       else
@@ -1583,9 +1563,9 @@ main (argc, argv)
     fputs (deps_buffer, deps_stream);
     putc ('\n', deps_stream);
     if (deps_stream != stdout) {
-      fclose (deps_stream);
       if (ferror (deps_stream))
 	fatal ("I/O error on output");
+      fclose (deps_stream);
     }
   }
 
@@ -1616,7 +1596,7 @@ void trigraph_pcp (FILE_BUF *buf)
   int len;
 
   fptr = bptr = sptr = buf->buf;
-  while ((sptr = (U_CHAR *) index ((char *)sptr, '?')) != NULL) {
+  while ((sptr = (U_CHAR *) strchr ((char *)sptr, '?')) != NULL) {
     if (*++sptr != '?')
       continue;
     switch (*++sptr) {
@@ -1655,7 +1635,7 @@ void trigraph_pcp (FILE_BUF *buf)
     }
     len = sptr - fptr - 2;
     if (bptr != fptr && len > 0)
-      bcopy (fptr, bptr, len);	/* BSD doc says bcopy () works right
+      memmove (bptr, fptr, len);	/* BSD doc says bcopy () works right
 				   for overlapping strings.  In ANSI
 				   C, this will be memmove (). */
     bptr += len;
@@ -1664,7 +1644,7 @@ void trigraph_pcp (FILE_BUF *buf)
   }
   len = buf->length - (fptr - buf->buf);
   if (bptr != fptr && len > 0)
-    bcopy (fptr, bptr, len);
+    memmove (bptr, fptr, len);
   buf->length -= fptr - bptr;
   buf->buf[buf->length] = '\0';
   if (warn_trigraphs && fptr != bptr)
@@ -2061,7 +2041,7 @@ do { ip->macro->type = T_MACRO;		\
 	    } else if (*ibp++ == '\n') {
 	      ibp--;
 	      if (put_out_comments) {
-		bcopy (before_bp, obp, ibp - before_bp);
+		memmove (obp, before_bp, ibp - before_bp);
 		obp += ibp - before_bp;
 	      }
 	      break;
@@ -2128,7 +2108,7 @@ do { ip->macro->type = T_MACRO;		\
 	else {
 	  ibp++;
 	  if (put_out_comments) {
-	    bcopy (before_bp, obp, ibp - before_bp);
+	    memmove (obp, before_bp, ibp - before_bp);
 	    obp += ibp - before_bp;
 	  }
 	}
@@ -2845,13 +2825,13 @@ long handle_directive (FILE_BUF *ip, FILE_BUF *op)
 	/* Output directive name.  */
         check_expand (op, kt->length+1);
         *op->bufp++ = '#';
-        bcopy (kt->name, op->bufp, kt->length);
+        memmove (op->bufp, kt->name, kt->length);
         op->bufp += kt->length;
 
 	/* Output arguments.  */
         len = (cp - buf);
         check_expand (op, len);
-        bcopy (buf, op->bufp, len);
+        memmove (op->bufp, buf, len);
         op->bufp += len;
       }
 
@@ -2938,7 +2918,7 @@ void special_symbol ( HASHNODE *hp, FILE_BUF *op)
 
   case T_CONST:
     buf = (char *) alloca (4 * sizeof (long));
-    sprintf (buf, "%ld", hp->value.ival);
+    sprintf (buf, "%zd", hp->value.ival);
     break;
 
   case T_SPECLINE:
@@ -3000,9 +2980,8 @@ oops:
   }
   len = strlen (buf);
   check_expand (op, len);
-  bcopy (buf, op->bufp, len);
+  memmove (op->bufp, buf, len);
   op->bufp += len;
-
   return;
 }
 
@@ -3058,7 +3037,6 @@ get_filename:
 	{
           long n;
 	  char *ep,*nam;
-	  extern char *rindex ();
 
 	  if ((nam = fp->fname) != NULL) {
 	    /* Found a named file.  Figure out dir of the file,
@@ -3067,12 +3045,12 @@ get_filename:
 	    stackp = dsp;
 #ifndef QDOS
 #ifndef VMS
-            ep = rindex (nam, '\\');
-            if (ep == NULL) ep = rindex (nam, ':');
+            ep = strrchr (nam, '\\');
+            if (ep == NULL) ep = strrchr (nam, ':');
 #else				/* VMS */
-	    ep = rindex (nam, ']');
-	    if (ep == NULL) ep = rindex (nam, '>');
-	    if (ep == NULL) ep = rindex (nam, ':');
+	    ep = strrchr (nam, ']');
+	    if (ep == NULL) ep = strrchr (nam, '>');
+	    if (ep == NULL) ep = strrchr (nam, ':');
 	    if (ep != NULL) ep++;
 #endif				/* VMS */
 	    if (ep != NULL) {
@@ -3115,7 +3093,7 @@ get_filename:
     } else {
       trybuf = expand_to_temp_buffer (buf, limit, 0);
       buf = (U_CHAR *) alloca (trybuf.bufp - trybuf.buf + 1);
-      bcopy (trybuf.buf, buf, trybuf.bufp - trybuf.buf);
+      memmove (buf, trybuf.buf, trybuf.bufp - trybuf.buf);
       limit = buf + (trybuf.bufp - trybuf.buf);
       free (trybuf.buf);
       retried++;
@@ -3273,7 +3251,7 @@ int  finclude (int f, char *fname, FILE_BUF *op)
     goto nope;		/* Impossible? */
 
   fp = &instack[indepth + 1];
-  bzero ((char *) fp, sizeof (FILE_BUF));
+  memset ((char *) fp, 0, sizeof (FILE_BUF));
   fp->fname = fname;
   fp->length = 0;
   fp->lineno = 1;
@@ -3324,7 +3302,7 @@ int  finclude (int f, char *fname, FILE_BUF *op)
     }
     fp->buf = (U_CHAR *) alloca (st_size + 2);
     fp->bufp = fp->buf;
-    bcopy (basep, fp->buf, st_size);
+    memmove (fp->buf, basep, st_size);
     fp->length = st_size;
     free (basep);
   }
@@ -3391,7 +3369,7 @@ void do_define (U_CHAR *buf, U_CHAR *limit)
   else if (!is_idstart[*symname]) {
     U_CHAR *msg;			/* what pain... */
     msg = (U_CHAR *) alloca (sym_length + 1);
-    bcopy (symname, msg, sym_length);
+    memmove (msg, symname, sym_length);
     msg[sym_length] = 0;
 #ifndef QDOS
     error ("invalid macro name `%s'", msg);
@@ -3466,7 +3444,7 @@ void do_define (U_CHAR *buf, U_CHAR *limit)
       struct arglist *temp;
       long i = 0;
       for (temp = arg_ptrs; temp; temp = temp->next) {
-	bcopy (temp->name, &defn->argnames[i], temp->length);
+	memmove(&defn->argnames[i], temp->name, temp->length);
 	i += temp->length;
 	if (temp->next != 0) {
 	  defn->argnames[i++] = ',';
@@ -3493,7 +3471,7 @@ void do_define (U_CHAR *buf, U_CHAR *limit)
 	  || compare_defs (defn, hp->value.defn)) {
 	U_CHAR *msg;			/* what pain... */
 	msg = (U_CHAR *) alloca (sym_length + 20);
-	bcopy (symname, msg, sym_length);
+	memmove (msg, symname, sym_length);
 	strcpy ((char *) (msg + sym_length), " redefined");
 	warning ((char *)msg);
       }
@@ -3501,7 +3479,7 @@ void do_define (U_CHAR *buf, U_CHAR *limit)
       hp->type = T_MACRO;
       hp->value.defn = defn;
     } else
-      install (symname, sym_length, T_MACRO, (long) defn, hashcode);
+      install (symname, sym_length, T_MACRO, (intptr_t) defn, hashcode);
   }
 
   return;
@@ -3943,7 +3921,7 @@ void do_line (U_CHAR *buf, U_CHAR *limit, FILE_BUF *op)
 
       hp->length = fname_length;
       ip->fname = hp->value.cpval = ((char *) hp) + sizeof (HASHNODE);
-      bcopy (fname, hp->value.cpval, fname_length);
+      memmove (hp->value.cpval, fname, fname_length);
     }
   } else if (*bp) {
     error ("invalid format #line command");
@@ -3995,7 +3973,7 @@ void do_error (U_CHAR *buf, U_CHAR *limit)
 {
   long length = limit - buf;
   char *copy = (char *) xmalloc (length + 1);
-  bcopy (buf, copy, length);
+  memmove (copy, buf, length);
   copy[length] = 0;
   SKIP_WHITE_SPACE (copy);
   error ("#error %s", copy);
@@ -4672,7 +4650,7 @@ void output_line_command (FILE_BUF *ip, FILE_BUF *op, long conditional,
   check_expand (op, len + 1);
   if (op->bufp > op->buf && op->bufp[-1] != '\n')
     *op->bufp++ = '\n';
-  bcopy (line_cmd_buf, op->bufp, len);
+  memmove (op->bufp, line_cmd_buf, len);
   op->bufp += len;
   op->lineno = ip->lineno;
 }
@@ -4831,7 +4809,7 @@ void macroexpand (HASHNODE *hp, FILE_BUF *op)
       /* Generate in XBUF the complete expansion
 	 with arguments substituted in.
 	 TOTLEN is the total size generated so far.
-	 OFFSET is the index in the definition
+	 OFFSET is the strchr in the definition
 	 of where we are copying from.  */
       offset = totlen = 0;
       for (ap = defn->pattern; ap != NULL; ap = ap->next) {
@@ -4936,10 +4914,10 @@ void macroexpand (HASHNODE *hp, FILE_BUF *op)
 	      else break;
 	    }
 	  }
-	  bcopy (p1, xbuf + totlen, l1 - p1);
+	  memmove (xbuf + totlen, p1, l1 - p1);
 	  totlen += l1 - p1;
 	} else {
-	  bcopy (arg->expanded, xbuf + totlen, arg->expand_length);
+	  memmove (xbuf + totlen, arg->expanded, arg->expand_length);
 	  totlen += arg->expand_length;
 	}
 
@@ -5029,7 +5007,7 @@ char * macarg (struct argdata *argptr)
     U_CHAR *buffer = (U_CHAR *) xmalloc (bufsize + extra + 1);
     long final_start = 0;
 
-    bcopy (ip->bufp, buffer, bufsize);
+    memmove (buffer, ip->bufp, bufsize);
     ip->bufp = bp;
     ip->lineno += newlines;
 
@@ -5050,7 +5028,7 @@ char * macarg (struct argdata *argptr)
       bufsize += bp - ip->bufp;
       extra += newlines;
       buffer = (U_CHAR *) xrealloc ((char *)buffer, bufsize + extra + 1);
-      bcopy (ip->bufp, buffer + bufsize - (bp - ip->bufp), bp - ip->bufp);
+      memmove (buffer + bufsize - (bp - ip->bufp), ip->bufp, bp - ip->bufp);
       ip->bufp = bp;
       ip->lineno += newlines;
     }
@@ -5059,7 +5037,7 @@ char * macarg (struct argdata *argptr)
        discarding comments and duplicating newlines in whatever
        part of it did not come from a macro expansion.
        EXTRA space has been preallocated for duplicating the newlines.
-       FINAL_START is the index of the start of that part.  */
+       FINAL_START is the strchr of the start of that part.  */
     if (argptr != 0) {
       argptr->raw = buffer;
       argptr->raw_length = bufsize;
@@ -5491,7 +5469,7 @@ long grow_outbuf (FILE_BUF *obuf, long needed)
  * Otherwise, compute the hash code.
  */
 HASHNODE * install (U_CHAR *name, long len, enum node_type type,
-     long value,
+     intptr_t value,
      long hash)
         /* watch out here if sizeof (U_CHAR *) != sizeof (long) */
 {
@@ -5708,7 +5686,7 @@ void dump_arg_n (DEFINITION *defn, long argnum)
 {
   register U_CHAR *p = defn->argnames;
   while (argnum + 1 < defn->nargs) {
-    p = (U_CHAR *) index ((char*)p, ' ') + 1;
+    p = (U_CHAR *) strchr ((char*)p, ' ') + 1;
     argnum++;
     }
 
@@ -5739,140 +5717,3 @@ long file_size_and_mode(long fd, long *mode_pointer, long int *size_pointer)
   return 0;
 }
 
-#ifdef	VMS
-
-/* Under VMS we need to fix up the "include" specification
-   filename so that everything following the 1st slash is
-   changed into its correct VMS file specification. */
-
- hack_vms_include_specification (fname)
-     char *fname;
-{
-  register char *cp, *cp1, *cp2;
-  char Local[512];
-  extern char *index (), *rindex ();
-
-  /* Ignore leading "./"s */
-  while (fname[0] == '.' && fname[1] == '/')
-    strcpy (fname, fname+2);
-  /* Look for the boundary between the VMS and UNIX filespecs */
-  cp = rindex (fname, ']');	/* Look for end of dirspec. */
-  if (cp == 0) cp == rindex (fname, '>'); /* ... Ditto		    */
-  if (cp == 0) cp == rindex (fname, ':'); /* Look for end of devspec. */
-  if (cp) {
-    cp++;
-  } else {
-    cp = index (fname, '/');	/* Look for the "/" */
-  }
-  /* See if we found that 1st slash */
-  if (cp == 0) return;		/* Nothing to do!!! */
-  if (*cp != '/') return;	/* Nothing to do!!! */
-  /* Point to the UNIX filename part (which needs to be fixed!) */
-  cp1 = cp+1;
-  /* If the directory spec is not rooted, we can just copy
-     the UNIX filename part and we are done */
-  if (((cp - fname) > 2)
-      && ((cp[-1] == ']') || (cp[-1] == '>'))
-      && (cp[-2] != '.')) {
-    strcpy (cp, cp1);
-    return;
-  }
-  /* If there are no other slashes then the filename will be
-     in the "root" directory.  Otherwise, we need to add
-     directory specifications. */
-  if (index (cp1, '/') == 0) {
-    /* Just add "[000000]" as the directory string */
-    strcpy (Local, "[000000]");
-    cp2 = Local + strlen (Local);
-  } else {
-    /* Open the directory specification */
-    cp2 = Local;
-    *cp2++ = '[';
-    /* As long as there are still subdirectories to add, do them. */
-    while (index (cp1, '/') != 0) {
-      /* If this token is "." we can ignore it */
-      if ((cp1[0] == '.') && (cp1[1] == '/')) {
-	cp1 += 2;
-	continue;
-      }
-      /* Add a subdirectory spec. */
-      if (cp2 != Local+1) *cp2++ = '.';
-      /* If this is ".." then the spec becomes "-" */
-      if ((cp1[0] == '.') && (cp1[1] == '.') && (cp[2] == '/')) {
-	/* Add "-" and skip the ".." */
-	*cp2++ = '-';
-	cp1 += 3;
-	continue;
-      }
-      /* Copy the subdirectory */
-      while (*cp1 != '/') *cp2++= *cp1++;
-      cp1++;			/* Skip the "/" */
-    }
-    /* Close the directory specification */
-    *cp2++ = ']';
-  }
-  /* Now add the filename */
-  while (*cp1) *cp2++ = *cp1++;
-  *cp2 = 0;
-  /* Now append it to the original VMS spec. */
-  strcpy (cp, Local);
-  return;
-}
-#endif	/* VMS */
-
-#ifdef	VMS
-
-/* These are the read/write replacement routines for
-   VAX-11 "C".  They make read/write behave enough
-   like their UNIX counterparts that CCCP will work */
-
-int
-read (fd, buf, size)
-     int fd;
-     char *buf;
-     int size;
-{
-#undef	read	/* Get back the REAL read routine */
-  register int i;
-  register int total = 0;
-
-  /* Read until the buffer is exhausted */
-  while (size > 0) {
-    /* Limit each read to 32KB */
-    i = (size > (32*1024)) ? (32*1024) : size;
-    i = read (fd, buf, i);
-    if (i <= 0) {
-      if (i == 0) return (total);
-      return(i);
-    }
-    /* Account for this read */
-    total += i;
-    buf += i;
-    size -= i;
-  }
-  return (total);
-}
-
-int
-write (fd, buf, size)
-     int fd;
-     char *buf;
-     int size;
-{
-#undef	write	/* Get back the REAL write routine */
-  int i;
-  int j;
-
-  /* Limit individual writes to 32Kb */
-  i = size;
-  while (i > 0) {
-    j = (i > (32*1024)) ? (32*1024) : i;
-    if (write (fd, buf, j) < 0) return (-1);
-    /* Account for the data written */
-    buf += j;
-    i -= j;
-  }
-  return (size);
-}
-
-#endif /* VMS */

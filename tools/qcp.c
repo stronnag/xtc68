@@ -25,12 +25,15 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <stdint.h>
+#define _GNU_SOURCE
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef NOINLINE
-#define inline
+#if defined(__unix__) || defined(__APPLE__)
+#include <arpa/inet.h>
+#else
+#include <winsock.h>
 #endif
 
 #ifdef __GNUC__
@@ -53,21 +56,10 @@ typedef struct PACKED {
   uint32_t d_backup;
 } QLDIR_t;
 
-short is_big_endian;
 
-ushort swapword(ushort val) {
-  return (is_big_endian) ? val : (ushort)(val << 8) + (val >> 8);
-}
-
-uint32_t swaplong(uint32_t val) {
-  return (is_big_endian) ? val
-                         : (uint32_t)(((uint32_t)swapword(val & 0xFFFF) << 16) |
-                                      (uint32_t)swapword(val >> 16));
-}
-
-#ifdef NEED_STPCPY
+#ifdef WIN32
 char *stpcpy(char *d, const char *s) {
-  while (*d++ = *s++) /* NULL loop */
+  while ((*d++ = *s++)) /* NULL loop */
     ;
   return d - 1;
 }
@@ -91,7 +83,7 @@ uint32_t CheckXTcc(char *filename) {
     read(fd, &fdat, sizeof(xtcc));
     close(fd);
     if (fdat.x.x == xtcc.x.x) {
-      len = swaplong(fdat.dlen);
+      len = htonl(fdat.dlen);
     }
   }
   return len;
@@ -103,13 +95,10 @@ void usage(void) {
 }
 
 int main(int ac, char **av) {
-  uint32_t one = 1;
   uint32_t dspac = 0;
   int c;
   char *inf = NULL, *ouf = NULL;
   char onam[PATH_MAX], secret[PATH_MAX];
-
-  is_big_endian = 1 - *(char *)&one;
 
   while ((c = getopt(ac, av, "x:h?")) != EOF) {
     switch (c) {
@@ -185,7 +174,7 @@ int main(int ac, char **av) {
 
       if ((fd = open(secret, O_RDWR, 0666)) > -1) {
         while (read(fd, &qd, sizeof(qd)) == sizeof(qd)) {
-          if (nlen == swapword(qd.d_szname) &&
+          if (nlen == htons(qd.d_szname) &&
               strncasecmp(qd.d_name, q, nlen) == 0) {
             lseek(fd, -1 * sizeof(qd), SEEK_CUR);
             break;
@@ -196,14 +185,14 @@ int main(int ac, char **av) {
         fd = open(secret, O_CREAT | O_WRONLY, 0666);
       }
       if (fd >= 0) {
-        qd.d_szname = swapword(nlen);
+        qd.d_szname = htons(nlen);
         memcpy(qd.d_name, q, nlen);
         *(qd.d_name + nlen) = '\0'; // harmless, even if len==36
         qd.d_type = 1;
         qd.d_access = 0;
         qd.d_update = 0;
-        qd.d_length = (stat(onam, &s) == 0) ? swaplong(s.st_size) : 1;
-        qd.d_datalen = swaplong(dspac);
+        qd.d_length = (stat(onam, &s) == 0) ? htonl(s.st_size) : 1;
+        qd.d_datalen = htonl(dspac);
         write(fd, &qd, sizeof(qd));
         close(fd);
         if (ouf) {

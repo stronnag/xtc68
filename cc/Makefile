@@ -172,5 +172,5 @@ zipsrc:
 	$(ZIP) ccsrc$(S)zip makefile cc$(S)pr $(SRC) $(HDR) cc$(S)1 cc$(S)ds?
 
 install: $(PROG)
-	install -d $(prefix)
-	install $(PROG) $(prefix)
+	install -d $(prefix)/bin
+	install $(PROG) $(prefix)/bin

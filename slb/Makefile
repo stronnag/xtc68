@@ -8,9 +8,11 @@
 #  ... for compiling on MINIX
 LDFLAGS += $(CFLAGS)
 CFLAGS +=  -I. -O2
-
-
 LIBS =
+MACHINE := $(shell $(CC) -dumpmachine)
+ifneq (, $(findstring mingw, $(MACHINE)))
+  LIBS=-l wsock32
+endif
 
 # Set the object file extension
 # Set it to 's' for MINIX-PC, 'o' for other variants
@@ -54,5 +56,5 @@ slbdis.$O   :   slb.h
 slbrefs.$O  :   slb.h
 
 install: $(PROG) qdos-ar qdos-ranlib
-	install -d $(prefix)
-	install $^ $(prefix)
+	install -d $(prefix)/bin
+	install $^ $(prefix)/bin
