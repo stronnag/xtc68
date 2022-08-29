@@ -13,7 +13,7 @@ $(PROG): $(OBJ)
 	$(CC) $(CFLAGS) -oqcpp $(OBJ)
 
 clean:
-	rm -f *.o qcpp
+	rm -f *.o qcpp *.exe
 
 install: $(PROG)
 	install -d $(prefix)/bin

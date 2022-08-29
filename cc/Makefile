@@ -157,6 +157,7 @@ clean:
 	@$(RM) *.ncb
 	@$(RM) *.opt
 	@$(RM) $(PROG)
+	@$(RM) *.exe
 
 zip:
 	-$(RM) cc$(S)zip

@@ -17,7 +17,7 @@ qcp: qcp.c
 	$(CC) -Wall -O2 -o $@ $< $(WLIB)
 
 clean:
-	rm -f qls qcp
+	rm -f qls qcp *.exe
 
 install: qls qcp
 	install -d $(prefix)/bin

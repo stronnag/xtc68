@@ -233,6 +233,7 @@ clean:
 		$(RM) *$(S)rs?
 		$(RM) *$(S)rzc
 		$(RM) $(PROG)
+		$(RM) *.exe
 
 #------------------------------------------------------------------------------
 # Special section to handle building programs

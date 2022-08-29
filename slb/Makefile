@@ -37,7 +37,7 @@ slb :   ${OBJ}
 	${CC} ${CFLAGS} ${DEFINES} -c $<
 
 clean :
-	${RM} -f ${OBJ} *_i *_s ${PROG}
+	${RM} -f ${OBJ} *i *s ${PROG} *.exe
 
 clobber : clean
 

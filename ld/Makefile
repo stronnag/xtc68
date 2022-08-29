@@ -17,7 +17,7 @@ $(PROG): $(OBJS)
 	$(CC) $(CFLAGS) -o $(PROG) $(OBJS)
 
 clean:
-	rm -f *.o $(PROG)
+	rm -f *.o $(PROG) *.exe
 
 install: $(PROG)
 	install -d $(prefix)/bin

@@ -26,7 +26,7 @@ scan.o:   scan.c jas.h scan.h parse.h
 sym.o:    sym.c jas.h
 
 clean:
-	rm -f *.o as68
+	rm -f *.o as68 *.exe
 
 install: as68
 	install -d $(prefix)/bin
