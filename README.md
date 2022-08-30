@@ -41,7 +41,7 @@ Note that it is not purpose of this repository to provide a QDOS C68 development
 The search path for QDOS header files and libraries is:
 
 * Under the `share/qdos` directory where `share` is at the same level as the binary `bin` directory (i.e. as distributed binaries)
-* Under the directory defined at build time `$prefix/share/qdos`; `prefix` defaults to `/usr/local` for the binary distributions.
+* Under the directory defined at build time `$prefix/share/qdos`; this is not set for the binary distributions.
 * In directories defined by the environment variables `QLINC` (header files) and `QLLIB` (libraries).
 * In the fallback directories under `/usr/local/share/qdos`
 
@@ -60,11 +60,13 @@ helloworld: dataspace 904 (388)
 
 On most POSIX (like) systems (Linux, *BSD, MacOS, Msys) to build and install the executables.
 
+* You need a native C compiler, `bash`, `meson` and `ninja`
+
 Modern practice on essentially "sole user" systems is to install under `~/.local`, with `~/.local/bin` appended to the `PATH`, so:
 
 ```
-make install prefix=~/.local
-# gmake install prefix=~/.local ## FreeBSD et al
+meson build --prefix=~/.local --strip
+ninja install -C build
 ```
 
 To install the QDOS includes and libraries
@@ -73,15 +75,15 @@ To install the QDOS includes and libraries
 ./sdk-install.sh [~/.local]
 ```
 
-If the optional directory is omitted, `/usr/local` is assumed. You can also use the environment variable `PREFIX` (or `prefix`) instead.
+If the optional `--prefix` directory is omitted, `/usr/local` is assumed.
 
-If you really want to install in `/usr/local`:
+If you *really* want to install in `/usr/local`:
 
 ```
 # build and install the executables in /usr/local (default)
-make && sudo make install
-# on *BSD, you need GNU Make
-gmake && sudo gmake install
+meson build --strip
+ninja -C build
+sudo ninja install -C build
 sudo ./sdk-install.sh
 ```
 

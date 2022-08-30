@@ -6,8 +6,6 @@ libname=$2
 shift
 shift
 
-PATH=/usr/local/qdos/bin:$PATH
-
 case $flags in
    -*) ;;
    *) flags="-$flags" ;;
