@@ -1,0 +1,11 @@
+[binaries]
+c = 'o64-clang'
+cpp = 'o64-clang++'
+ar = 'x86_64-apple-darwin18-ar'
+strip = 'x86_64-apple-darwin18-strip'
+
+[host_machine]
+system = 'darwin'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
