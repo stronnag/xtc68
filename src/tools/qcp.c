@@ -38,33 +38,44 @@
 #include <winsock.h>
 #endif
 
-#ifdef __GNUC__
-#define PACKED __attribute__((packed))
-#else
-#define PACKED
-#endif
-
-typedef struct PACKED {
-  uint32_t d_length;          /* file length */
-  unsigned char d_access;     /* file access type */
-  unsigned char d_type;       /* file type */
-  uint32_t d_datalen PACKED;  /* data length */
-  uint32_t d_reserved PACKED; /* Unused */
-  short d_szname;             /* size of name */
-  char d_name[36];            /* name area */
-  uint32_t d_update PACKED;   /* last update */
-  short d_version;
-  short d_fileno;
-  uint32_t d_backup;
-} qldirent_t;
+#include <libgen.h>
 
 typedef struct {
-  union {
-    char xtcc[4];
-    uint32_t x;
-  } x;
-  uint32_t dlen;
-} xtcc_t;
+  size_t d_length;          /* file length */
+  time_t d_mtime;
+  uint32_t d_datasize;
+  uint8_t d_type;
+} qldirent_t;
+
+int checkXTcc(char *filename, qldirent_t *qd) {
+  uint8_t xtbuf[8];
+  int fd;
+  int res = -1;
+  if ((fd = open(filename, O_RDONLY, 0666)) > 0) {
+    res = 0;
+    uint32_t len = 0;
+    lseek(fd, -8, SEEK_END);
+    read(fd, xtbuf, sizeof(xtbuf));
+    if(memcmp(xtbuf, "XTcc", 4) == 0) {
+      len = ntohl(*(uint32_t*)(xtbuf+4));
+    }
+    struct stat s;
+    fstat(fd, &s);
+
+    memset(qd, 0, sizeof(qldirent_t));
+    if(len > 0) {
+      qd->d_type = 1;
+    }
+    qd->d_datasize = len;
+    qd->d_length = s.st_size;
+    qd->d_mtime = s.st_mtime;
+    close(fd);
+  } else {
+    fprintf(stderr, "open %s:", filename);
+    perror(" ");
+  }
+  return res;
+}
 
 
 #ifdef WIN32
@@ -75,75 +86,26 @@ char *stpcpy(char *d, const char *s) {
 }
 #endif
 
-uint32_t checkXTcc(char *filename) {
-  static xtcc_t xtcc = {{"XTcc"}, 0};
-  uint32_t len;
-  xtcc_t fdat={0};
-  int fd;
-
-  len = 0;
-  if ((fd = open(filename, O_RDONLY, 0666)) > 0) {
-    lseek(fd, -8, SEEK_END);
-    read(fd, &fdat, sizeof(xtcc));
-    close(fd);
-    if (fdat.x.x == xtcc.x.x) {
-      len = htonl(fdat.dlen);
-    }
-  }
-  return len;
-}
-
 void usage(void) {
   fputs(" qcp [-x dataspace] infile [outfile]\n", stderr);
   exit(0);
 }
 
 void set_dataspace(char *fn, uint32_t dsize) {
-  char *dname;
-  char *fname;
-  /** Note POSIX (libgen) *name() functions corrupt the input
-   *  so it is necessary to (a) save it and (b) do the following in order
-  **/
-
-  char *xfn = strdup(fn);
-  fname = basename(xfn);
-  dname = dirname(xfn);
-  char *uqlxdir = malloc(strlen(dname)+16);
-  qldirent_t* qd = malloc(sizeof(qldirent_t));
-
-  char *ptr = stpcpy(uqlxdir, dname);
-  *ptr++ = '/';
-  strcpy(ptr, ".-UQLX-");
-  int nlen = strlen(fname);
   int fd;
-
-  if ((fd = open(uqlxdir, O_RDWR, 0666)) > -1) {
-    while (read(fd, qd, sizeof(qldirent_t)) == sizeof(qldirent_t)) {
-      if (nlen == htons(qd->d_szname) && strncasecmp(qd->d_name, fname, nlen) == 0) {
-        lseek(fd, -1 * sizeof(qd), SEEK_CUR);
-        break;
-      }
+  uint8_t xtbuf[4];
+  if ((fd = open(fn, O_RDWR, 0)) >= 0) {
+    lseek(fd, -8, SEEK_END);
+    read(fd, xtbuf, 4);
+    if(memcmp(xtbuf, "XTcc", 4) != 0) {
+      lseek(fd, 0, SEEK_END);
+      write(fd,"XTcc", 4);
     }
-  } else {
-    fd = open(uqlxdir, O_CREAT | O_WRONLY, 0666);
-  }
-
-  if (fd >= 0) {
-    struct stat s;
-    memset(qd, 0, sizeof(qldirent_t));
-    qd->d_szname = htons(nlen);
-    memcpy(qd->d_name, fname, nlen);
-    qd->d_type = 1;
-    qd->d_length = (stat(fn, &s) == 0) ? htonl(s.st_size) : 1;
-    qd->d_datalen = htonl(dsize);
-    write(fd, qd, sizeof(qldirent_t));
+    uint32_t hlen = htonl(dsize);
+    write(fd, &hlen, 4);
     close(fd);
   }
-  free(qd);
-  free(uqlxdir);
-  free(xfn);
 }
-
 
 void copy_file(char *infile, char *outfile, uint32_t dsize) {
   char *outf = outfile;
@@ -220,14 +182,15 @@ int main(int ac, char **av) {
       }
     }
     for(int i = 0; i < nsrc; i++) {
-      uint32_t dsize = checkXTcc(av[optind+i]);
-      if(dsize == 0) {
-        dsize = dspace;
-      }
-
-      copy_set(av[optind+i], outf, dsize);
-      if(dsize ==  0) {
-        fprintf(stderr,"no data for %s\n", av[optind+i]);
+      qldirent_t qd;
+      if(checkXTcc(av[optind+i], &qd) == 0) {
+        if(qd.d_datasize == 0) {
+          qd.d_datasize = dspace;
+        }
+        copy_set(av[optind+i], outf, qd.d_datasize);
+        if(qd.d_datasize == 0) {
+          fprintf(stderr,"no data for %s\n", av[optind+i]);
+        }
       }
     }
   } else {

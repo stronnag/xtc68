@@ -20,15 +20,11 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #ifdef NOINLINE
 #define inline
-#endif
-
-#ifdef __GNUC__
-#define PACKED __attribute__((packed))
-#else
-#define PACKED
 #endif
 
 #if defined(__unix__) || defined(__APPLE__)
@@ -36,22 +32,14 @@
 #else
 #include <winsock.h>
 #endif
-
 #include <libgen.h>
 
-typedef struct PACKED {
-  uint32_t d_length;          /* file length */
-  unsigned char d_access;     /* file access type */
-  unsigned char d_type;       /* file type */
-  uint32_t d_datalen PACKED;  /* data length */
-  uint32_t d_reserved PACKED; /* Unused */
-  short d_szname;             /* size of name */
-  char d_name[36];            /* name area */
-  uint32_t d_update PACKED;   /* last update */
-  short d_version;
-  short d_fileno;
-  uint32_t d_backup;
-} QLDIR_t;
+typedef struct {
+  size_t d_length;          /* file length */
+  time_t d_mtime;
+  uint32_t d_datasize;
+  uint8_t d_type;
+} qldirent_t;
 
 #ifdef WIN32
 char *stpcpy(char *d, const char *s) {
@@ -66,48 +54,67 @@ void usage(void) {
   exit(0);
 }
 
-int main(int ac, char **av) {
-  char *secret;
-  char *p;
+int checkXTcc(char *filename, qldirent_t *qd) {
+  uint8_t xtbuf[8];
   int fd;
-  QLDIR_t qd;
-  struct stat s;
+  int res = -1;
 
-    if(ac > 1) {
-    char *dname = av[1];
-    secret = malloc(strlen(dname)+16);
-    p = stpcpy(secret, dname);
-    strcpy(p, "/.-UQLX-");
-    if ((fd = open(secret, O_RDWR, 0)) >= 0) {
-      char fnam[PATH_MAX];
-      short len;
-
-      char *q = stpcpy(fnam, dname);
-      *q++ = '/';
-      int ie = 0;
-      while (read(fd, &qd, sizeof(qd)) == sizeof(qd)) {
-        len = htons(qd.d_szname);
-        if(len > 36) {
-          memset(&qd, 0, sizeof(qd));
-          lseek(fd, -1 * sizeof(qd), SEEK_CUR);
-          write(fd, &qd, sizeof(qd));
-          len = 0;
-        }
-        if(len != 0) {
-          strncpy(q, qd.d_name, len);
-          *(q + len) = 0;
-          if (stat(fnam, &s) == 0) {
-            struct tm *tm;
-            tm = localtime(&s.st_mtime);
-            char tbuff[64];
-            strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%m:%S", tm);
-            printf("%-36.*s%9zu%8u%4d %s\n", len, qd.d_name, (size_t)s.st_size, (uint32_t)htonl(qd.d_datalen), qd.d_type, tbuff);
-          }
-        }
-        ie++;
-      }
+  if ((fd = open(filename, O_RDONLY, 0666)) > 0) {
+    res = 0;
+    uint32_t len = 0;
+    lseek(fd, -8, SEEK_END);
+    read(fd, xtbuf, sizeof(xtbuf));
+    if(memcmp(xtbuf, "XTcc", 4) == 0) {
+      len = htonl(*(uint32_t*)(xtbuf+4));
     }
+    struct stat s;
+    fstat(fd, &s);
+
+    memset(qd, 0, sizeof(qldirent_t));
+    if(len > 0) {
+      qd->d_type = 1;
+    }
+    qd->d_datasize = len;
+    qd->d_length = s.st_size;
+    qd->d_mtime = s.st_mtime;
     close(fd);
+  }
+  return res;
+}
+
+void read_ql_dir(char*dname) {
+  DIR *dirp;
+  qldirent_t qd;
+  struct dirent *dp;
+  if (!(dirp = opendir(dname))) {
+    fprintf(stderr, "dirp fail\n");
+    return;
+  }
+  char buf[PATH_MAX];
+  char *ptr = stpcpy(buf, dname);
+  *ptr++ = '/';
+  while ((dp = readdir(dirp))) {
+    if (0 == strcmp(dp->d_name, ".") || 0 == strcmp(dp->d_name, "..") ||
+        0 == strcmp(dp->d_name, ".-UQLX-"))
+      continue;
+    if(dp->d_type != DT_REG) {
+      continue;
+    }
+    strcpy(ptr, dp->d_name);
+    if(checkXTcc(buf, &qd) == 0) {
+      struct tm *tm;
+      tm = localtime(&qd.d_mtime);
+      char tbuff[64];
+      strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%m:%S", tm);
+      printf("%-36.36s%9zu%8u%4d %s\n", dp->d_name, qd.d_length, qd.d_datasize, qd.d_type, tbuff);
+    }
+  }
+}
+
+int main(int ac, char **av) {
+  if(ac > 1) {
+    char *dname = av[1];
+    read_ql_dir(dname);
   } else {
     usage();
   }
