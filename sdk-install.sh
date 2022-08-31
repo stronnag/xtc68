@@ -37,9 +37,6 @@ mkdir -p $PREFIX/share/qdos/include/sys
 mkdir -p $PREFIX/share/qdos/include/netinet/
 mkdir -p $PREFIX/share/qdos/include/arpa/
 mkdir -p $PREFIX/share/qdos/lib
-mkdir -p $PREFIX/share/qdos/etc
-
-[ -f support/ql.mak ] && $CP support/ql.mak $PREFIX/share/qdos/etc
 
 while read FILE
 do

@@ -91,26 +91,26 @@ Note `sudo` is required for a non-root user to install to `/usr/local`.
 
 ## Integration with native make (i.e. GNU Make)
 
-* The `sdk-install.sh` script provides `ql.mak`, which it will copy to `$PREFIX/share/qdos/etc/ql.mak`
+* The installation provides `ql.mk`, which it will copy to `$PREFIX/share/qdos/etc/ql.mk`
 * In your QDOS project `Makefile`, as the first line (`.local` prefix install)
 
   ```
   # local install, alas $$HOME is not expanded here ..
-  include /home/USERNAME/.local/share/qdos/etc/ql.mak
+  include /home/USERNAME/.local/share/qdos/etc/ql.mk
   ```
 
   * or
 
   ```
   # System install
-  include /usr/local/qdos/etc/ql.mak
+  include /usr/local/qdos/etc/ql.mk
   ```
 
   * or
 
   ```
   mkdir ~/.config/xtc68
-  cp $PREFIX/share/qdos/etc/ql.mak ~/.config/xtc68/
+  cp $PREFIX/share/qdos/etc/ql.mk ~/.config/xtc68/
   # then in a Makefile
   include /home/USERNAME/.config/xtc68/ql.mak
   ```

@@ -7,6 +7,7 @@ subdir('src/cpp')
 subdir('src/ld')
 subdir('src/slb')
 subdir('src/tools')
+subdir('support')
 
 executable(
   'qcc',
