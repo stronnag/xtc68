@@ -30,3 +30,5 @@ perl                                   283100    3784   1 2021-08-24 13:32:47
 jobs_x                                    712     500   1 2021-08-23 19:10:54
 show_x                                   2584     500   1 2021-08-23 21:06:03
 ```
+
+`qls` is not built on Windows, due to a deficient `dirent` API.

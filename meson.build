@@ -10,6 +10,14 @@ subdir('src/tools')
 subdir('support')
 
 executable(
+  'as68',
+  as68_src,
+  c_args: as68_copts,
+  link_args: as68_ldopts,
+  install: true,
+)
+
+executable(
   'qcc',
   qcc_src,
   c_args: qcc_copts,
@@ -50,14 +58,6 @@ executable(
 )
 
 executable(
-  'qls',
-  tools_qls_src,
-  c_args: tools_copts,
-  link_args: tools_ldopts,
-  install: true,
-)
-
-executable(
   'qcp',
   tools_qcp_src,
   c_args: tools_copts,
@@ -65,10 +65,12 @@ executable(
   install: true,
 )
 
+if host_machine.system() != 'windows'
 executable(
-  'as68',
-  as68_src,
-  c_args: as68_copts,
-  link_args: as68_ldopts,
+  'qls',
+  tools_qls_src,
+  c_args: tools_copts,
+  link_args: tools_ldopts,
   install: true,
 )
+endif
