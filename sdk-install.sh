@@ -14,8 +14,8 @@ do
       PREFIX=$L
       ;;
     *)
-      echo "install.sh [-e] [base directory] [-h]"
-      echo " -e  install binaries as well as include and libraries"
+      echo "sdk-install.sh [base directory] [-h]"
+      echo "    install include and libraries"
       exit
       ;;
   esac
@@ -26,7 +26,7 @@ if [ ! -w $PREFIX ] ; then
     if which sudo >/dev/null 2>&1 ; then
       exec sudo $0 $*
     else
-      echo "No sudo found, please run ./install.sh as root if necessary"
+      echo "No sudo found, please run ./sdk-install.sh as root if necessary"
       [ -r $PREFIX ] || exit 1
     fi
   fi
