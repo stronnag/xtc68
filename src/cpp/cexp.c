@@ -158,12 +158,6 @@ static const short yycheck[] = {
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef __GNUC__
-#if (!defined(__STDC__) && defined(sparc)) || defined(__sparc__)
-#include <alloca.h>
-#endif /* Sparc.  */
-#endif /* Not GNU C.  */
-
 /* This is the parser code that is written into each bison parser
   when the %semantic_parser declaration is not specified in the grammar.
   It was written by Richard Stallman by simplifying the hairy parser

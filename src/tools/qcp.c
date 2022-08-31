@@ -19,19 +19,18 @@
 | 								           |
 | totally not (c) Jonathan Hudson                                          |
 `-------------------------------------------------------------------------*/
+#define __USE_GNU
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
-#define __USE_GNU
 #include <fcntl.h>
 #include <limits.h>
 #include <stdint.h>
-#define _GNU_SOURCE
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <libgen.h>
-#include <alloca.h>
 #if defined(__unix__) || defined(__APPLE__)
 #include <arpa/inet.h>
 #else
