@@ -9,10 +9,11 @@ These files may also be found in the `utils` directory of UQLX; where they've bi
 * For `xtc68` compiled files, the dataspace is taken from the `XTcc` token at the end of the file.
 * For other executables, the dataspace must be provided.
 * If `outfile` is omitted, the dataspace is set for an extant file.
+* Multiple input files may be provided; if there is more than one, the output must be a directory.
 
 ```
 $ qcp -h
-  qcp [-x dataspace] infile [outfile]
+  qcp [-x dataspace] infile... [outfile]
 
 ```
 ## qls

@@ -7,6 +7,10 @@ CC = qcc
 LD = qld
 AS = as68
 CPP = qcpp
+AR = qdos-ar
+RANLIB = qdos-ranlib
+
+
 
 %.o : %.s
 	$(CC) $(ASFLAGS) -c $< -o $@

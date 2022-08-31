@@ -37,6 +37,8 @@
 #include <winsock.h>
 #endif
 
+#include <libgen.h>
+
 typedef struct PACKED {
   uint32_t d_length;          /* file length */
   unsigned char d_access;     /* file access type */
@@ -65,41 +67,44 @@ void usage(void) {
 }
 
 int main(int ac, char **av) {
-  char secret[PATH_MAX];
-  char *p, *q;
+  char *secret;
+  char *p;
   int fd;
   QLDIR_t qd;
   struct stat s;
 
-  if (*(av + 1) && stat(*(av + 1), &s) == 0 && (S_ISDIR(s.st_mode))) {
-    p = stpcpy(secret, *(av + 1));
-    if (*(p - 1) != '/') {
-      *p++ = '/';
-    }
-    q = p;
-
-    strcpy(p, ".-UQLX-");
-
-    if ((fd = open(secret, O_RDONLY, 0)) >= 0) {
+    if(ac > 1) {
+    char *dname = av[1];
+    secret = malloc(strlen(dname)+16);
+    p = stpcpy(secret, dname);
+    strcpy(p, "/.-UQLX-");
+    if ((fd = open(secret, O_RDWR, 0)) >= 0) {
       char fnam[PATH_MAX];
-      int n;
       short len;
 
-      n = q - secret;
-      strncpy(fnam, secret, n);
-
+      char *q = stpcpy(fnam, dname);
+      *q++ = '/';
+      int ie = 0;
       while (read(fd, &qd, sizeof(qd)) == sizeof(qd)) {
         len = htons(qd.d_szname);
-        strncpy(fnam + n, qd.d_name, len);
-        *(fnam + n + len) = 0;
-
-        if (stat(fnam, &s) == 0) {
-          struct tm *tm;
-          tm = localtime(&s.st_mtime);
-          char tbuff[64];
-          strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%m:%S", tm);
-          printf("%-36.*s%9zu%8u%4d %s\n", len, qd.d_name, (size_t)s.st_size, (uint32_t)htonl(qd.d_datalen), qd.d_type, tbuff);
+        if(len > 36) {
+          memset(&qd, 0, sizeof(qd));
+          lseek(fd, -1 * sizeof(qd), SEEK_CUR);
+          write(fd, &qd, sizeof(qd));
+          len = 0;
         }
+        if(len != 0) {
+          strncpy(q, qd.d_name, len);
+          *(q + len) = 0;
+          if (stat(fnam, &s) == 0) {
+            struct tm *tm;
+            tm = localtime(&s.st_mtime);
+            char tbuff[64];
+            strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%m:%S", tm);
+            printf("%-36.*s%9zu%8u%4d %s\n", len, qd.d_name, (size_t)s.st_size, (uint32_t)htonl(qd.d_datalen), qd.d_type, tbuff);
+          }
+        }
+        ie++;
       }
     }
     close(fd);

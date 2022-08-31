@@ -29,7 +29,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
+#include <stdbool.h>
+#include <libgen.h>
+#include <alloca.h>
 #if defined(__unix__) || defined(__APPLE__)
 #include <arpa/inet.h>
 #else
@@ -54,7 +56,16 @@ typedef struct PACKED {
   short d_version;
   short d_fileno;
   uint32_t d_backup;
-} QLDIR_t;
+} qldirent_t;
+
+typedef struct {
+  union {
+    char xtcc[4];
+    uint32_t x;
+  } x;
+  uint32_t dlen;
+} xtcc_t;
+
 
 #ifdef WIN32
 char *stpcpy(char *d, const char *s) {
@@ -64,16 +75,10 @@ char *stpcpy(char *d, const char *s) {
 }
 #endif
 
-uint32_t CheckXTcc(char *filename) {
+uint32_t checkXTcc(char *filename) {
+  static xtcc_t xtcc = {{"XTcc"}, 0};
   uint32_t len;
-
-  static struct {
-    union {
-      char xtcc[4];
-      uint32_t x;
-    } x;
-    uint32_t dlen;
-  } fdat, xtcc = {{"XTcc"}, 0};
+  xtcc_t fdat={0};
   int fd;
 
   len = 0;
@@ -93,16 +98,99 @@ void usage(void) {
   exit(0);
 }
 
+void set_dataspace(char *fn, uint32_t dsize) {
+  char *dname;
+  char *fname;
+  /** Note POSIX (libgen) *name() functions corrupt the input
+   *  so it is necessary to (a) save it and (b) do the following in order
+  **/
+
+  char *xfn = strdup(fn);
+  fname = basename(xfn);
+  dname = dirname(xfn);
+  char *uqlxdir = malloc(strlen(dname)+16);
+  qldirent_t* qd = malloc(sizeof(qldirent_t));
+
+  char *ptr = stpcpy(uqlxdir, dname);
+  *ptr++ = '/';
+  strcpy(ptr, ".-UQLX-");
+  int nlen = strlen(fname);
+  int fd;
+
+  if ((fd = open(uqlxdir, O_RDWR, 0666)) > -1) {
+    while (read(fd, qd, sizeof(qldirent_t)) == sizeof(qldirent_t)) {
+      if (nlen == htons(qd->d_szname) && strncasecmp(qd->d_name, fname, nlen) == 0) {
+        lseek(fd, -1 * sizeof(qd), SEEK_CUR);
+        break;
+      }
+    }
+  } else {
+    fd = open(uqlxdir, O_CREAT | O_WRONLY, 0666);
+  }
+
+  if (fd >= 0) {
+    struct stat s;
+    memset(qd, 0, sizeof(qldirent_t));
+    qd->d_szname = htons(nlen);
+    memcpy(qd->d_name, fname, nlen);
+    qd->d_type = 1;
+    qd->d_length = (stat(fn, &s) == 0) ? htonl(s.st_size) : 1;
+    qd->d_datalen = htonl(dsize);
+    write(fd, qd, sizeof(qldirent_t));
+    close(fd);
+  }
+  free(qd);
+  free(uqlxdir);
+  free(xfn);
+}
+
+
+void copy_file(char *infile, char *outfile, uint32_t dsize) {
+  char *outf = outfile;
+  struct stat s;
+  if(0 == stat(outfile, &s) && S_ISDIR(s.st_mode)) {
+    char *ifn = strdup(infile);
+    char *ibase = basename(ifn);
+    outf = alloca(strlen(outfile)+1+strlen(ibase)+1);
+    char *ptr = stpcpy(outf, outfile);
+    *ptr++ = '/';
+    strcpy(ptr, ibase);
+    free(ifn);
+  }
+
+  int fd, fo, n;
+  if ((fd = open(infile, O_RDONLY, 0)) >= 0) {
+    if ((fo = open(outf, O_CREAT | O_WRONLY | O_TRUNC, 0666)) >= 0) {
+      char *buf = malloc(4096);
+      while ((n = read(fd, buf, sizeof(buf))) > 0) {
+        write(fo, buf, n);
+      }
+      close(fo);
+      free(buf);
+    }
+    close(fd);
+  }
+  if(dsize != 0) {
+    set_dataspace(outf, dsize);
+  }
+}
+
+void copy_set(char *infile, char *outfile, uint32_t dsize) {
+  if(outfile == NULL) {
+    set_dataspace(infile, dsize);
+  } else {
+    copy_file(infile, outfile, dsize);
+  }
+}
+
 int main(int ac, char **av) {
-  uint32_t dspac = 0;
+  uint32_t dspace = 0;
   int c;
-  char *inf = NULL, *ouf = NULL;
-  char onam[PATH_MAX], secret[PATH_MAX];
 
   while ((c = getopt(ac, av, "x:h?")) != EOF) {
     switch (c) {
     case 'x':
-      dspac = strtol(optarg, NULL, 0);
+      dspace = strtol(optarg, NULL, 0);
       break;
     case 'h':
     case 'q':
@@ -112,105 +200,38 @@ int main(int ac, char **av) {
     }
   }
 
-  for (; optind < ac; optind++) {
-    if (!inf) {
-      inf = *(av + optind);
-    } else if (!ouf) {
-      ouf = *(av + optind);
+  int nsrc = ac-optind;
+  char *outf;
+
+  if (nsrc > 0) {
+    if(nsrc == 1) {
+      outf=NULL;
     } else {
-      usage();
+      outf = av[ac-1];
+      if(nsrc > 1) {
+        struct stat st;
+        int ns = stat(outf, &st);
+        bool isdir = ((ns == 0) && (S_ISDIR(st.st_mode) != 0));
+        nsrc--;
+        if(!isdir && nsrc != 1) {
+          fprintf(stderr,"output must be directory for multiple files\n");
+          exit(127);
+        }
+      }
     }
+    for(int i = 0; i < nsrc; i++) {
+      uint32_t dsize = checkXTcc(av[optind+i]);
+      if(dsize == 0) {
+        dsize = dspace;
+      }
+
+      copy_set(av[optind+i], outf, dsize);
+      if(dsize ==  0) {
+        fprintf(stderr,"no data for %s\n", av[optind+i]);
+      }
+    }
+  } else {
+    puts("no args");
   }
-
-  if (inf) {
-    char *p, *q;
-    int fd;
-    QLDIR_t qd = {0};
-    short nlen;
-    struct stat s;
-
-    if (dspac == 0) {
-      dspac = CheckXTcc(inf);
-    }
-
-    if (dspac) {
-      if (ouf) {
-        stat(ouf, &s);
-        if (S_ISDIR(s.st_mode)) {
-          p = stpcpy(onam, ouf);
-          if (*(p - 1) != '/') {
-            *p++ = '/';
-          }
-          if ((q = strrchr(inf, '/'))) {
-            q++;
-          } else {
-            q = inf;
-          }
-          strcpy(p, q);
-        } else {
-          strcpy(onam, ouf);
-        }
-      } else {
-        strcpy(onam, inf);
-      }
-
-      p = strrchr(onam, '/');
-      if (p) {
-        int n;
-
-        p++;
-        n = p - onam;
-        strncpy(secret, onam, n);
-        q = p;
-        p = secret + n;
-      } else {
-        p = secret;
-        q = onam;
-      }
-
-      strcpy(p, ".-UQLX-");
-      nlen = strlen(q);
-
-      if ((fd = open(secret, O_RDWR, 0666)) > -1) {
-        while (read(fd, &qd, sizeof(qd)) == sizeof(qd)) {
-          if (nlen == htons(qd.d_szname) && strncasecmp(qd.d_name, q, nlen) == 0) {
-            lseek(fd, -1 * sizeof(qd), SEEK_CUR);
-            break;
-          }
-          memset(&qd, 0, sizeof(qd));
-        }
-      } else {
-        fd = open(secret, O_CREAT | O_WRONLY, 0666);
-      }
-      if (fd >= 0) {
-        qd.d_szname = htons(nlen);
-        memcpy(qd.d_name, q, nlen);
-        *(qd.d_name + nlen) = '\0'; // harmless, even if len==36
-        qd.d_type = 1;
-        qd.d_access = 0;
-        qd.d_update = 0;
-        qd.d_length = (stat(onam, &s) == 0) ? htonl(s.st_size) : 1;
-        qd.d_datalen = htonl(dspac);
-        write(fd, &qd, sizeof(qd));
-        close(fd);
-        if (ouf) {
-          int fo, n;
-          if ((fd = open(inf, O_RDONLY, 0)) >= 0) {
-            if ((fo = open(onam, O_CREAT | O_WRONLY | O_TRUNC, 0666)) >= 0) {
-              char buf[1024];
-              while ((n = read(fd, buf, sizeof(buf))) > 0) {
-                write(fo, buf, n);
-              }
-              close(fo);
-            }
-            close(fd);
-          }
-        }
-      }
-    } else
-      fputs("Data space required\n", stderr);
-  } else
-    usage();
-
   return 0;
 }
