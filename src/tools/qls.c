@@ -49,11 +49,6 @@ char *stpcpy(char *d, const char *s) {
 }
 #endif
 
-void usage(void) {
-  fputs("usage: qls path\n", stderr);
-  exit(0);
-}
-
 int checkXTcc(char *filename, qldirent_t *qd) {
   uint8_t xtbuf[8];
   int fd;
@@ -117,11 +112,10 @@ void read_ql_dir(char*dname) {
 }
 
 int main(int ac, char **av) {
+  char *dname = "./";
   if(ac > 1) {
-    char *dname = av[1];
-    read_ql_dir(dname);
-  } else {
-    usage();
+    dname = av[1];
   }
+  read_ql_dir(dname);
   return 0;
 }
