@@ -65,7 +65,6 @@ executable(
   install: true,
 )
 
-if host_machine.system() != 'windows'
 executable(
   'qls',
   tools_qls_src,
@@ -73,4 +72,3 @@ executable(
   link_args: tools_ldopts,
   install: true,
 )
-endif

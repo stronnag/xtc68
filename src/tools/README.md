@@ -2,6 +2,8 @@
 
 These files were previously found in the `utils` directory of UQLX; where they've bit-rotted into uselessness.
 
+The files here support sqlux, in particular, the discovery and maintenance of 'XTcc' data tokens.
+
 ## qcp
 
 `qcp` copies `xtc68` executable(s) into a UQLX directory.
@@ -13,12 +15,14 @@ These files were previously found in the `utils` directory of UQLX; where they'v
 
 ```
 $ qcp -h
-  qcp [-x dataspace] infile... [outfile]
+  qcp [-x dataspace] infile(s)... [outfile]
 
 ```
 ## qls
 
 `qls` lists the executable files in a UQLX/QDOS datastore. Timestamps are from the local (Unix) file system in RFC 3339 format. Dataspace is from (xtc68) 'XTcc' tokens only.
+
+Only regular files are shown, with "as-is" separators. There is no directory recursion.
 
 ```
 $ qls ~/mdv1
@@ -30,5 +34,3 @@ perl                                   283100    3784   1 2021-08-24 13:32:47
 jobs_x                                    712     500   1 2021-08-23 19:10:54
 show_x                                   2584     500   1 2021-08-23 21:06:03
 ```
-
-`qls` is not built on Windows, due to a deficient `dirent` API.

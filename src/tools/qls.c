@@ -61,22 +61,25 @@ int checkXTcc(char *filename, qldirent_t *qd) {
 
   if ((fd = open(filename, O_RDONLY, 0666)) > 0) {
     res = 0;
-    uint32_t len = 0;
-    lseek(fd, -8, SEEK_END);
-    read(fd, xtbuf, sizeof(xtbuf));
-    if(memcmp(xtbuf, "XTcc", 4) == 0) {
-      len = htonl(*(uint32_t*)(xtbuf+4));
-    }
     struct stat s;
     fstat(fd, &s);
-
-    memset(qd, 0, sizeof(qldirent_t));
-    if(len > 0) {
-      qd->d_type = 1;
+    if(S_ISREG(s.st_mode)) {
+      uint32_t len = 0;
+      lseek(fd, -8, SEEK_END);
+      read(fd, xtbuf, sizeof(xtbuf));
+      if(memcmp(xtbuf, "XTcc", 4) == 0) {
+        len = htonl(*(uint32_t*)(xtbuf+4));
+      }
+      memset(qd, 0, sizeof(qldirent_t));
+      if(len > 0) {
+        qd->d_type = 1;
+      }
+      qd->d_datasize = len;
+      qd->d_length = s.st_size;
+      qd->d_mtime = s.st_mtime;
+    } else {
+      return -1;
     }
-    qd->d_datasize = len;
-    qd->d_length = s.st_size;
-    qd->d_mtime = s.st_mtime;
     close(fd);
   }
   return res;
@@ -97,15 +100,17 @@ void read_ql_dir(char*dname) {
     if (0 == strcmp(dp->d_name, ".") || 0 == strcmp(dp->d_name, "..") ||
         0 == strcmp(dp->d_name, ".-UQLX-"))
       continue;
+#ifndef WIN32
     if(dp->d_type != DT_REG) {
       continue;
     }
+#endif
     strcpy(ptr, dp->d_name);
     if(checkXTcc(buf, &qd) == 0) {
       struct tm *tm;
       tm = localtime(&qd.d_mtime);
       char tbuff[64];
-      strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%m:%S", tm);
+      strftime(tbuff, sizeof(tbuff), "%Y-%m-%d %H:%M:%S", tm);
       printf("%-36.36s%9zu%8u%4d %s\n", dp->d_name, qd.d_length, qd.d_datasize, qd.d_type, tbuff);
     }
   }
