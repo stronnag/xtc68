@@ -89,6 +89,10 @@ sudo ./sdk-install.sh
 
 Note `sudo` is required for a non-root user to install to `/usr/local`.
 
+### Cross compiling
+
+The `cross/mkcross.sh` script supports cross-compilation hosted on Linux for MacOS and Windows (as well as generating the Linux archive). Note that the MacOS recipe has a dependency on a local path for the MacOS cross-compiler).
+
 ## Integration with native make (i.e. GNU Make)
 
 * The installation provides `ql.mk`, which it will copy to `$PREFIX/share/qdos/etc/ql.mk`

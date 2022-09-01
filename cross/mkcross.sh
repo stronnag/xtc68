@@ -3,6 +3,9 @@
 PLAT=${1:-win:mac}
 BASE=${2:-/tmp/xtc68}
 
+# There are only used for building, the prefix is not embedded in release build
+# binaries i.e. when `-Drelbuild=true` is provided to the meson setup stage.
+
 WINPFX=$BASE/windows/xtc68
 MACPFX=$BASE/macos/xtc68
 LINPFX=$BASE/linux/xtc68
@@ -30,6 +33,7 @@ mkarchive() {
 }
 
 if [[ "$PLAT" =~  "lin" ]] ; then
+  # oldest libc on site, in order to maximise cross-distro compatibility
   echo -e "\a\n*** Do the Linux release builds on Debian Stable ***\n"
   rm -rf build-linux $BASE/linux
   meson build-linux --prefix=$LINPFX --strip -Drelbuild=true
