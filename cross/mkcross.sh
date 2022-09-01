@@ -26,8 +26,8 @@ mkarchive() {
       (cd $BASE/$osname && zip -9r /tmp/xtc68-$(date +%F)-$osname-amd64.zip xtc68)
       ;;
     *)
-      rm -f /tmp/xtc68-$(date +%F)-$osname-amd64.tar.gz
-      tar -C $BASE/$osname -czf /tmp/xtc68-$(date +%F)-$osname-amd64.tar.gz xtc68
+      rm -f /tmp/xtc68-$(date +%F)-$osname-amd64.tar.zst
+      ZSTD_CLEVEL=19 tar -C $BASE/$osname -caf /tmp/xtc68-$(date +%F)-$osname-amd64.tar.zst xtc68
       ;;
   esac
 }
