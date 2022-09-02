@@ -5,7 +5,7 @@ ld_copts = ['-O2', '-Wall', '-Werror', '-pedantic',
 if get_option('relbuild')
   message ('ld: not setting PREFIX')
 else
-  ld_copts += '-DPREFIX="' + get_option('prefix') + '"'
+  ld_copts += '-DPREFIX=' + get_option('prefix')
 endif
 
 ld_ldopts = []

@@ -7,7 +7,7 @@ cpp_copts= ['-O2', '-Wall', '-Werror', '-Wextra', '-pedantic',
 if get_option('relbuild')
   message ('cpp: not setting PREFIX')
 else
-  cpp_copts += '-DPREFIX="' + get_option('prefix') + '"'
+  cpp_copts += '-DPREFIX=' + get_option('prefix')
 endif
 
 cpp_ldopts = []
