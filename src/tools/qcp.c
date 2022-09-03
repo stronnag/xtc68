@@ -37,8 +37,6 @@
 #include <winsock.h>
 #endif
 
-#include <libgen.h>
-
 typedef struct {
   size_t d_length;          /* file length */
   time_t d_mtime;
@@ -188,7 +186,7 @@ int main(int ac, char **av) {
         }
         copy_set(av[optind+i], outf, qd.d_datasize);
         if(qd.d_datasize == 0) {
-          fprintf(stderr,"no data for %s\n", av[optind+i]);
+          fprintf(stderr,"no dataspace for %s\n", av[optind+i]);
         }
       }
     }

@@ -4,5 +4,5 @@ tools_copts = ['-O2', '-Wall', '-Werror', '-pedantic']
 tools_ldopts = []
 
 if host_machine.system() == 'windows'
-  tools_ldopts += '-lwsock32'
+  tools_ldopts += ['-lwsock32', '-lshlwapi' ]
 endif
