@@ -16,7 +16,8 @@ char *get_binary_path(void) {
   char *dest = calloc(1, PATH_MAX);
   uint32_t size;
 #if defined(__linux__)
-  realpath("/proc/self/exe", dest);
+  if(realpath("/proc/self/exe", dest) == NULL)
+    return NULL;
 #elif defined(WIN32)
   GetModuleFileName(NULL, dest, PATH_MAX);
 #elif defined(__APPLE__)

@@ -5,7 +5,7 @@ as68_src = files('cbuf.c', 'cpy.c', 'gen.c', 'hdr.c', 'lex.c',
 
 
 
-as68_copts= ['-O2', '-Wall', '-Werror', '-pedantic',
+as68_copts= [cflags, '-O2', '-Wall', '-Werror', '-pedantic',
 	     '-DXTC68', '-I.',
 	     '-DLABELDIFF', '-DUSELINE', '-DMINIX', '-DHOST_LITTLE_ENDIAN']
 
