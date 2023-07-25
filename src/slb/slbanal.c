@@ -27,12 +27,11 @@ PRIVATE char TextBuf[20];
 
 /*========================================================== FREE_NAME */
 PRIVATE
-void Free_Name(ptr)
+void Free_Name(IDPTR ptr)
     /*      ~~~~~~~~~~~~
      *  This routine frees the name string set up for an ID entry.
      *  Called as a vector via the Free_Nodes() routine.
      *----------------------------------------------------------------------*/
-    IDPTR ptr;
 {
   DBG(("FREE_NAME", 0x801, "Enter: ptr=%ld, name='%s'", (long)ptr, ptr->name));
   if (ptr->name)
@@ -43,7 +42,7 @@ void Free_Name(ptr)
 
 /*============================================================ FREE_IDS */
 PUBLIC
-void Free_Ids()
+void Free_Ids(void)
 /*      ~~~~~~~~
  *  This routine works through the Id list (if any) clearing it down
  *  and freeing all the associated memory.
@@ -56,12 +55,10 @@ void Free_Ids()
 
 /*============================================================== ADD_ID */
 PUBLIC
-void Add_Id(id, text)
+void Add_Id(short id, char *text)
     /*      ~~~~~~
      *  Add the id given as a parameter to the list being built up.
      *----------------------------------------------------------------------*/
-    short id;
-char *text;
 {
   IDPTR ptr;
   char idstr[20];
@@ -78,12 +75,11 @@ char *text;
 
 /*========================================================== FIND_ID */
 PUBLIC
-char *Find_Id(id)
+char *Find_Id(short id)
 /*        ~~~~~~~
  *  Search the id table to see if entry present.   If it is, then
  *  return the name, otherwise return the hex string for an Id
  *--------------------------------------------------------------------*/
-short id;
 {
   static char buffer[10];
   IDPTR ptr;
@@ -107,7 +103,7 @@ short id;
 
 /*============================================================== GET_ID */
 PUBLIC
-char *Get_Id()
+char *Get_Id(void)
 /*      ~~~~~~
  *  Read in an ID from the source file.
  *  If possible, convert it to a text string represenetation,
@@ -126,7 +122,7 @@ char *Get_Id()
 
 /*=========================================================== GET_LONGWORD */
 PUBLIC
-char *Get_LongWord()
+char *Get_LongWord(void)
 /*      ~~~~~~~~~~~~
  *  Read a long-word in from the source, and return it as a hex string.
  *  N.B.  The next call will overwrite the string, so save it if required.
@@ -140,12 +136,11 @@ char *Get_LongWord()
 
 /*=============================================================== GET_OP */
 PRIVATE
-void Get_Op(buffer)
+void Get_Op(char *buffer)
     /*      ~~~~~~
      *  Get the operator part of an XDEF and return it in the
      *  buffer provided.
      *----------------------------------------------------------------------*/
-    char *buffer;
 {
   DBG(("GET_OP", 0xF01, ""));
   switch (inchar(libfp)) {
@@ -166,7 +161,7 @@ void Get_Op(buffer)
 
 /*====================================================== GET_TRUNCRULE */
 PUBLIC
-char *Get_TruncRule()
+char *Get_TruncRule(void)
 /*        ~~~~~~~~~~~~~
  *  Get the truncate rule and convert it to a text string.
  *  N. B.  the next call will corrupt the string.
@@ -231,7 +226,7 @@ char *Get_TruncRule()
 
 /*========================================================= FLUSH_DATA */
 PRIVATE
-void Flush_Data()
+void Flush_Data(void)
 /*      ~~~~~~~~~~
  *
  *  This routine is used to merely flush the data buffer.
@@ -247,7 +242,7 @@ void Flush_Data()
 
 /*====================================================== START_DIRECTIVE */
 
-void Start_Directive()
+void Start_Directive(void)
 /*      ~~~~~~~~~~~~~~~
  *  The start of a directive has been encountered, so write out any
  *  data currently in the buffer.
@@ -263,7 +258,7 @@ void Start_Directive()
 
 /*=========================================================== DATA_CHAR */
 
-void Data_Char()
+void Data_Char(void)
 /*      ~~~~~~~~~
  *  A standard data character needs to be printed in both hex and
  *  character format.   The hex format is printed as we go, and the
@@ -282,13 +277,10 @@ void Data_Char()
 
 /*======================================================== ANALYSE_MODULE*/
 PRIVATE
-int analyse_module(fp, modname)
+int analyse_module(FILE *fp, char *modname)
 /*      ~~~~~~~~~~~~~~
  *  This routine is called to print an analysis of any module.
  *------------------------------------------------------------------------*/
-
-FILE *fp;
-char *modname;
 {
   long filestart;
 
@@ -403,7 +395,7 @@ char *modname;
 
 /*========================================================= ANALYSE_MODE */
 PUBLIC
-int Analyse_Mode()
+int Analyse_Mode(void)
 /*      ~~~~~~~~~~~~
  *
  *  Analyse the modules

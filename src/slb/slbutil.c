@@ -24,12 +24,11 @@
 #include <assert.h>
 
 /*================================================== ALLOCATE_MEMORY */
-char *Allocate_Memory(n)
+char *Allocate_Memory(size_t n)
 /*      ~~~~~~~~~~~~~~~
  * Allocate the memory requested.
  * If not possible then output error message and give up.
  *------------------------------------------------------------------*/
-size_t n;
 {
   char *p;
 
@@ -44,15 +43,12 @@ size_t n;
 }
 
 /*=============================================================== COPY_CHARS */
-void Copy_Chars(outfp, infp, count)
+void Copy_Chars(FILE *outfp,  FILE *infp, size_t count)
     /*      ~~~~~~~~~~
      *  Simply copy the specified number of characters between the
      *  two files.  If the target file is passed as NULL, this acts
      *  as a 'skip' routine.
      *---------------------------------------------------------------------------*/
-    FILE *outfp,
-    *infp;
-size_t count;
 {
   DBG(("COPY_CHARS", 0x1001, "Enter: outfp=%ld, infp=%ld, count=%d", outfp, infp, count));
   while (count-- > 0) {
@@ -65,13 +61,12 @@ size_t count;
 
 /*=================================================== OPEN_SROFF_FILE */
 PUBLIC
-FILE *Open_Sroff_File(s)
+FILE *Open_Sroff_File(char *s)
 /*      ~~~~~~~~~~~~~~~
  * Open a file for input.
  * Check that it is a SROFF file.
  * return FP if OK, and NULL otherwise.
  *--------------------------------------------------------------------*/
-char *s;
 {
   FILE *fp;
 
@@ -91,12 +86,11 @@ char *s;
 
 /*=========================================================== IS_SROFF */
 PUBLIC
-int Is_Sroff(fp)
-/*      ~~~~~~~
- * Check that file is a SROFF file.
- * (or at least it starts with an FB byte !)
- *--------------------------------------------------------------------*/
-FILE *fp;
+int Is_Sroff(FILE *fp)
+    /*      ~~~~~~~
+     * Check that file is a SROFF file.
+     * (or at least it starts with an FB byte !)
+     *--------------------------------------------------------------------*/
 {
   int c;
 
@@ -146,7 +140,7 @@ void lprintf(char *formatstr, _PARAMLIST)
 
 /*========================================================== GET_STRING */
 PUBLIC
-char *Get_String()
+char *Get_String(void)
 /*       ~~~~~~~~~~
  *  Get a string consisting of a length byte followed by text.
  *  return a pointer to this string.
@@ -169,16 +163,12 @@ char *Get_String()
 
 /*========================================================= ADD_NODE */
 PUBLIC
-NODEPTR Add_Node(tree, owner, s, size)
+NODEPTR Add_Node(NODEBASE tree, NODEPTR owner, char *s, size_t size)
 /*
  *  This is called to add a 'leaf' to a node tree when the owner node
  *  is already known.   If it is not known then Make_Node should be used
  *  instead.
  *--------------------------------------------------------------------*/
-NODEBASE tree;
-NODEPTR owner;
-char *s;
-size_t size;
 {
   NODEPTR n;
   int cmp;
@@ -217,14 +207,11 @@ size_t size;
 
 /*=========================================================== MAKE_NODE */
 PUBLIC
-NODEPTR Make_Node(tree, s, size)
+NODEPTR Make_Node(NODEBASE tree, char *s, size_t size)
 /*
  *  This is called to add a 'leaf' to a node tree when the owner node
  *  is not known.
  *--------------------------------------------------------------------*/
-NODEBASE tree;
-char *s;
-size_t size;
 {
   DBG(("MAKE_NODE", 0x1001, "Enter: Tree at %ld=%ld, s='%s', size=%d", tree, *tree, s, size));
   Find_Node(*tree, s);
@@ -234,14 +221,13 @@ size_t size;
 
 /*=========================================================== FIRST_NODE */
 PUBLIC
-NODEPTR First_Node(node)
+NODEPTR First_Node(NODEPTR node)
 /*          ~~~~~~~~~~
  *  Find the first node (alphabetically) in the tree (or branch).
  *  Basically this just involves following the 'prev' pointer until we
  *  reach a leaf of the tree.  If there is no 'prev' branch then the
  *  given node is the first one.
  *-----------------------------------------------------------------------*/
-NODEPTR node;
 {
   if (!node) {
     DBG(("FIRST_NODE", 0x1001, "Entry/Exit: NULL"));
@@ -258,14 +244,13 @@ NODEPTR node;
 
 /*=========================================================== NEXT_NODE */
 PUBLIC
-NODEPTR Next_Node(node)
+NODEPTR Next_Node(NODEPTR node)
 /*          ~~~~~~~~~
  *  Find the next node in an existing tree.  Normally the tree will
  *  have been set up in alpahbetical order, but this is not assumed.
  *
  *  A NULL return is made if there is no 'next' node in the tree;
  *---------------------------------------------------------------------*/
-NODEPTR node;
 {
   if (!node) {
     DBG(("NEXT_NODE", 0x1001, "Entry/Exit: NULL"));
@@ -299,7 +284,7 @@ NODEPTR node;
 }
 
 /*=========================================================== FIND_NODE */
-NODEPTR Find_Node(tree, s)
+NODEPTR Find_Node(NODEPTR tree, char *s)
 /*         ~~~~~~~~~
  * This routine searches the given tree to see if the
  * given entry already exists.
@@ -312,8 +297,6 @@ NODEPTR Find_Node(tree, s)
  *  does not exist the node that would be the owner. Subsequent
  *  calls will reset this value.
  *-------------------------------------------------------------------- */
-NODEPTR tree;
-char *s;
 {
   NODEPTR n;
   int cmp;
@@ -345,13 +328,12 @@ char *s;
 
 /*========================================================== KILL_NODE */
 PUBLIC
-void Kill_Node(ptr)
+void Kill_Node(NODEPTR ptr)
     /*      ~~~~~~~~~
      *  This removes a node that is a 'leaf' from the tree.
      *  It is a program error to call this routine if it is NOT
      *  a leaf.
      *---------------------------------------------------------------------*/
-    NODEPTR ptr;
 {
   NODEPTR owner;
 
@@ -390,15 +372,13 @@ void Kill_Node(ptr)
 
 /*============================================================ FREE_NODES */
 PUBLIC
-void Free_Nodes(node, function)
+void Free_Nodes(NODEPTR node, void (*function)(IDPTR))
     /*      ~~~~~~~~~~
      *  This routine works through the Node Tree list (if any) clearing it down
      *  and freeing all the associated memory.   The associated function (if
      *  not NULL) is called to free any additional memory associated with a
      *  specific node type.
      *----------------------------------------------------------------------*/
-    NODEPTR node;
-void (*function)();
 {
   if (!node)
     return;
@@ -413,7 +393,7 @@ void (*function)();
   }
   if (function) {
     DBG(("FREE_NODES", 0x1001, "... calling Users extra function at %ld", function));
-    (*function)(node);
+    (*function)((IDPTR)node);
   }
   Kill_Node(node);
   DBG(("FREE_NODES", 0x1001, "Exit: (for node=%ld)", node));
@@ -421,11 +401,10 @@ void (*function)();
 }
 
 /*======================================================= MAKE_STRING */
-char *Make_String(s)
+char *Make_String(char *s)
 /*      ~~~~~~~~~~~
  * Save a string and return its saved address.
  *-------------------------------------------------------------------*/
-char *s;
 {
   STRINGPTR n;
 
@@ -441,10 +420,9 @@ char *s;
 
 /*====================================================== FIND_STRING */
 PUBLIC
-char *Find_String(s)
+char *Find_String(char *s)
 /*      ~~~~~~~~~~~
  *-------------------------------------------------------------------*/
-char *s;
 {
   STRINGPTR n;
 
@@ -455,7 +433,7 @@ char *s;
 }
 
 /*======================================================= KILL_STRING */
-void Kill_String(s)
+void Kill_String(char *s)
     /*      ~~~~~~~~~~~
      *  Reduce the count of users.
      *
@@ -465,7 +443,6 @@ void Kill_String(s)
      *  If the count reaches zero and this is a leaf, then remove the leaf
      *  and free the memory.  Recurse up if this makes the owner a leaf.
      *-------------------------------------------------------------------*/
-    char *s;
 {
   STRINGPTR n;
 #if 0

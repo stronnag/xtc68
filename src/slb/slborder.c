@@ -32,10 +32,9 @@ PRIVATE void Xdef_Node_Free _PROTOTYPE((XDEFPTR));
 
 /*============================================================== PRINT_SPACES */
 PUBLIC
-void Print_Spaces(count)
+void Print_Spaces(size_t count)
     /*
      *----------------------------------------------------------------------------*/
-    size_t count;
 {
   while (count-- > 0)
     outchar(' ', listfp);
@@ -44,7 +43,7 @@ void Print_Spaces(count)
 
 /*========================================================== END_OF_LINE */
 PRIVATE
-void End_Of_Line()
+void End_Of_Line(void)
 /*      ~~~~~~~~~~~
  *  Routine called when newline required.   Will generate page
  *  throws and headings if required.
@@ -93,12 +92,11 @@ void End_Of_Line()
 
 /*============================================================== PRINT_ENTRY */
 PRIVATE
-void Print_Entry(name)
+void Print_Entry(char *name)
     /*      ~~~~~~~~~~~
      *  This routine is used to print a single cross-reference entry
      *  for the -W and -Y options.
      *---------------------------------------------------------------------------*/
-    char *name;
 {
   int length;
 
@@ -120,13 +118,13 @@ void Print_Entry(name)
 
 /*======================================================== PRINT_DEPENDS */
 PRIVATE
-void Print_Depends(t)
+void Print_Depends(XDEFPTR t)
     /*      ~~~~~~~~~~~~
      *  Process the symbol tree, and print out the desired results.
      *  What is actually printed will depend on which flags have been
      *  set while analysing the parameters.
      *------------------------------------------------------------------------*/
-    XDEFPTR t;
+
 {
   LISTPTR fp, np;
 
@@ -223,15 +221,13 @@ void Print_Depends(t)
 
 /*======================================================== ADD_LIST */
 PRIVATE
-char *Add_List(listptr, s)
+char *Add_List(LISTPTR *listptr, char *s)
 /*      ~~~~~~~~
  * Add an entry to a list.
  *
  * If an entry is found to be already on the list then it is
  * not added again.
  *-----------------------------------------------------------------*/
-LISTPTR *listptr;
-char *s;
 {
   LISTPTR p;
 
@@ -245,7 +241,7 @@ char *s;
 
 /*========================================================= MAKE_XDEF */
 PRIVATE
-XDEFPTR Make_Xdef(s)
+XDEFPTR Make_Xdef(char *s)
 /*         ~~~~~~~~~
  * This routine creates a new definition node and then adds it
  * to the global definition tree. It sets the inter-node links
@@ -253,7 +249,6 @@ XDEFPTR Make_Xdef(s)
  * If a node of the correct name exists, then it merely exits
  * with a pointer to that node.
  *------------------------------------------------------------------*/
-char *s;
 {
   XDEFPTR n;
 
@@ -273,7 +268,7 @@ char *s;
 #ifdef FREE_AT_END
 /*========================================================= XDEF_NODE_FREE */
 PRIVATE
-void Xdef_Node_Free(node)
+void Xdef_Node_Free(XDEFPTR node)
     /*      ~~~~~~~~~~~~~~
      *  This routine is called from Free_Nodes() when about to free the XDEF
      *  node given in the parameter.  It frees any additonal resources above
@@ -282,7 +277,6 @@ void Xdef_Node_Free(node)
      *  This routined must free any XDEF or XREF trees attaached to this node,
      *  and also any strings attached to this node
      *----------------------------------------------------------------------*/
-    XDEFPTR node;
 {
   DBG(("XDEF_NODE_FREE", 0x801, "Enter: node=%ld, name='%s'", node, node->node.name));
   if (node->file) {
@@ -307,7 +301,7 @@ void Xdef_Node_Free(node)
 
 /*============================================================ FREE_XDEFS */
 PRIVATE
-void Free_Xdefs()
+void Free_Xdefs(void)
 /*      ~~~~~~~~~~
  *  This routine is used to free the XDEF tree and all associated nodes
  *  and memory.
@@ -323,7 +317,7 @@ void Free_Xdefs()
 
 /*========================================================== ANALYSE_FILE */
 PRIVATE
-int Process_File()
+int Process_File(void)
 /*      ~~~~~~~~~~~~
  *  Read through the file.   We need to build up the following tables:
  *      a)  A local symbol table for this file.  This is used
@@ -461,7 +455,7 @@ int Process_File()
 }
 
 /*=================================================== LIBRARY_ANALYSIS */
-int Library_Analysis()
+int Library_Analysis(void)
 /*      ~~~~~~~~~~~~~~~~
  *---------------------------------------------------------------------*/
 {

@@ -1,6 +1,6 @@
 project('xtc68', 'c', version : '0.0.0')
 
-cflags = '-D_FORTIFY_SOURCE=3'
+cflags = ''
 
 subdir('src/as68')
 subdir('src/cc')

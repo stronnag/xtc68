@@ -42,15 +42,14 @@ void dddd(char *a, int b, char *s,...)
 
 /*============================================================= SEARCH_LIST */
 PUBLIC
-LISTPTR search_list(modname)
-/*          ~~~~~~~~~~~
- *  Search the file list for the given modulename.  If found, return
- *  a pointer to the relevant list entry, otherwise NULL.
- *
- *  Any normalisation of the modulename passed as a parameter
- *  should have been done prior to calling this routine.
- *--------------------------------------------------------------------------*/
-char *modname;
+LISTPTR search_list(    char *modname)
+    /*          ~~~~~~~~~~~
+     *  Search the file list for the given modulename.  If found, return
+     *  a pointer to the relevant list entry, otherwise NULL.
+     *
+     *  Any normalisation of the modulename passed as a parameter
+     *  should have been done prior to calling this routine.
+     *--------------------------------------------------------------------------*/
 {
   LISTPTR ptr = filelist;
 
@@ -68,11 +67,10 @@ char *modname;
 
 /*=========================================================== REMOVE_LIST */
 PUBLIC
-int remove_list(modname)
+int remove_list(char *modname)
 /*      ~~~~~~~~~~~
  *  Remove the entry containing the given modulename from the file list
  *--------------------------------------------------------------------------*/
-char *modname;
 {
   LISTPTR ptr, oldptr = NULL;
 
@@ -105,7 +103,7 @@ char *modname;
 
 /*========================================================== GET_MODULENAME */
 PUBLIC
-int get_modulename(fp, modname)
+int get_modulename(FILE *fp, char *modname)
 /*      ~~~~~~~~~~~~~~
  *  Get the module name from the file.
  *
@@ -115,8 +113,6 @@ int get_modulename(fp, modname)
  *  Leave the file pointer at the next character after the name - this
  *  may be comment data.
  *--------------------------------------------------------------------------*/
-FILE *fp;
-char *modname;
 {
   int n;
   char *ptr = modname;
@@ -141,7 +137,7 @@ char *modname;
 
 /*============================================================ COPY_MODULE */
 PUBLIC
-int copy_module(modname, lbfp, newfp, lstfp)
+int copy_module(char *modname, FILE *lbfp, FILE *newfp, FILE *lstfp)
 /*      ~~~~~~~~~~~
  *  This is the heart of the SLB librarian as this module is
  *  called eventually whatever options you have selected.
@@ -152,10 +148,6 @@ int copy_module(modname, lbfp, newfp, lstfp)
  *  On entry, the file pointer should be positioned just after the
  *  modulename (but before any comments, etc following it).
  *--------------------------------------------------------------------------*/
-char *modname;
-FILE *lbfp;
-FILE *newfp;
-FILE *lstfp;
 {
   char filename[100];
 
@@ -279,14 +271,10 @@ FILE *lstfp;
 
 /*============================================================== COPY_FILE */
 PRIVATE
-int copy_file(filename, modname, lbfp, lstfp)
+int copy_file(char *filename, char *modname, FILE *lbfp, FILE *lstfp)
 /*      ~~~~~~~~~
  *  Open the specified file, and then copy it to the library.
  *-------------------------------------------------------------------------*/
-char *filename;
-char *modname;
-FILE *lbfp;
-FILE *lstfp;
 {
   int reply;
   FILE *newfp;
@@ -303,7 +291,10 @@ FILE *lstfp;
 
 /*========================================================== EXTRACT_MODULE */
 PRIVATE
-int extract_module(filename, modname, lbfp, lstfp)
+int extract_module(char *filename,
+                   char *modname,
+                   FILE *lbfp,
+                   FILE *lstfp)
 /*      ~~~~~~~~~~~~~~
  *  This creates a new output file, and extracts a single module
  *  from the library into it.
@@ -311,10 +302,6 @@ int extract_module(filename, modname, lbfp, lstfp)
  *  The source file pointer should be positioned just after the
  *  module name when this routine is entered.
  ---------------------------------------------------------------------------*/
-char *filename;
-char *modname;
-FILE *lbfp;
-FILE *lstfp;
 {
   int reply = 0;
   FILE *newfp = (FILE *)NULL;
@@ -341,11 +328,10 @@ FILE *lstfp;
 
 /*============================================================= ADD_MODULE */
 PRIVATE
-int add_module(ptr)
+int add_module(LISTPTR ptr)
 /*      ~~~~~~~~~~
  *  Add a module to the library
  *-------------------------------------------------------------------------*/
-LISTPTR ptr;
 {
   if (vflag) {
     eprintf("adding '%s", ptr->node.name);
@@ -358,7 +344,7 @@ LISTPTR ptr;
 
 /*============================================================ CREATE_MODE */
 PUBLIC
-int create_mode()
+int create_mode(void)
 /*      ~~~~~~~~~~~
  *  Create a new library file by continually adding modules to the end
  *  until the file list is exhausted.
@@ -377,7 +363,7 @@ int create_mode()
 #if 0
 /*============================================================== ADD_MODE */
 PUBLIC
-int     Add_Mode ()
+int     Add_Mode (void)
 /*      ~~~~~~~~
  *  Add modules to an existing library.
  *
@@ -407,7 +393,7 @@ int     Add_Mode ()
 
 /*============================================================ DELETE_MODE */
 PUBLIC
-int delete_mode()
+int delete_mode(void)
 /*      ~~~~~~~~~~~
  *  Delete modules from an existing library.
  *
@@ -438,7 +424,7 @@ int delete_mode()
 
 /*=============================================================== REPLACE */
 PUBLIC
-int replace_mode()
+int replace_mode(void)
 /*      ~~~~~~~~~~~~
  *  Replace modules in an existing library.
  *
@@ -483,7 +469,7 @@ int replace_mode()
 
 /*=========================================================== EXTRACT_MODE */
 PUBLIC
-int extract_mode()
+int extract_mode(void)
 /*      ~~~~~~~~~~~~
  *  Take any modules specified out of the main library into individual
  *  files.
@@ -515,7 +501,7 @@ int extract_mode()
 
 /*============================================================= SPLIT_MODE */
 PUBLIC
-int split_mode()
+int split_mode(void)
 /*      ~~~~~~~~~~
  *  Take all modules specified out of the main library into individual
  *  files.

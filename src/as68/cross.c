@@ -25,8 +25,7 @@ void pcrossw(short w, char *cp) {
 #endif
 }
 
-void pcrossl(l, cp) long l;
-char *cp;
+void pcrossl(long l, char *cp)
 {
   union {
     long l;
@@ -46,31 +45,26 @@ char *cp;
 
 static char mklowbuf[4];
 
-char *mklowbyte(l)
-long l;
+char *mklowbyte(long l)
 {
   mklowbuf[0] = l;
   return mklowbuf;
 }
 
-char *mklowshort(l)
-long l;
+char *mklowshort(long l)
 {
   mklowbuf[0] = l >> 8;
   mklowbuf[1] = l;
   return mklowbuf;
 }
 
-char *mklowlong(l)
-long l;
+char *mklowlong(long l)
 {
   pcrossl(l, mklowbuf);
   return mklowbuf;
 }
 
-char *swapw(cp, n)
-char *cp;
-long n;
+char *swapw(char *cp, long n)
 {
   char *p = cp;
 #ifdef HOST_LITTLE_ENDIAN
@@ -86,9 +80,7 @@ long n;
   return p;
 }
 
-char *swapl(cp, n)
-char *cp;
-long n;
+char *swapl(char *cp, long n)
 {
   char *p = cp;
 #ifdef HOST_LITTLE_ENDIAN

@@ -33,15 +33,14 @@ SYM *cursym = (SYM *)NULL;
 extern SYM dot;
 extern long newdot;
 
-extern EXPR Yexpr(), Xexpr(), Aexpr(), Sexpr(), Pexpr(), Mexpr(), Uexpr(), Yfactor();
-extern LIST *Yname_list(), *Yexpr_list();
-extern OPERAND *Yoperand();
+extern EXPR Yexpr(void), Xexpr(void), Aexpr(void), Sexpr(void), Pexpr(void), Mexpr(void), Uexpr(void), Yfactor(void);
+extern LIST *Yname_list(void), *Yexpr_list(void);
+extern OPERAND *Yoperand(void);
 
 VOID Yinstruction(void);
 VOID Ystatement(void);
 
-VOID Yerror(s)
-char *s;
+VOID Yerror(char *s)
 {
   if (!ignore) {
     fprintf(stderr, "jas: line %d ( %s )\n", line, s);
@@ -130,8 +129,8 @@ VOID Yinstruction(void) {
 #ifdef MINIX
   short asciz = 0;
 #endif
-  extern LIST *Yname_list();
-  extern LIST *Yexpr_list();
+  extern LIST *Yname_list(void);
+  extern LIST *Yexpr_list(void);
 
   switch (token) {
   default:
@@ -403,9 +402,7 @@ LIST *Yexpr_list(void) {
   return lp;
 }
 
-LIST *make_slist(last, string)
-LIST **last;
-char *string;
+LIST *make_slist(LIST **last, char *string)
 {
   char *cp;
   LIST *lp, *xlp;

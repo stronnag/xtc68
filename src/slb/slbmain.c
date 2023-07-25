@@ -39,9 +39,11 @@ PRIVATE void Action_Taken _PROTOTYPE((char *));
 
 PRIVATE int errflag = 0;
 
+int(*string_cmp)(const char *, const char *);
+
 /*============================================================== PROGRAM_ID */
 PRIVATE
-void Program_Id()
+void Program_Id(void)
 /*      ~~~~~~~~~~
  *--------------------------------------------------------------------------*/
 {
@@ -71,12 +73,11 @@ void error(int num, _PARAMLIST)
 
 /*================================================================ INCHAR */
 PUBLIC
-int inchar(fp)
+int inchar(FILE *fp)
 /*      ~~~~~~
  * Routine to read a character from a file.
  * Terminates with error (not including EOF).
  *------------------------------------------------------------------------*/
-FILE *fp;
 {
   if (fp == (FILE *)NULL)
     error(1);
@@ -89,13 +90,11 @@ FILE *fp;
 
 /*============================================================ OUTCHAR */
 PUBLIC
-void outchar(c, fp)
+void outchar(int c, FILE *fp)
     /*      ~~~~~~~
      * Routine to put a character into a file, and stop if
      * an error occurs.
      *---------------------------------------------------------------------*/
-    int c;
-FILE *fp;
 {
   if (fp) {
     errno = 0;
@@ -107,14 +106,13 @@ FILE *fp;
 
 /*======================================================== HAS_EXTENSION */
 PUBLIC
-char *has_extension(name)
+char *has_extension(char *name)
 /*      ~~~~~~~~~~~~~
  *  Analyse the name supplied to see if it has an extension.
  *
  *  If it does return a pointer to the first character of the
  *  extension, and otherwise return NULL.
  *-----------------------------------------------------------------------*/
-char *name;
 {
   char *ptr = &name[strlen(name) - 1];
 
@@ -135,7 +133,7 @@ char *name;
 
 /*===================================================== GET_BASENAME */
 PUBLIC
-void get_basename(name)
+void get_basename(char *name)
     /*      ~~~~~~~~~~~~
      *  Reduce the module name to its basic form without any leading
      *  device/directory or trailing extension.
@@ -148,7 +146,6 @@ void get_basename(name)
      *  This routine changes the actual string passed as a parameter,
      *  so make certain that it is OK to do so.
      *-----------------------------------------------------------------------*/
-    char *name;
 {
   char *ptr;
 
@@ -197,13 +194,11 @@ void get_basename(name)
 
 /*============================================================== OPEN_FILE */
 PUBLIC
-FILE *open_file(filename, mode)
+    FILE *open_file(char *filename, char *mode)
 /*      ~~~~~~~~~
  *  Open the requested file.  If there are any problems then
  *  report them.  Return NULL or the fp.
  ------------------------------------------------------------------------- */
-char *filename;
-char *mode;
 {
   FILE *fp;
 
@@ -214,7 +209,7 @@ char *mode;
 
 /*=========================================================== ADD1_LIST */
 PRIVATE
-void add1_list(filename)
+    void add1_list(char *filename)
     /*      ~~~~~~~~
      *  Add the specified file to the list of file/module names.
      *
@@ -223,7 +218,6 @@ void add1_list(filename)
      *  determine the modulename.  In both cases, the -e flag
      *  determines whether the extension (if any) is to be removed.
      *---------------------------------------------------------------------*/
-    char *filename;
 {
   LISTPTR ptr = listend;
   FILE *fp;
@@ -260,14 +254,13 @@ void add1_list(filename)
 
 /*=========================================================== ADD_LIST */
 PRIVATE
-void add_list(filename)
+    void add_list(char *filename)
     /*      ~~~~~~~~
      *  Add the specified file(s) to the list of file/module names.
      *
      *  This module allows for wild cards in the filenames, and if
      *  they are present expands them into a longer list.
      *---------------------------------------------------------------------*/
-    char *filename;
 {
 #ifdef QDOS
   char flist[1024], *p;
@@ -287,7 +280,7 @@ void add_list(filename)
 
 /*========================================================== BUILD_LIST */
 PRIVATE
-void build_list(fp)
+    void build_list(FILE *fp)
     /*      ~~~~~~~~~~
      *  Read through the module file, building a list of the module names
      *  that need to be processed.
@@ -298,7 +291,6 @@ void build_list(fp)
      *  line is also to be treated as comment.
      *  EOF or a null line indicate end of list
      *---------------------------------------------------------------------*/
-    FILE *fp;
 {
   char *ptr, *nptr;
   char name[100], filename[100];
@@ -326,10 +318,9 @@ void build_list(fp)
 
 /*======================================================== ACTION_TAKEN */
 PRIVATE
-void Action_Taken(text)
+void Action_Taken(char *text)
     /*      ~~~~~~~~~~~~
      *----------------------------------------------------------------------*/
-    char *text;
 {
   DBG(("ACTION_TAKEN", 0x21, "Enter: %s", text));
   if (vflag) {
@@ -364,7 +355,7 @@ int main(int argc, char **argv)
 #endif
   my_argc = argc;
   my_argv = argv;
-  string_cmp = (int (*)())strcasecmp;
+  string_cmp  = strcasecmp;
   /* Parse the arguments */
 
   while ((ch = getopt(argc, argv, "a:A:cCdDeEfFkKl:L:m:M:nNoOrRs:S:t:T:uUvVW:w:xXy:Y:")) != EOF) {
@@ -433,7 +424,7 @@ int main(int argc, char **argv)
       goto MAINTOPT;
     case 'u': /* Treat all symbols as UPPER case */
     case 'U':
-      string_cmp = (int (*)())strcmp;
+      string_cmp = strcmp;
       Uflag++;
       break;
     case 'v': /* VERBOSE */

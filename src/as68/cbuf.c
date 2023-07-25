@@ -115,8 +115,7 @@ CBUF *generate(short n, short act, long val, SYM *psym) {
   return cp;
 }
 
-VOID zeros(n)
-register long n;
+VOID zeros(long n)
 {
   if (newdot & 1) {
     generate(8, GENVALUE, 0L, (SYM *)NULL);

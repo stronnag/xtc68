@@ -60,8 +60,7 @@ void (*_consetup)() = consetup_title;
 long (*_writetrans)() = NULL;
 #endif /* QDOS */
 
-void warn(n, s) int n;
-char *s;
+void warn(int n, char *s)
 {
 #ifndef QDOS
   fprintf(stderr, "AS68: ");
@@ -74,11 +73,9 @@ char *s;
   sawerror = 1;
 }
 
-void error(n, s) int n;
-char *s;
+void error(int n, char *s)
 {
-  warn(n, s);
-  longjmp(err_buf, 1);
+  warn(n, s);  longjmp(err_buf, 1);
 }
 
 int main(int argc, char *argv[]) {
@@ -131,9 +128,7 @@ char *allocate(unsigned long size) {
   return (char *)NULL;
 }
 
-char *myreallocate(ptr, size)
-char *ptr;
-unsigned long size;
+char *myreallocate(char *ptr, unsigned long size)
 {
   register char *loc;
 
@@ -145,8 +140,7 @@ unsigned long size;
   return (char *)NULL;
 }
 
-void setflags(ac, av) int ac;
-char **av;
+void setflags(int ac, char **av)
 {
   int errflag = 0, i;
   int Vflag = 0;

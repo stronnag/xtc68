@@ -245,8 +245,6 @@ EXTERN char *HeadTime INIT("");
 EXTERN int LineNo INIT(01);
 EXTERN int linepos INIT(0); /* Current position on line */
 
-EXTERN int (*string_cmp)();
-
 #define STRCMP (*string_cmp)
 #define MAXLINE 256
 #define LINES_PER_PAGE 60 /* Not including heading */

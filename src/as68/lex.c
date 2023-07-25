@@ -280,7 +280,7 @@ int yyprocess(char c) {
   }
 }
 
-void yymodify(buf) char *buf;
+void yymodify(char *buf)
 {
   register char *cp;
 

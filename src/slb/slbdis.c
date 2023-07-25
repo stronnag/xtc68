@@ -97,7 +97,7 @@ PRIVATE int endflag;
 
 /*============================================================ CHECK_LABEL */
 PRIVATE
-void Check_Label()
+void Check_Label(void)
 /*      ~~~~~~~~~~~
  *  This routine is only active for the second pass.
  *  It sees if it is necessary to print a label at the current
@@ -110,7 +110,7 @@ void Check_Label()
 
 /*============================================================= GET_DATA */
 PRIVATE
-long get_data(size)
+long get_data(int size)
 /*      ~~~~~~~~
  *  This routine is used to get the next bit of data from the file
  *  Either 2 or 4 bytes is always requested.
@@ -119,7 +119,6 @@ long get_data(size)
  *  of producing the dis-assembly will be either acted on directly
  *  or ignored as appropriate.
  *-----------------------------------------------------------------------*/
-int size;
 {
   char buffer[6];
   long reply = 0;
@@ -238,7 +237,7 @@ int size;
 
 /*================================================================ GWORD */
 PRIVATE
-short gword()
+short gword(void)
 /*      ~~~~~
  *
  *  Obtains the next word of the program code
@@ -256,7 +255,7 @@ short gword()
 
 /*================================================================== GLONG */
 PRIVATE
-long glong()
+long glong(void)
 /*      ~~~~~
  *
  *  Obtains the next long word of the program code
@@ -287,12 +286,10 @@ void reladdr(__attribute__((unused)) char sep)
 
 /*=================================================================== MOVEM */
 PRIVATE
-void movem(from, predec, rmsk)
+void movem(int from, int predec, int rmsk)
     /*      ~~~~~
      *  Analyses the operands of a 'movem' instruction.
      *-------------------------------------------------------------------------*/
-    int from,
-    predec, rmsk;
 {
   int b, f = 0;
 
@@ -321,11 +318,10 @@ void movem(from, predec, rmsk)
 
 /*=================================================================== OP1 */
 PRIVATE
-int op1(mode, reg)
+int op1(int mode, int reg)
 /*      ~~~
  *
  *------------------------------------------------------------------------*/
-int mode, reg;
 {
   int d;
   long l;
@@ -393,13 +389,11 @@ int mode, reg;
 
 /*================================================================== OP2 */
 PRIVATE
-void op2(f, m1, r1, m2, r2)
+void op2(int f, int m1, int r1, int m2, int r2)
     /*      ~~~
      * Print two operands
      * f set means order passed, clear reverses order
      *----------------------------------------------------------------------*/
-    int f,
-    m1, r1, m2, r2;
 {
   DBG(("OP2", 1001, "Enter"));
   f ? op1(m1, r1) : op1(m2, r2);
@@ -410,12 +404,10 @@ void op2(f, m1, r1, m2, r2)
 
 /*================================================================ OPMODE */
 PRIVATE
-void opmode(op, opm, reg, m, r)
+void opmode(char *op, int opm, int reg, int m, int r)
     /*      ~~~~~~~
      *
      *------------------------------------------------------------------------*/
-    char *op;
-int opm, reg, m, r;
 {
   DBG(("OPMODE", 1001, "Enter: opm=%d, reg=%d, m=%d, r=%d", opm, reg, m, r));
   OPI(op, size[gisize = BFIELD(opm, 1, 2)]);

@@ -275,13 +275,12 @@ char *ccinc = NULL;  /* Path for automatic include path parameter */
 char *cclib = NULL;  /* Path for automatic library path parameter */
 
 /*============================================================ WHAT_OPT */
-struct OPTIONS *what_opt(opt)
+struct OPTIONS *what_opt(char *opt)
 /*				 ~~~~~~~~
  *	Routine to decide if an option is allowable.
  *
  *	Returns NULL on failure, and pointer into options array otherwise.
  *----------------------------------------------------------------------*/
-char *opt;
 {
   struct OPTIONS *ptr;
   int i;
@@ -721,7 +720,7 @@ int command_line(CC_PASSES_t *preopts, int thispass, CC_PASSES_t *postopts, char
 }
 
 /*================================================================== USEAGE */
-void useage()
+void useage(void)
 /*		~~~~~~
  *	Simply print a usage message.
  *--------------------------------------------------------------------------*/
@@ -731,7 +730,8 @@ void useage()
 }
 
 /*================================================================= ADD_OPT */
-void add_option(pass_opt, p)
+void add_option(int pass_opt, char *p)
+
     /*		~~~~~~~~~~
      *
      *	Add an new option to a passes options.
@@ -741,8 +741,6 @@ void add_option(pass_opt, p)
      *	into a "single" option.  All other programs use a standard argv[]
      *	style array to store the options.
      *-------------------------------------------------------------------------*/
-    int pass_opt;
-char *p;
 {
   DBG(("ADD_OPT", 0x14, "pass = %d; p='%s'", pass_opt, p));
 
@@ -1200,14 +1198,13 @@ void Environment_Variables(void)
 }
 
 /*==================================================================== MAIN */
-int main(argc, argv)
+int main(int argc, char *argv[])
+
 /*		~~~~
  *
  * Main routine to do the compilations, managing all arguments.
  **
  *--------------------------------------------------------------------------*/
-int argc;
-char *argv[];
 {
   struct FILE_LIST *nameptr;
   char inname[MAX_FNAME], outname[MAX_FNAME], workbuf[MAX_FNAME];

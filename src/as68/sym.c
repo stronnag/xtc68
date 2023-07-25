@@ -54,8 +54,7 @@ char **flexnames = (char **)NULL;
 int *flexused = (int *)0;
 int flexsize = 0;
 
-int hash(name)
-register char *name;
+int hash(char *name)
 {
   register int val;
   register int i;
@@ -65,9 +64,7 @@ register char *name;
   return val % NHASH;
 }
 
-VOID setname(p, name)
-SYM *p;
-char *name;
+VOID setname(SYM *p, char *name)
 {
   int i, len = strlen(name);
 
@@ -102,9 +99,7 @@ char *name;
   flexused[i] += len + 1;
 }
 
-VOID cpyname(dst, p)
-char *dst;
-SYM *p;
+VOID cpyname(char *dst, SYM *p)
 {
   int i, j;
 
@@ -126,9 +121,7 @@ SYM *p;
 #endif
 }
 
-int cmpname(p, name)
-SYM *p;
-char *name;
+int cmpname(SYM *p, char *name)
 {
   if (flag8)
     return strncmp(name, p->name.here, 8);
@@ -162,8 +155,7 @@ SYM *newsym(void) {
   return p;
 }
 
-SYM *lookup(name)
-register char *name;
+SYM *lookup(char *name)
 {
   register int h;
   register SYM *p;
@@ -198,8 +190,7 @@ VOID symwalk(int acc, VOID (*fun)(SYM *)) {
   }
 }
 
-VOID putsym(p)
-register SYM *p;
+VOID putsym(SYM *p)
 {
 #if !defined(QDOS) && !defined(XTC68)
   struct {
@@ -344,8 +335,7 @@ VOID dumpsym(void) {
   symwalk(O_UNDEF, putsym);
 }
 
-VOID setindex(p)
-SYM *p;
+VOID setindex(SYM *p)
 {
   int i, j, n;
   char *cp;

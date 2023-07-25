@@ -69,7 +69,7 @@ typedef unsigned char U_CHAR;
 #include <errno.h> /* This defines "errno" properly */
 
 #ifdef XTC68
-extern char *get_binary_path();
+extern char *get_binary_path(void);
 #endif
 
 #ifndef O_RDONLY
@@ -604,7 +604,7 @@ void fatal(char *str, ...) {
 
 void fancy_abort(void) { fatal("Internal gcc abort."); }
 
-void perror_with_name(name) char *name;
+void perror_with_name(char *name)
 {
   fprintf(stderr, "%s: ", progname);
 #ifdef QDOS
@@ -620,7 +620,7 @@ void perror_with_name(name) char *name;
   errors++;
 }
 
-void pfatal_with_name(name) char *name;
+void pfatal_with_name(char *name)
 {
   perror_with_name(name);
 #ifdef VMS
@@ -2849,7 +2849,6 @@ void special_symbol(HASHNODE *hp, FILE_BUF *op) {
   long true_indepth;
   FILE_BUF *ip = NULL;
   static struct tm *timebuf = NULL;
-  struct tm *localtime();
 
   long paren = 0; /* For special `defined' keyword */
 

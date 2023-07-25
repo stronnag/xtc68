@@ -84,8 +84,7 @@ char *fname;
  *  26 Jan 95   DJW   - Added 'const' keyword to parameter definitions
  */
 
-int strpos(s, c) const char *s;
-int c;
+int strpos(const char *s, int c)
 {
   char *reply;
 

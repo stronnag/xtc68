@@ -26,9 +26,7 @@ BRANCH *brlist = (BRANCH *)NULL;
 static void moveup(BRANCH *, int);
 #endif
 
-VOID add_brnch(cptr, where)
-CBUF *cptr;
-long where;
+VOID add_brnch(CBUF *cptr, long where)
 {
   register BRANCH *bp;
 
@@ -51,8 +49,7 @@ long where;
 }
 
 #ifndef GENERIC
-static void moveup(bp, cnt) register BRANCH *bp;
-register int cnt;
+static void moveup(BRANCH *bp, int cnt)
 {
   register BRANCH *xbp;
 
@@ -69,7 +66,7 @@ register int cnt;
 }
 #endif
 
-void do_opt() {
+void do_opt(void) {
 #ifdef GENERIC
   BRANCH *bp, **lbp;
 #else

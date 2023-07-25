@@ -65,7 +65,7 @@ On most POSIX (like) systems (Linux, *BSD, MacOS, Msys) to build and install the
 Modern practice on essentially "sole user" systems is to install under `~/.local`, with `~/.local/bin` appended to the `PATH`, so:
 
 ```
-meson build --prefix=~/.local --strip
+meson setup build --prefix=~/.local --strip
 ninja install -C build
 ```
 
@@ -81,7 +81,7 @@ If you *really* want to install in `/usr/local`:
 
 ```
 # build and install the executables in /usr/local (default)
-meson build --strip
+meson setup build --strip
 ninja -C build
 sudo ninja install -C build
 sudo ./sdk-install.sh

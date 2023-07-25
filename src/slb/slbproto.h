@@ -18,7 +18,7 @@
 #define _PARAMLIST
 #endif
 
-extern int(*string_cmp) _PROTOTYPE((char *, char *));
+extern int(*string_cmp) _PROTOTYPE((const char *, const char *));
 /*
  *  sblmain
  */
@@ -46,8 +46,8 @@ int remove_list _PROTOTYPE((char *));
  *  slbanal
  */
 void Free_Ids _PROTOTYPE((void));
-void Add_Id _PROTOTYPE((int, char *));
-char *Find_Id _PROTOTYPE((int));
+void Add_Id _PROTOTYPE((short, char *));
+char *Find_Id _PROTOTYPE((short));
 char *Get_Id _PROTOTYPE((void));
 char *Get_LongWord _PROTOTYPE((void));
 char *Get_TruncRule _PROTOTYPE((void));
@@ -82,10 +82,10 @@ NODEPTR Find_Node _PROTOTYPE((NODEPTR, char *));
 NODEPTR Next_Node _PROTOTYPE((NODEPTR));
 NODEPTR First_Node _PROTOTYPE((NODEPTR));
 void Kill_Node _PROTOTYPE((NODEPTR));
-void Free_Nodes _PROTOTYPE((NODEPTR, void (*)()));
+void Free_Nodes _PROTOTYPE((NODEPTR, void (*func)(IDPTR)));
 char *Make_String _PROTOTYPE((char *));
 char *Find_String _PROTOTYPE((char *));
 void Kill_String _PROTOTYPE((char *));
 #define String_Save(s) Make_String(s)
 
-extern int extract_mode();
+extern int extract_mode(void);

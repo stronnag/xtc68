@@ -53,7 +53,7 @@ Dec 89              QDOS port done by Jeremy Allison
 #define _version ldversion
 #define movmem(a, b, c) memcpy(b, a, c);
 #endif
-extern char *get_binary_path();
+extern char *get_binary_path(void);
 #endif
 
 #define XSTR(s) STR(s)

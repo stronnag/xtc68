@@ -76,7 +76,7 @@ static void output_with_xref(unsigned short rval, CBUF *code) {
      */
 #if 0
 	/* Is is signed or unsigned */
-	c = (code->nbits) | ( (rval == R_PCREL) ? 0x28 : 0x50 ); /* Signed PC-rel or 
+	c = (code->nbits) | ( (rval == R_PCREL) ? 0x28 : 0x50 ); /* Signed PC-rel or
 						 Unsigned - run time reloc */
 #else
     c = (code->nbits / 8) | 0x50;
@@ -326,8 +326,8 @@ VOID translate(unsigned short seg, int null) {
     error(0, "internal relocation alignment error");
 #endif
 }
-VOID chkvalue(code)
-CBUF *code;
+
+VOID chkvalue(CBUF *code)
 {
   long value;
 

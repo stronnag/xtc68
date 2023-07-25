@@ -23,9 +23,7 @@ INST itable[] = {
 
 int ninsts = (sizeof itable) / (sizeof itable[0]);
 
-INST *ifind(token, misc)
-register char *token;
-short *misc;
+INST *ifind(char *token, short *misc)
 {
   register int lo = 4;
   register int hi = ninsts - 2;
@@ -74,10 +72,7 @@ short *misc;
   return (INST *)NULL;
 }
 
-int icmpare(token, mnemon, misc)
-char *token;
-char *mnemon;
-short *misc;
+int icmpare(char *token, char *mnemon, short *misc)
 {
   register int i;
   register char *tp, *mp;
@@ -144,10 +139,7 @@ struct hcc_bug {
              {"ne", 0x6}, {"ge", 0xC}, {"gt", 0xE}, {"le", 0xF}, {"lt", 0xD}, {"cc", 0x4}, {"hi", 0x2}, {"ls", 0x3},
              {"cs", 0x5}, {"hs", 0x4}, {"lo", 0x5}, {"mi", 0xB}, {"pl", 0xA}, {"vc", 0x8}, {"vs", 0x9}, {"", 0}};
 
-int chk_cond(tp, all, misc)
-register char *tp;
-int all;
-short *misc;
+int chk_cond(char *tp, int all, short *misc)
 {
   register int i;
 

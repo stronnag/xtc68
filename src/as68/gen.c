@@ -14,8 +14,7 @@
 #include "jas.h"
 #include "proto.h"
 
-int inst_ok(sp)
-register STMT *sp;
+int inst_ok(STMT *sp)
 {
   register INST *ip = sp->inst;
   register unsigned short size;
@@ -116,8 +115,7 @@ register STMT *sp;
   return 0;
 }
 
-VOID findinst(sp)
-STMT *sp;
+VOID findinst(STMT *sp)
 {
   register INST *ip;
   register INST *jp;
@@ -137,8 +135,7 @@ STMT *sp;
   Yerror("illegal instruction");
 }
 
-VOID geninst(sp)
-STMT *sp;
+VOID geninst(STMT *sp)
 {
   register OPERAND *op;
   register char *cp;

@@ -82,7 +82,7 @@ int yygetc(void) {
   return 0;
 }
 
-void yyungetc(c) int c;
+void yyungetc(int c)
 {
   if (lastc) {
     char buf[32];
@@ -274,8 +274,7 @@ int yylex(void) {
   return 0;
 }
 
-long getnum(s)
-register char *s;
+long getnum(char *s)
 {
   register long val;
   register int base;
