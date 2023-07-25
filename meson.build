@@ -1,7 +1,5 @@
 project('xtc68', 'c', version : '0.0.0')
 
-cflags = ''
-
 subdir('src/as68')
 subdir('src/cc')
 subdir('src/c68')

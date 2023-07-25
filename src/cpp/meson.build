@@ -1,7 +1,7 @@
 cpp_src = files('version.c', 'cexp.c', 'cccp.c', 'appdir.c',
 		'config.h', 'tm.h', 'tm-m68k.h')
 
-cpp_copts= [cflags, '-O2', '-Wall', '-Werror', '-Wextra', '-pedantic',
+cpp_copts= ['-O2', '-Wall', '-Werror', '-Wextra', '-pedantic',
 	    '-DXTC68', '-I.', '-DCPLUSPLUS']
 
 if get_option('relbuild')

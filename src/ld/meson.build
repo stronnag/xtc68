@@ -1,5 +1,5 @@
 ld_src = files('ldold.c', 'appdir.c')
-ld_copts = [cflags, '-O2', '-Wall', '-Werror', '-pedantic',
+ld_copts = ['-O2', '-Wall', '-Werror', '-pedantic',
 	    '-DXTC68', '-fsigned-char' ]
 
 if get_option('relbuild')

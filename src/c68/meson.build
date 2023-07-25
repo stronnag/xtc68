@@ -11,6 +11,6 @@ c68_src = files('analyze.c', 'cglbdef.c', 'cmain.c', 'decl.c',
 		'chdr.h', 'expr.h', 'outproto.h', 'check.h',
 		'proto.h')
 
-c68_copts= [cflags, '-O2', '-Wall', '-Werror', '-Wextra', '-pedantic', '-DXTC68', '-I.', '-DNDEBUG']
+c68_copts= ['-O2', '-Wall', '-Werror', '-Wextra', '-pedantic', '-DXTC68', '-I.', '-DNDEBUG']
 
 c68_ldopts = []
