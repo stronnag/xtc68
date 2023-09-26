@@ -27,7 +27,7 @@ You should then install a [c68 runtime](#runtime) into the `xtc68/share/qdos/inc
 
 ## Runtime
 
-You need the C68 runtime binary distribution. A good place to start looking is http://www.dilwyn.me.uk/c/index.html. If runtime disk1 is installed under `support`, the `sdk-install.sh` script will install a usable environment, such that:
+You need the C68 runtime binary distribution. A good place to start looking is https://dilwyn.qlforums.co.uk/c/. If runtime disk1 is installed under `support`, the `sdk-install.sh` script will install a usable environment, such that:
 
 ```
 qcc -o hw hw.c
