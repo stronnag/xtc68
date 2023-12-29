@@ -750,12 +750,9 @@ void printstr(char *str, ...)
       WriteToParent(str, strlen(str) + 1);
     } else
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
-    write(STDERR_FILENO, str, strlen(str));
-#pragma GCC diagnostic pop
+      write(STDERR_FILENO, str, strlen(str));
 #endif
-      str = (char *)va_arg(ap, char *);
+    str = (char *)va_arg(ap, char *);
   }
   va_end(ap);
   DBG(("PRINTSTR", 0x11, "Exit"));

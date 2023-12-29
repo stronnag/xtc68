@@ -47,6 +47,7 @@ typedef unsigned char U_CHAR;
 #include <inttypes.h>
 #include <libgen.h>
 #include <limits.h>
+#include <stdint.h>
 
 /* VMS-specific definitions */
 #ifdef VMS
@@ -470,9 +471,13 @@ char *predefs = "";
 
 /* `struct directive' defines one #-directive, including how to handle it.  */
 
+typedef struct directive directive_t;
+
+typedef void(*Dofuncptr)(U_CHAR*, U_CHAR*, FILE_BUF*, directive_t *);
+
 struct directive {
   long length; /* Length of name */
-  void (*func)(U_CHAR *, U_CHAR *, FILE_BUF *, struct directive *);
+  Dofuncptr func;
   char *name;                /* Name of directive */
   enum node_type type;       /* Code which describes which directive. */
   char angle_brackets;       /* Nonzero => <...> is special.  */
@@ -482,38 +487,38 @@ struct directive {
 
 /* Here is the actual list of #-directives, most-often-used first.  */
 
-void do_define(U_CHAR *buf, U_CHAR *limit);
-void do_line(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op);
-void do_include(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op);
-void do_undef(U_CHAR *buf);
-void do_xifdef(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, struct directive *keyword);
-void do_else(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op);
-void do_elif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op);
-void do_endif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op);
-void do_sccs(void);
-void do_once(void);
-void do_pragma(U_CHAR *buf);
-void do_if(U_CHAR *buf, U_CHAR *limit);
-void do_error(U_CHAR *buf, U_CHAR *limit);
+void do_define(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_line(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_include(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_undef(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_xifdef(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_else(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_elif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_endif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_sccs(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_once(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_pragma(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_if(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+void do_error(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
 
-#define DOPROC void (*)(U_CHAR *, U_CHAR *, FILE_BUF *, struct directive *)
-#pragma GCC diagnostic push
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
 struct directive directive_table[] = {
-    {6, (DOPROC)do_define, "define", T_DEFINE, 0, 1, 0},    {2, (DOPROC)do_if, "if", T_IF, 0, 0, 0},
-    {5, (DOPROC)do_xifdef, "ifdef", T_IFDEF, 0, 0, 0},      {6, (DOPROC)do_xifdef, "ifndef", T_IFNDEF, 0, 0, 0},
-    {5, (DOPROC)do_endif, "endif", T_ENDIF, 0, 0, 0},       {4, (DOPROC)do_else, "else", T_ELSE, 0, 0, 0},
-    {4, (DOPROC)do_elif, "elif", T_ELIF, 0, 0, 0},          {4, (DOPROC)do_line, "line", T_LINE, 0, 0, 0},
-    {7, (DOPROC)do_include, "include", T_INCLUDE, 1, 0, 0}, {5, (DOPROC)do_undef, "undef", T_UNDEF, 0, 0, 0},
-    {5, (DOPROC)do_error, "error", T_ERROR, 0, 0, 0},
+    {6, do_define, "define", T_DEFINE, 0, 1, 0},
+    {2, do_if, "if", T_IF, 0, 0, 0},
+    {5, do_xifdef, "ifdef", T_IFDEF, 0, 0, 0},
+    {6, do_xifdef, "ifndef", T_IFNDEF, 0, 0, 0},
+    {5, do_endif, "endif", T_ENDIF, 0, 0, 0},
+    {4, do_else, "else", T_ELSE, 0, 0, 0},
+    {4, do_elif, "elif", T_ELIF, 0, 0, 0},
+    {4, do_line, "line", T_LINE, 0, 0, 0},
+    {7, do_include, "include", T_INCLUDE, 1, 0, 0},
+    {5, do_undef, "undef", T_UNDEF, 0, 0, 0},
+    {5, do_error, "error", T_ERROR, 0, 0, 0},
 #ifdef SCCS_DIRECTIVE
-    {4, (DOPROC)do_sccs, "sccs", T_SCCS, 0, 0, 0},
+    {4, do_sccs, "sccs", T_SCCS, 0, 0, 0},
 #endif
-    {6, (DOPROC)do_pragma, "pragma", T_PRAGMA, 0, 0, 1},    {-1, NULL, "", T_UNUSED, 0, 0, 0},
+    {6, do_pragma, "pragma", T_PRAGMA, 0, 0, 1},
+    {-1, NULL, "", T_UNUSED, 0, 0, 0},
 };
-#pragma GCC diagnostic pop
 
 /* table to tell if char can be part of a C identifier. */
 U_CHAR is_idchar[256];
@@ -795,7 +800,7 @@ void make_definition(U_CHAR *str) {
 
   /* pass NULL as output ptr to do_define since we KNOW it never
      does any output.... */
-  do_define(buf, buf + strlen((char *)buf) /* ,NULL, kt*/);
+  do_define(buf, buf + strlen((char *)buf) ,NULL, NULL);
   --indepth;
 }
 
@@ -817,7 +822,7 @@ void make_undef(U_CHAR *str) {
   for (kt = directive_table; kt->type != T_UNDEF; kt++)
     ;
 
-  do_undef(str /* ,str + strlen (str) - 1, NULL, kt */);
+  do_undef(str, NULL, NULL, NULL);
   --indepth;
 }
 
@@ -2969,7 +2974,9 @@ void special_symbol(HASHNODE *hp, FILE_BUF *op) {
  * Expects to see "fname" or <fname> on the input.
  */
 
-void do_include(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op) {
+
+// U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, directive_t *keyword);
+ void do_include(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, __attribute__((unused)) directive_t *kw) {
   char *fname;         /* Dynamically allocated fname buffer */
   U_CHAR *fbeg, *fend; /* Beginning and end of fname */
 
@@ -3320,7 +3327,7 @@ BUF points to the contents of the #define command, as a continguous string.
 LIMIT points to the first character past the end of the definition.
 KEYWORD is the keyword-table entry for #define.  */
 
-void do_define(U_CHAR *buf, U_CHAR *limit) {
+ void do_define(U_CHAR *buf, U_CHAR *limit, __attribute__((unused)) FILE_BUF *f, __attribute__((unused)) directive_t *k) {
   U_CHAR *bp;      /* temp ptr into input buffer */
   U_CHAR *symname; /* remember where symbol name starts */
   long sym_length; /* and how long it is */
@@ -3804,7 +3811,7 @@ DEFINITION *collect_expansion(U_CHAR *buf, U_CHAR *end, long nargs, struct argli
  */
 #define FNAME_HASHSIZE 37
 
-void do_line(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op) {
+ void do_line(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, __attribute__((unused)) directive_t *k) {
   register U_CHAR *bp;
   FILE_BUF *ip = &instack[indepth];
   FILE_BUF tem;
@@ -3910,7 +3917,7 @@ void do_line(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op) {
  * according to un*x /lib/cpp, it is not an error to undef
  * something that has no definitions, so it isn't one here either.
  */
-void do_undef(U_CHAR *buf) {
+ void do_undef(U_CHAR *buf, __attribute__((unused)) U_CHAR *l, __attribute__((unused)) FILE_BUF *f, __attribute__((unused)) directive_t *k) {
   HASHNODE *hp;
 
   SKIP_WHITE_SPACE(buf);
@@ -3939,7 +3946,7 @@ void do_undef(U_CHAR *buf) {
  * Use the text of the line in the error message, then terminate.
  * (We use error() because it prints the filename & line#.)
  */
-void do_error(U_CHAR *buf, U_CHAR *limit) {
+ void do_error(U_CHAR *buf, U_CHAR *limit, __attribute__((unused)) FILE_BUF *f, __attribute__((unused)) directive_t *k) {
   long length = limit - buf;
   char *copy = (char *)xmalloc(length + 1);
   memmove(copy, buf, length);
@@ -3953,7 +3960,7 @@ void do_error(U_CHAR *buf, U_CHAR *limit) {
 /* Remember the name of the current file being read from so that we can
    avoid ever including it again.  */
 
-void do_once(void) {
+void do_once(__attribute__((unused))U_CHAR *buf, __attribute__((unused))U_CHAR *limit, __attribute__((unused)) FILE_BUF *f, __attribute__((unused)) directive_t *k) {
   long i;
   FILE_BUF *ip = NULL;
 
@@ -3977,11 +3984,11 @@ void do_once(void) {
 /* #pragma and its argument line have already been copied to the output file.
    Here just check for recognized pragmas.  */
 
-void do_pragma(U_CHAR *buf) {
+ void do_pragma(U_CHAR *buf, __attribute__((unused))U_CHAR *limit, __attribute__((unused)) FILE_BUF *f, __attribute__((unused)) directive_t *k) {
   while (*buf == ' ' || *buf == '\t')
     buf++;
   if (!strncmp((char *)buf, "once", 4))
-    do_once();
+    do_once(buf, limit, f, k);
   return;
 }
 
@@ -4011,7 +4018,7 @@ nope:
 #endif
 
 /* Just ignore #sccs, on systems where we define it at all.  */
-void do_sccs(void) {
+void do_sccs(__attribute__((unused))U_CHAR *buf, __attribute__((unused))U_CHAR *limit, __attribute__((unused)) FILE_BUF *f, __attribute__((unused)) directive_t *k) {
   if (pedantic)
     error("ANSI C does not allow #sccs");
 }
@@ -4029,7 +4036,7 @@ void do_sccs(void) {
  *      or not, depending on the value from step 3.
  */
 
-void do_if(U_CHAR *buf, U_CHAR *limit) {
+ void do_if(U_CHAR *buf, U_CHAR *limit, __attribute__((unused)) FILE_BUF *f, __attribute__((unused)) directive_t *k) {
   long value;
   FILE_BUF *ip = &instack[indepth];
 
@@ -4042,7 +4049,7 @@ void do_if(U_CHAR *buf, U_CHAR *limit) {
  * see the comment above do_else.
  */
 
-void do_elif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op) {
+ void do_elif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, __attribute__((unused)) directive_t *k) {
   long value;
   FILE_BUF *ip = &instack[indepth];
 
@@ -4317,7 +4324,7 @@ void skip_if_group(FILE_BUF *ip, long any) {
  * for missing #endif's etc. will point to the original #if.  It
  * is possible that something different would be better.
  */
-void do_else(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op) {
+ void do_else(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, __attribute__((unused)) directive_t *k) {
   FILE_BUF *ip = &instack[indepth];
 
   if (pedantic) {
@@ -4351,7 +4358,7 @@ void do_else(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op) {
 /*
  * unstack after #endif command
  */
-void do_endif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op) {
+ void do_endif(U_CHAR *buf, U_CHAR *limit, FILE_BUF *op, __attribute__((unused)) directive_t *k) {
   if (pedantic) {
     SKIP_WHITE_SPACE(buf);
     if (buf != limit)

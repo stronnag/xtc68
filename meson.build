@@ -1,4 +1,4 @@
-project('xtc68', 'c', version : '0.0.0')
+project('xtc68', 'c', version : '0.0.1')
 
 subdir('src/as68')
 subdir('src/cc')

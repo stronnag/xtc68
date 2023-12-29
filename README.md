@@ -60,7 +60,7 @@ helloworld: dataspace 904 (388)
 
 On most POSIX (like) systems (Linux, *BSD, MacOS, Msys) to build and install the executables.
 
-* You need a native C compiler, `bash`, `meson` and `ninja`. It is recommended that you use GCC >= 12.0 or clang.
+* You need a native C compiler, `bash`, `meson` and `ninja`. It is recommended that you use GCC >= 12.0 or clang. Specifically, if your GCC is older than GCCv12, you **must** use clang.
 
 Modern practice on essentially "sole user" systems is to install under `~/.local`, with `~/.local/bin` appended to the `PATH`, so:
 

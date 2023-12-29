@@ -685,25 +685,18 @@ void xdef_dir(int body_flag) {
  * Define a name ?
  */
 void define_dir(void) {
-#ifndef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
-#endif
   strupr(sy.string);
   if (sy.id > 0) {
     if (sy.id > MAX_PDEF)
       halt(11, "XDEF symbols");
-    strncpy(pdef_name[sy.id], sy.string, MAX_LEN - 1);
+    memcpy (pdef_name[sy.id], sy.string, MAX_LEN - 1);
     pdef_name[sy.id][MAX_LEN - 1] = 0;
   } else {
     if (-sy.id > MAX_NDEF)
       halt(5);
-    strncpy(ndef_name[-sy.id], sy.string, MAX_LEN - 1);
+    memcpy (ndef_name[-sy.id], sy.string, MAX_LEN - 1);
     ndef_name[-sy.id][MAX_LEN - 1] = 0;
   }
-#ifndef __clang__
-#pragma GCC diagnostic pop
-#endif
   nxsy();
 }
 
@@ -1433,10 +1426,7 @@ void write_prog(void) {
     }
   }
   if (psize & 1) { // Write an extra byte of zero to even up the program file
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
     write(handle, &c, 1);
-#pragma GCC diagnostic pop
   }
   /* Read the QDOS header information */
   bss_size -= (endcode - start);
@@ -1454,12 +1444,9 @@ void write_prog(void) {
 #ifdef XTC68
   {
     char x[4];
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
     write(handle, "XTcc", 4);
     out_long(x, dspace);
     write(handle, x, 4);
-#pragma GCC diagnostic pop
 
 #if defined(__unix__) || defined(__APPLE__)
     fchmod(handle, S_IRUSR | S_IWUSR);

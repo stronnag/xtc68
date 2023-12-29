@@ -472,13 +472,6 @@ yyreduce:
   }
 #endif
 
-  // As the sign-compare appears to be deliberate
-  // * Shutoff the warnings
-  // * Be explict and the size (so it works the same on 32 and 64)
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
-
   switch (yyn) {
 
   case 1:
@@ -633,7 +626,7 @@ yyreduce:
     {
       yyval.integer.unsignedp = 0;
       if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-        yyval.integer.value = (unsigned long)yyvsp[-2].integer.value <= yyvsp[0].integer.value;
+        yyval.integer.value = (long int)yyvsp[-2].integer.value <= yyvsp[0].integer.value;
       else
         yyval.integer.value = yyvsp[-2].integer.value <= yyvsp[0].integer.value;
       ;
@@ -644,7 +637,7 @@ yyreduce:
     {
       yyval.integer.unsignedp = 0;
       if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-        yyval.integer.value = (unsigned long)yyvsp[-2].integer.value >= yyvsp[0].integer.value;
+        yyval.integer.value = (long int)yyvsp[-2].integer.value >= yyvsp[0].integer.value;
       else
         yyval.integer.value = yyvsp[-2].integer.value >= yyvsp[0].integer.value;
       ;
@@ -655,7 +648,7 @@ yyreduce:
     {
       yyval.integer.unsignedp = 0;
       if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-        yyval.integer.value = (unsigned long)yyvsp[-2].integer.value < yyvsp[0].integer.value;
+        yyval.integer.value = (long int)yyvsp[-2].integer.value < yyvsp[0].integer.value;
       else
         yyval.integer.value = yyvsp[-2].integer.value < yyvsp[0].integer.value;
       ;
@@ -666,7 +659,7 @@ yyreduce:
     {
       yyval.integer.unsignedp = 0;
       if (yyvsp[-2].integer.unsignedp || yyvsp[0].integer.unsignedp)
-        yyval.integer.value = (unsigned long)yyvsp[-2].integer.value > yyvsp[0].integer.value;
+        yyval.integer.value = (long int)yyvsp[-2].integer.value > yyvsp[0].integer.value;
       else
         yyval.integer.value = yyvsp[-2].integer.value > yyvsp[0].integer.value;
       ;
@@ -743,7 +736,7 @@ yyreduce:
       break;
     }
   }
-#pragma GCC diagnostic pop
+
   /* the action file gets copied in in place of this dollarsign */
   /*#line 362 "bison.simple"*/
 
