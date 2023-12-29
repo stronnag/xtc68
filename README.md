@@ -60,13 +60,21 @@ helloworld: dataspace 904 (388)
 
 On most POSIX (like) systems (Linux, *BSD, MacOS, Msys) to build and install the executables.
 
-* You need a native C compiler, `bash`, `meson` and `ninja`
+* You need a native C compiler, `bash`, `meson` and `ninja`. It is recommended that you use GCC >= 12.0 or clang.
 
 Modern practice on essentially "sole user" systems is to install under `~/.local`, with `~/.local/bin` appended to the `PATH`, so:
 
 ```
 meson setup build --prefix=~/.local --strip
 ninja install -C build
+```
+
+To use clang, e.g. for older / broken GCC:
+
+```
+## if necessary, first install clang ...
+CC=clang meson setup _clbuild --prefix=~/.local --strip
+ninja -C _clbuild install
 ```
 
 To install the QDOS includes and libraries
