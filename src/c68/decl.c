@@ -24,6 +24,7 @@
 
 /*****************************************************************************/
 
+#include <xtc68.h>
 #include "chdr.h"
 #include "expr.h"
 #include "cglbdec.h"
@@ -411,7 +412,7 @@ static SYM *declare P2(SYM *, sp, STORAGE, sc) {
       switch (storageof(sp)) {
       default:
         message(ERR_ILLCLASS);
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       case sc_external:
       case sc_typedef:
         break;
@@ -796,7 +797,8 @@ static SIZE struct_declarator_list P3(TYP *, tp, SIZE, offset, TYP *, stp) {
         break;
       }
       tp = TYPEOF(sp);
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
+
     case tk_colon:
       getsym();
       /*
@@ -1223,8 +1225,7 @@ static TYP *declaration_specifiers P2(STORAGE *, storage, STORAGE, def_sc) {
       if (def_sc == sc_parms) {
         message(ERR_ILLCLASS);
       }
-      /*FALLTHRU */
-      __attribute__((fallthrough));
+      XTC68_FALLTHROUGH;
 #endif /* SYNTAX_CORRECT */
     case kw_register:
 #ifndef SYNTAX_CORRECT
@@ -1316,11 +1317,10 @@ static TYP *declaration_specifiers P2(STORAGE *, storage, STORAGE, def_sc) {
     case kw_restrict:
 #ifndef SYNTAX_CORRECT
       message(ERR_RESTRICT);
-      /*FALLTHRU */
 #endif /* SYNTAX_CORRECT */
 #endif /* EXTENSION */
-      __attribute__((fallthrough));
-      /* type qualifiers */
+      XTC68_FALLTHROUGH;
+
     case kw_const:
     case kw_volatile:
 #ifdef TOPSPEED
@@ -1477,7 +1477,8 @@ static TYP *direct_declarator_tail P2(SYM *, sp, TYP *, tp) {
 #endif /* SYNTAX_CORRECT */
         break;
       }
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
+
     default:
       if (!trad_option) {
         beginparamblock();
@@ -1784,7 +1785,8 @@ static SIZE declaration P3(STORAGE, sc, STORAGE, def_sc, SIZE, offset) {
           funcbody(sp, block);
           return offset;
         }
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
+
       default:
         sp = declare(sp, def_sc);
         offset = doinit(sp, offset);
@@ -1795,7 +1797,8 @@ static SIZE declaration P3(STORAGE, sc, STORAGE, def_sc, SIZE, offset) {
 #ifdef CPU_DEFINED
             addoptinfo(sp, def_sc);
 #endif      /* CPU_DEFINED */
-            /*FALLTHRU */
+	    XTC68_FALLTHROUGH;
+
           case sc_external:
           case sc_typedef:
             break;

@@ -25,7 +25,7 @@
 /*****************************************************************************/
 
 #include "config.h"
-
+#include <xtc68.h>
 #ifdef MC680X0
 
 #include "chdr.h"
@@ -471,7 +471,7 @@ static BOOL is_dest_overwritten P2(ADDRESS *, ap, CODE *, ip) {
         if (is_temporary_register(ap->preg)) {
           return TRUE;
         }
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       default:
         if (is_address_used(ap, ip2->oper1) || is_address_used(ap, ip2->oper2)) {
           return FALSE;
@@ -510,7 +510,7 @@ BOOL is_equal_address P2(ADDRESS *, ap1, ADDRESS *, ap2) {
       default:
         return FALSE;
       }
-      __attribute__((fallthrough));
+      XTC68_FALLTHROUGH;
     default:
       return FALSE;
     }
@@ -695,7 +695,7 @@ static BOOL was_move_redundant P3(CODE *, ip, CODE *, ip2, BOOL, memory) {
           if (is_equal_address(ip->oper2, ip2->oper2)) {
             return FALSE;
           }
-          /*FALLTHRU */
+	  XTC68_FALLTHROUGH;
         case am_ind:
         case am_indx:
           if (altered && memory) {
@@ -729,7 +729,7 @@ static BOOL was_move_redundant P3(CODE *, ip, CODE *, ip2, BOOL, memory) {
           if (is_equal_address(ip->oper2, ip2->oper1)) {
             return FALSE;
           }
-          /*FALLTHRU */
+	  XTC68_FALLTHROUGH;
         case am_ind:
         case am_indx:
           if (ip2->oper2 != NIL_ADDRESS) {
@@ -1195,7 +1195,7 @@ static void peep_move P1(CODE *, ip) {
         }
       }
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case am_dreg:
   case am_areg:
   case am_freg:
@@ -1205,7 +1205,7 @@ static void peep_move P1(CODE *, ip) {
       if (is_flag_used(ip)) {
         break; /* sets the flags so cannot be deleted */
       }
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     case am_areg:
     case am_freg:
       if (was_move_redundant(ip, ip, FALSE) || is_move_redundant(ip, ip, FALSE)) {
@@ -1233,7 +1233,7 @@ static void peep_move P1(CODE *, ip) {
       if (is_flag_used(ip)) {
         break; /* sets the flags so cannot be deleted */
       }
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     case am_freg:
       if (was_move_redundant(ip, ip, TRUE) || is_move_redundant(ip, ip, TRUE)) {
         peep_delete(ip);
@@ -1690,7 +1690,7 @@ static void peep_tst P1(CODE *, ip) {
     if (is_equal_address(prev->oper1, ip->oper1)) {
       break;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   default:
     /*
      * If instructions have different length then the flags will not be
@@ -2262,13 +2262,12 @@ REGMAP *build_regmap P1(CODE *, ip) {
 
     case am_indx2:
       map->used |= (1UL << src->sreg);
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     case am_ind:
     case am_indx:
       map->used |= (1UL << src->preg);
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     case am_direct:
-      /*FALLTHRU */
       map->read |= (1UL << REG_MEMORY);
       break;
 
@@ -2292,13 +2291,12 @@ REGMAP *build_regmap P1(CODE *, ip) {
 
     case am_indx2:
       map->used |= (1UL << dst->sreg);
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     case am_ind:
     case am_indx:
       map->used |= (1UL << dst->preg);
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     case am_direct:
-      /*FALLTHRU */
       map->modified |= (1UL << REG_MEMORY);
       break;
 

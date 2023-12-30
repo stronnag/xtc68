@@ -17,6 +17,7 @@
  *         original software.
  */
 
+#include <xtc68.h>
 #include "slb.h"
 
 PRIVATE void Free_Name _PROTOTYPE((IDPTR));
@@ -308,7 +309,7 @@ int analyse_module(FILE *fp, char *modname)
         Start_Directive();
         lprintf("ILLEGAL DIRECTIVE:  %02.2x at %ld", ch, ftell(fp));
         error(20);
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
       case SROFF_FLAG:
         DBG(("ANALYSE_MODULE", 0x801, "... FB - another SROFF_FLAG"));
         Data_Char();

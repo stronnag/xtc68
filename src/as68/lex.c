@@ -11,6 +11,7 @@
  *    of using this software, even if they result from defects in it.
  */
 
+#include <xtc68.h>
 #include "jas.h"
 #include "parse.h"
 #include "proto.h"
@@ -201,7 +202,7 @@ int yyprocess(char c) {
       }
     }
     error(line, "non-terminated comment");
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
 
   case '\'':
     do_star = 0;

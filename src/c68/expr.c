@@ -40,7 +40,7 @@
  * part of an expression.
  *
  *****************************************************************************/
-
+#include <xtc68.h>
 #include "chdr.h"
 #include "expr.h"
 #include "cglbdec.h"
@@ -632,8 +632,7 @@ static EXPR *deref P2(EXPR *, ep, TYP *, tp) {
     if (trad_option) {
       message(ERR_DEREF);
     }
-    /* FALLTHRU */
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
 #endif /* SYNTAX_CORRECT */
   case bt_char:
   case bt_charu:
@@ -671,7 +670,7 @@ static EXPR *deref P2(EXPR *, ep, TYP *, tp) {
       ep = mk_ref(ep, tp);
       break;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   default:
 #ifndef SYNTAX_CORRECT
     message(ERR_DEREF);
@@ -733,8 +732,8 @@ static EXPR *nameref P0(void) {
     } else if (!sizeof_flag && is_array_type(tp)) {
       message(ERR_IMPLICITADDR, nameof(sp));
     }
-    /* FALLTHRU */
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
+
 #endif /* SYNTAX_CORRECT */
   case sc_static:
   case sc_global:
@@ -851,7 +850,8 @@ static const CHAR *check_printf P5(const CHAR *, fname, int, num, const CHAR *, 
         break;
       }
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case format_precision:
     /* precision */
     if (*fstr == (CHAR)'.') {
@@ -866,7 +866,8 @@ static const CHAR *check_printf P5(const CHAR *, fname, int, num, const CHAR *, 
         }
       }
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case format_optional:
     /* optional */
     *pos = format_start;
@@ -1074,7 +1075,7 @@ static const CHAR *check_scanf P5(const CHAR *, fname, int, num, const CHAR *, f
         while (*fstr && *fstr != (CHAR)']') {
           fstr++;
         }
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       case 'c':
       case 's':
         if (suppress) {
@@ -1432,7 +1433,8 @@ static EXPR *primary P0(void) {
        * the ref node will be stripped off in a minute
        */
       ep = cond_deref(ep, tp);
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
+
     case tk_dot:
       getsym(); /* past -> or . */
       tp = ep->etp;
@@ -1565,7 +1567,8 @@ static EXPR *unary P0(void) {
   switch (lastst) {
   case tk_autodec:
     flag = TRUE;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case tk_autoinc:
     getsym();
     ep = unary();
@@ -1604,7 +1607,8 @@ static EXPR *unary P0(void) {
       break;
     }
     flag = TRUE;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case tk_minus:
     getsym();
     ep = unary();
@@ -2081,12 +2085,14 @@ static TYP *arithmetic_conversion2 P2(EXPR **, node1, EXPR **, node2) {
       *node2 = implicit_castop(*node2, tp);
       return tp;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_func:
     if (is_pointer_type(tp2)) {
       *node1 = implicit_castop(*node1, tp2);
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_int32:
   case bt_uint32:
   case bt_long:
@@ -2241,7 +2247,7 @@ static EXPR *multops P0(void) {
       switch (nt) {
       case en_div:
         check_zero(ep2);
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       case en_mul:
         check_arithmetic(ep1);
         check_arithmetic(ep2);
@@ -2801,7 +2807,7 @@ static EXPR *asnop P0(void) {
     case en_asrsh:
       implicit_cast = FALSE;
       check_shift(ep2, ep1->etp); /* should really be promoted type */
-                                  /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     case en_asand:
     case en_asor:
     case en_asxor:
@@ -2861,8 +2867,8 @@ static EXPR *asnop P0(void) {
           op = (EXPRTYPE)(op + 1);
           break;
         }
-        /*FALLTHRU */
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
+
 #endif /* FLOAT_SUPPORT */
       default:
         ep2 = implicit_castop(ep2, ep1->etp);
@@ -2879,7 +2885,7 @@ static EXPR *asnop P0(void) {
     case bt_union:
       check_complete(ep1->etp);
 #ifdef INTEL_386
-      /*FALLTHRU */
+        XTC68_FALLTHROUGH;
     case bt_float:
     case bt_double:
     case bt_longdouble:
@@ -2946,7 +2952,8 @@ static EXPR *condition P1(EXPR *, ep) {
   case en_lor:
     ep->v.p[0] = condition(ep->v.p[0]);
     ep->v.p[1] = condition(ep->v.p[1]);
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case en_eq:
   case en_ne:
   case en_lt:
@@ -2959,8 +2966,8 @@ static EXPR *condition P1(EXPR *, ep) {
   case en_assign:
 #ifndef SYNTAX_CORRECT
     message(WARN_ASSIGN);
-    /*FALLTHRU */
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
+
 #endif /* SYNTAX_CORRECT */
   default:
     ep = mk_node(en_test, ep, NIL_EXPR, tp_int);
@@ -3244,7 +3251,8 @@ EXPR *(*exprfunc)();
   case en_call:
   case en_assign:
     ep->v.p[1] = walkexpr(ep->v.p[1], exprfunc);
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case en_uminus:
   case en_not:
   case en_test:
@@ -3256,7 +3264,8 @@ EXPR *(*exprfunc)();
   case en_ref:
   case en_fieldref:
     ep->v.p[0] = walkexpr(ep->v.p[0], exprfunc);
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case en_size:
   case en_fcon:
   case en_icon:
@@ -3412,7 +3421,8 @@ EXPR *transform_assign2 P2(EXPR *, ep, const CHAR *, name) {
   switch (ep0->nodetype) {
   case en_fieldref:
     size = ((((SIZE)ep0->v.bit.width) << 8) | ((tp_long->size * 8L) - (SIZE)(ep0->v.bit.offset) - (SIZE)(ep0->v.bit.width)));
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case en_ref:
     size |= ((SIZE)is_unsigned_type(tp) << 15);
     /*

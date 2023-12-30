@@ -24,6 +24,7 @@
 
 /*****************************************************************************/
 
+#include <xtc68.h>
 #include "chdr.h"
 #include "expr.h"
 #include "cglbdec.h"
@@ -628,7 +629,8 @@ static void preprocessor_directive P0(void) {
       message(ERR_PREPROC);
       return;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case '0':
   case '1':
   case '2':
@@ -661,7 +663,8 @@ static void preprocessor_directive P0(void) {
     switch (*bufcur) {
     case '"':
       nextch(); /* step over the initial quote */
-                /*FALLTHRU */
+      XTC68_FALLTHROUGH;
+
     default:
       for (symstart = bufcur; *bufcur; nextch()) {
         if (*bufcur == (CHAR)'"' || *bufcur == (CHAR)'\n') {
@@ -792,7 +795,8 @@ static int getsch P1(BOOL, is_string) {
     if (is_string) {
       return END_STRING;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case '\0':
     if (bufcur >= buflimit) {
       /*
@@ -801,7 +805,7 @@ static int getsch P1(BOOL, is_string) {
       nextline();
       return getsch(is_string);
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   default:
     i = (int)(*bufcur) & 0377;
     nextch();
@@ -898,7 +902,7 @@ static int getsch P1(BOOL, is_string) {
 #endif
       default:
         message(WARN_ESCAPECH, i);
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       case '\\':
       case '\'':
       case '\"':
@@ -1174,7 +1178,7 @@ static void getexp P0(void) {
   switch (*bufcur) {
   case '-':
     flag = TRUE;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case '+':
     nextch();
     break;
@@ -1233,7 +1237,7 @@ static void getnum P0(void) {
     case 'E':
       break;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   default:
     getdecimal();
     switch (*bufcur) {
@@ -1241,14 +1245,14 @@ static void getnum P0(void) {
       /* rval already set */
       nextch();
       getfrac(); /* add the fractional part */
-                 /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     default:
       switch (*bufcur) {
       case 'e':
       case 'E':
         nextch();
         getexp(); /* get the exponent */
-                  /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       default:
         if (lastst == tk_rconst) {
           switch (*bufcur) {
@@ -1456,8 +1460,7 @@ void getsym P0(void) {
           }
           break;
         }
-        /*FALLTHRU */
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
 #endif /* EXTENSION */
       default:
         lastst = tk_divide;
@@ -1797,7 +1800,7 @@ void getsym P0(void) {
         nextline();
         continue;
       }
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     default:
       message((MSGNUM)(is_print(*bufcur) ? ERR_ILLCHAR : ERR_ILLXCHAR), (int)*bufcur);
       bufcur++;

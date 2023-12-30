@@ -11,6 +11,7 @@
  *    of using this software, even if they result from defects in it.
  */
 
+#include <xtc68.h>
 #include "scan.h"
 #include "jas.h"
 #include "parse.h"
@@ -291,7 +292,8 @@ long getnum(char *s)
       base = 16;
       break;
     }
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
+
 #endif
   case '@':
     base = 8;

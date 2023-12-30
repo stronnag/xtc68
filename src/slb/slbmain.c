@@ -25,6 +25,7 @@
  *                    - The -k flag added.
  */
 
+#include <xtc68.h>
 #include "slb.h"
 #include <stdarg.h>
 #include <time.h>
@@ -461,7 +462,7 @@ int main(int argc, char **argv)
   case 1:
     if ((maintflag + analflag) == 1)
       break;
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
   default:
     DBG(("MAIN", 0x14, "Incompatible actions - count=%d, maintflag=%d, analflag=%d", actions, maintflag, analflag));
     eprintf("Incompatible combination of actions specified\n");

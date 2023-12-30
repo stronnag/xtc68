@@ -32,7 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <libgen.h> /*(POSIX) */
-
+#include <xtc68.h>
 #include "cc.h"
 #ifdef WIN32
 #include <process.h>
@@ -875,7 +875,7 @@ void Parameters(int argc, char *argv[])
     case ACTION_TMP_ALL:
       DBG(("PARAMETERS", 0x12, "   (ACTION_TMP_ALL)"));
       alltemp = 1;
-      /* FALLTHRU */
+      XTC68_FALLTHROUGH;
     case ACTION_TMP: /* Define temp directory */
       DBG(("PARAMETERS", 0x12, "   (ACTION_TMP)"));
       /* Ensure directory ends in '_' */
@@ -949,8 +949,7 @@ void Parameters(int argc, char *argv[])
         printstr("The GWASS assembler requires a 68020 or better\n", NULL);
         exit(-1);
       }
-      /* FALLTHRU */
-      __attribute__((fallthrough));
+      XTC68_FALLTHROUGH;
     case ACTION_GWASS:
       DBG(("PARAMETERS", 0x12, "   (ACTION_GWASS)"));
       if (CheckCPU() < 0x20) {
@@ -1442,7 +1441,7 @@ int main(int argc, char *argv[])
       if (!stricmp(p, "asm")) {
         goto ASM_PASS;
       }
-      /* FALL THRU */
+      XTC68_FALLTHROUGH;
     default:
       printstr("Unknown extension '", DOTS, *p, "'\n", NULL);
       exit(ERR_BP);

@@ -36,7 +36,7 @@
 #include "expr.h"
 #include "cglbdec.h"
 #include "proto.h"
-
+#include <xtc68.h>
 /********************************************************** Static Variables */
 
 #ifndef SYNTAX_CORRECT
@@ -607,11 +607,11 @@ static STMT *statement P0(void) {
     if (need_label) {
       message(WARN_NOTREACHED);
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case kw_case:
   case kw_default:
     need_label = FALSE;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case tk_begin:
   case tk_id:
     break;
@@ -669,7 +669,7 @@ static STMT *statement P0(void) {
       snp = labelstmt();
       break;
     }
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
     /* else fall through to process expression */
   default:
 #ifndef SYNTAX_CORRECT

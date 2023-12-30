@@ -48,7 +48,7 @@ typedef unsigned char U_CHAR;
 #include <libgen.h>
 #include <limits.h>
 #include <stdint.h>
-
+#include <xtc68.h>
 /* VMS-specific definitions */
 #ifdef VMS
 #include <time.h>
@@ -1214,7 +1214,7 @@ int main(int argc, char **argv) {
           out_fname = "";
           break;
         } /* else fall through into error */
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
       default:
 #ifndef QDOS
         fatal("Invalid option `%s'", new_argv[i]);
@@ -2114,7 +2114,7 @@ void rescan(FILE_BUF *op, long output_marks) {
         }
         break;
       }
-      /* fall through */
+      XTC68_FALLTHROUGH;
 
     case '_':
     case 'a':
@@ -2274,8 +2274,6 @@ void rescan(FILE_BUF *op, long output_marks) {
          a special character and arrange to dispatch on it again.
          The second time, IDENT_LENGTH will be zero so we will return.  */
 
-      /* Fall through */
-
     specialchar:
 
       /* Handle the case of a character such as /, ', " or null
@@ -2286,7 +2284,7 @@ void rescan(FILE_BUF *op, long output_marks) {
       ibp--;
       obp--;
       redo_char = 1;
-      __attribute__((fallthrough));
+      XTC68_FALLTHROUGH;
     default:
 
     randomchar:
@@ -4285,7 +4283,7 @@ void skip_if_group(FILE_BUF *ip, long any) {
           case T_ENDIF:
             if (pedantic && if_stack != save_if_stack)
               validate_else(bp);
-            __attribute__((fallthrough));
+	    XTC68_FALLTHROUGH;
           case T_ELIF:
             if (if_stack == instack[indepth].if_stack) {
               error("#%s not within a conditional", kt->name);

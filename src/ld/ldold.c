@@ -45,7 +45,7 @@ Dec 89              QDOS port done by Jeremy Allison
 #include <inttypes.h>
 #include <libgen.h>
 #include <limits.h>
-
+#include <xtc68.h>
 #ifdef XTC68
 #ifdef DOS_LIKE
 #include <io.h>
@@ -1544,7 +1544,7 @@ void command_line(int *xac, char ***xav, char **paths, char *lib_arr) {
             mem_size *= 1024;
           break;
         }
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
       default:
         fprintf(stderr, "Invalid Option: '%s'\n", argv[i]);
         break;

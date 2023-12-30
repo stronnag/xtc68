@@ -23,7 +23,7 @@
  */
 
 #include "config.h"
-
+#include <xtc68.h>
 #ifdef MC680X0
 
 /*****************************************************************************/
@@ -1389,7 +1389,8 @@ static ADDRESS *g_deref P3(const EXPR *, ep, TYP *, tp, FLAGS, flags) {
       ap1->preg = ep->v.p[0]->v.r;
       return ap1;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   default:
     ap1 = g_expr(ep, (FLAGS)(F_AREG | F_IMMED)); /* generate address */
     if (ap1->mode == am_immed) {
@@ -1532,7 +1533,8 @@ static ADDRESS *g_aincdec P3(const EXPR *, ep, FLAGS, flags, OPCODE, op) {
       freeop(ap2);
       return mk_legal(ap1, flags, tp);
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
 #endif /* COLDFIRE */
   case bt_int32:
   case bt_uint32:
@@ -1693,7 +1695,8 @@ static ADDRESS *g_asadd P3(const EXPR *, ep, FLAGS, flags, OPCODE, op) {
       freeop(ap2);
       return mk_legal(ap1, flags, tp);
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
 #endif /* COLDFIRE */
   case bt_int32:
   case bt_uint32:
@@ -1922,7 +1925,7 @@ static ADDRESS *g_asshift P3(const EXPR *, ep, FLAGS, flags, OPCODE, op) {
       freeop(ap2);
       return mk_legal(ap1, flags, tp);
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
 #endif /* COLDFIRE */
   case bt_int32:
   case bt_uint32:
@@ -1984,7 +1987,8 @@ static ADDRESS *g_div P3(const EXPR *, ep, FLAGS, flags, BOOL, mod) {
   case bt_schar:
     tp = tp_short;
     op = op_divs;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_uchar:
   case bt_charu:
     ap1 = g_expr(ep->v.p[0], (FLAGS)(F_DREG | F_VOL));
@@ -2003,7 +2007,8 @@ static ADDRESS *g_div P3(const EXPR *, ep, FLAGS, flags, BOOL, mod) {
   case bt_short:
   case bt_int16:
     op = op_divs;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_ushort:
   case bt_uint16:
     ap1 = g_expr(ep->v.p[0], (FLAGS)(F_DREG | F_VOL));
@@ -2020,7 +2025,8 @@ static ADDRESS *g_div P3(const EXPR *, ep, FLAGS, flags, BOOL, mod) {
   case bt_int32:
   case bt_long:
     op = op_divs;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_uint32:
   case bt_ulong:
   case bt_pointer32:
@@ -2062,7 +2068,8 @@ static ADDRESS *g_asdiv P3(const EXPR *, ep, FLAGS, flags, BOOL, mod) {
   case bt_char:
   case bt_schar:
     xflag = (FLAGS)(F_DREG | F_IMMED);
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_short:
   case bt_int16:
     op = op_divs;
@@ -2070,7 +2077,7 @@ static ADDRESS *g_asdiv P3(const EXPR *, ep, FLAGS, flags, BOOL, mod) {
   case bt_charu:
   case bt_uchar:
     xflag = (FLAGS)(F_DREG | F_IMMED);
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case bt_ushort:
   case bt_uint16:
   common:
@@ -2103,7 +2110,8 @@ static ADDRESS *g_asdiv P3(const EXPR *, ep, FLAGS, flags, BOOL, mod) {
   case bt_int32:
   case bt_long:
     op = op_divs;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_ulong:
   case bt_uint32:
   case bt_pointer32:
@@ -2229,7 +2237,7 @@ static ADDRESS *g_mul P2(const EXPR *, ep, FLAGS, flags) {
   case bt_schar:
     tp2 = tp_short;
     op = op_muls;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case bt_charu:
   case bt_uchar:
     ap1 = g_expr(ep0, (FLAGS)(F_DREG | F_VOL));
@@ -2244,7 +2252,8 @@ static ADDRESS *g_mul P2(const EXPR *, ep, FLAGS, flags) {
   case bt_short:
   case bt_int16:
     op = op_muls;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_ushort:
   case bt_uint16:
     ap1 = g_expr(ep0, (FLAGS)(F_DREG | F_VOL));
@@ -2256,7 +2265,7 @@ static ADDRESS *g_mul P2(const EXPR *, ep, FLAGS, flags) {
   case bt_int32:
   case bt_long:
     op = op_muls;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case bt_uint32:
   case bt_ulong:
   case bt_pointer32:
@@ -2313,7 +2322,8 @@ static ADDRESS *g_asmul P2(const EXPR *, ep, FLAGS, flags) {
   case bt_char:
   case bt_schar:
     xflags = (FLAGS)(F_DREG | F_IMMED);
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_short:
   case bt_int16:
     op = op_muls;
@@ -2321,7 +2331,8 @@ static ADDRESS *g_asmul P2(const EXPR *, ep, FLAGS, flags) {
   case bt_charu:
   case bt_uchar:
     xflags = (FLAGS)(F_DREG | F_IMMED);
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_ushort:
   case bt_uint16:
   common:
@@ -2348,7 +2359,8 @@ static ADDRESS *g_asmul P2(const EXPR *, ep, FLAGS, flags) {
   case bt_int32:
   case bt_long:
     op = op_muls;
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_uint32:
   case bt_ulong:
   case bt_pointer32:
@@ -2424,7 +2436,8 @@ static ADDRESS *g_hook P2(const EXPR *, ep, FLAGS, flags) {
   case bt_struct:
   case bt_union:
     tp = tp_pointer;
-    /* FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   default:
     flagx = (FLAGS)(flags & (F_DREG | F_AREG)) == F_AREG ? (FLAGS)(F_AREG | F_VOL) : (FLAGS)(F_DREG | F_VOL);
     break;
@@ -2573,7 +2586,7 @@ static ADDRESS *g_asbitfield P4(const EXPR *, ep, FLAGS, flags, OPCODE, op, BOOL
       tp = tp_short;
       break;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case op_divs:
     tp = tp_long;
     break;
@@ -2582,7 +2595,7 @@ static ADDRESS *g_asbitfield P4(const EXPR *, ep, FLAGS, flags, OPCODE, op, BOOL
       tp = tp_ushort;
       break;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
   case op_divu:
     tp = tp_ulong;
     break;
@@ -2748,7 +2761,8 @@ static ADDRESS *g_assign P2(const EXPR *, ep, FLAGS, flags) {
     if (!is_array_type(tp) && !is_array_assignment(tp)) {
       goto common;
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
+
   case bt_struct:
   case bt_union:
     /*
@@ -2952,7 +2966,7 @@ static SIZE push_param P1(const EXPR *, ep) {
          */
         size++;
         ap = mk_legal(ap, F_DREG, ep->etp);
-        /* FALLTHRU */
+	XTC68_FALLTHROUGH;
       case 2L:
       case 4L:
         g_move((ILEN)size, ap, &push);
@@ -3420,7 +3434,7 @@ static ADDRESS *g_cast P4(ADDRESS *, ap, TYP *, tp1, TYP *, tp2, FLAGS, flags) {
 		g_fcode (op_fmove, (ILEN) tp1->size, ap, ap1);
 		g_fcode (op_fmove, (ILEN) tp1->size, ap1, ap);
 	    }
-	    /*FALLTHRU */
+	    XTC68_FALLTHROUGH;
 #endif
     default:
       ap = mk_legal(ap, (FLAGS)(F_FREG | F_VOL), tp1);
@@ -3711,7 +3725,7 @@ static BOOL g_compare P1(const EXPR *, ep) {
           freeop(ap3);
           break;
         };
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       default:
         g_code(op_cmp, IL4, ap1, ap2);
         break;
@@ -3720,7 +3734,7 @@ static BOOL g_compare P1(const EXPR *, ep) {
       freeop(ap1);
       return is_unsigned_type(tp);
     }
-    /*FALLTHRU */
+    XTC68_FALLTHROUGH;
 #endif /* COLDFIRE */
   case bt_int32:
   case bt_uint32:
@@ -3747,7 +3761,7 @@ static BOOL g_compare P1(const EXPR *, ep) {
         freeop(ap3);
         break;
       };
-      /*FALLTHRU */
+      XTC68_FALLTHROUGH;
     default:
       g_code(op_cmp, (ILEN)tp->size, ap1, ap2);
       break;
@@ -4144,7 +4158,7 @@ PRIVATE void g_switch_compare P2(const EXPR *, ep, STMT *, stmt) {
         g_cbranch(op_beq, label);
         g_immed2(op_sub, tp, 1L, ap);
         min_value++;
-        /*FALLTHRU */
+	XTC68_FALLTHROUGH;
       case 0:
         g_cbranch(op_beq, label);
         break;
@@ -4283,8 +4297,7 @@ PRIVATE void g_return P2(const EXPR *, stmtexp, TYP *, tp) {
       freeop(ap);
       break;
     }
-    /*FALLTHRU */
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
 #endif /* FLOAT_IEEE */
 
 #ifdef FLOAT_MFFP
@@ -5084,16 +5097,12 @@ PRIVATE EXPR *g_transform P1(EXPR *, ep) {
       case bt_schar:
       case bt_short:
       case bt_int16:
-        if (!fpu_option)
-          __attribute__((fallthrough));
-        /*FALLTHRU */
       case bt_charu:
       case bt_uchar:
       case bt_ushort:
       case bt_uint16:
         ep->v.p[0] = mk_node(en_cast, ep->v.p[0], NIL_EXPR, tp_long);
-        /* FALLTHRU */
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
 #ifdef FLOAT_IEEE
       case bt_int32:
       case bt_long:
@@ -5126,16 +5135,12 @@ PRIVATE EXPR *g_transform P1(EXPR *, ep) {
       case bt_schar:
       case bt_short:
       case bt_int16:
-        if (!fpu_option)
-          __attribute__((fallthrough));
-        /*FALLTHRU */
       case bt_charu:
       case bt_uchar:
       case bt_ushort:
       case bt_uint16:
         ep->v.p[0] = mk_node(en_cast, ep->v.p[0], NIL_EXPR, tp_long);
-        /* FALLTHRU */
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
 #ifdef FLOAT_IEEE
       case bt_int32:
       case bt_long:
@@ -5173,8 +5178,8 @@ PRIVATE EXPR *g_transform P1(EXPR *, ep) {
       case bt_int16:
       case bt_uint16:
         ep->v.p[0] = mk_node(en_cast, ep->v.p[0], NIL_EXPR, tp_long);
-        /* FALLTHRU */
-        __attribute__((fallthrough));
+	XTC68_FALLTHROUGH;
+
 #ifdef FLOAT_IEEE
       case bt_int32:
       case bt_long:

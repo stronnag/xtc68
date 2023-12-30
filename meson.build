@@ -9,11 +9,14 @@ subdir('src/slb')
 subdir('src/tools')
 subdir('support')
 
+incdir = include_directories('src/include')
+
 executable(
   'as68',
   as68_src,
   c_args: as68_copts,
   link_args: as68_ldopts,
+  include_directories : incdir,
   install: true,
 )
 
@@ -22,6 +25,7 @@ executable(
   qcc_src,
   c_args: qcc_copts,
   link_args: qcc_ldopts,
+  include_directories : incdir,
   install: true,
 )
 
@@ -30,6 +34,7 @@ executable(
   c68_src,
   c_args: c68_copts,
   link_args: c68_ldopts,
+  include_directories : incdir,
   install: true,
 )
 
@@ -38,6 +43,7 @@ executable(
   cpp_src,
   c_args: cpp_copts,
   link_args: cpp_ldopts,
+  include_directories : incdir,
   install: true,
 )
 
@@ -46,6 +52,7 @@ executable(
   ld_src,
   c_args: ld_copts,
   link_args: ld_ldopts,
+  include_directories : incdir,
   install: true,
 )
 
@@ -54,6 +61,7 @@ executable(
   slb_src,
   c_args: slb_copts,
   link_args: slb_ldopts,
+  include_directories : incdir,
   install: true,
 )
 
@@ -62,6 +70,7 @@ executable(
   tools_qcp_src,
   c_args: tools_copts,
   link_args: tools_ldopts,
+  include_directories : incdir,
   install: true,
 )
 
@@ -70,5 +79,6 @@ executable(
   tools_qls_src,
   c_args: tools_copts,
   link_args: tools_ldopts,
+  include_directories : incdir,
   install: true,
 )

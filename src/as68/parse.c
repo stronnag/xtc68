@@ -10,7 +10,7 @@
  * 3) The authors are not responsible for any harmful consequences
  *    of using this software, even if they result from defects in it.
  */
-
+#include <xtc68.h>
 #include "jas.h"
 #include "parse.h"
 #include "proto.h"
@@ -186,8 +186,8 @@ VOID Yinstruction(void) {
   case _ASCII:
     asciz = 1;
     yywidth = 8;
-    /* FALL THROUGH */
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
+
 #endif
   case _DC:
     size = yywidth;
@@ -825,7 +825,8 @@ EXPR Yfactor(void) {
     if (funny_state == 2) {
       longjmp(YYopbuf, 1);
     }
-    __attribute__((fallthrough));
+    XTC68_FALLTHROUGH;
+
   default:
     Yerror("illegal expression");
   }
