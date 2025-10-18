@@ -1,4 +1,4 @@
-**Migrated to [CODEBERG](https://codeberg.org/stronnag/xtc68)
+**Migrated to [CODEBERG](https://codeberg.org/stronnag/xtc68)**
 
 xtc68
 =====
